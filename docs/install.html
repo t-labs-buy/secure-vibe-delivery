@@ -2172,6 +2172,32 @@ claude mcp add --scope user secure-vibe-delivery -- uvx --from git+https://githu
             </p>
           </section>
 
+          <section class="phase" id="remove">
+            <span class="phase-tag">If you need to</span>
+            <h2>Remove the server</h2>
+            <h3>From Claude Code</h3>
+            <p>To remove this server, run (on a Mac or on Windows):</p>
+            <pre class="language-bash">claude mcp remove secure-vibe-delivery -s user</pre>
+            <p>
+              If a project shares it through a committed <code>.mcp.json</code> file, delete the
+              <code>secure-vibe-delivery</code> entry from that file instead.
+            </p>
+            <h3>From Copilot Chat</h3>
+            <p>
+              Run <strong>MCP: Open User Configuration</strong>, delete the
+              <code>"secure-vibe-delivery": { … }</code> entry (and the comma before it, if it
+              was last), and save. For a project, edit <code>.vscode/mcp.json</code> the same way.
+            </p>
+            <h3>Optional: clean up</h3>
+            <p>
+              If the one-time setup downloaded Snyk for you, it's in the server's own folder and
+              can be deleted: <code>~/Library/Caches/secure-vibe-delivery</code> on a Mac,
+              <code>%LOCALAPPDATA%\secure-vibe-delivery</code> on Windows. Each checked project
+              also has a <code>.svd</code> folder with its reports, which you can delete once
+              you no longer need them. Your Snyk and Semgrep accounts aren't affected.
+            </p>
+          </section>
+
           <div class="pager">
             <button id="pagerPrev" type="button"></button>
             <button id="pagerNext" type="button"></button>
