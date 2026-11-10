@@ -102,6 +102,8 @@ def guide_for(kind: str, cwe: Optional[list[str]] = None, check: str = "") -> Op
     elif kind == "Code issue":
         path = next((_CWE_GUIDES[c] for c in (cwe or []) if c in _CWE_GUIDES),
                     "fix-security-findings/references/other-findings.md")
+    elif kind == "Infrastructure":
+        path = "fix-security-findings/references/infrastructure-settings.md"
     elif kind in ("Library", "Package"):
         path = "fix-security-findings/references/dependency-upgrades.md"
     elif kind in ("Failing test", "Coverage"):

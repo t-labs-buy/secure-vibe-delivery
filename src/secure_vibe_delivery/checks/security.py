@@ -1,11 +1,11 @@
-"""Security check: is it safe? Snyk (Open Source, Code, Secrets) + Semgrep + package provenance."""
+"""Security check: is it safe? Snyk (Open Source, Code, Secrets, IaC) + Semgrep + package provenance."""
 from __future__ import annotations
 
 import time
 
 from ..models import SEVERITY_ORDER, CheckResult, Finding, SecretFinding, Status, SubCheck
 from ..proc import journal_step, resolve_tool, run_cmd
-from . import packages, semgrep, snyk
+from . import iac, packages, semgrep, snyk
 from .context import CheckContext
 
 
@@ -65,6 +65,7 @@ async def run(ctx: CheckContext) -> CheckResult:
     root = ctx.root
     code_findings: list[Finding] = []
     lib_findings: list[Finding] = []
+    iac_findings: list[Finding] = []
     secrets: list[SecretFinding] = []
     not_run: dict[str, str] = {}
     scanners: dict[str, str] = {}
@@ -132,6 +133,28 @@ async def run(ctx: CheckContext) -> CheckResult:
     else:
         not_run["semgrep"] = "Semgrep not installed and uvx not available (brew install semgrep)"
 
+    # --- Snyk IaC: only when the project has infrastructure files ----------------------
+    iac_files = iac.find_files(root)
+    res.data["iac"] = {"files": [f for f, _ in iac_files],
+                       "kinds": sorted({k for _, k in iac_files})}
+    if not iac_files:
+        journal_step("decision", "No Terraform, Kubernetes, CloudFormation or ARM files found: Snyk IaC skipped "
+                                 "(nothing to scan)")
+    elif snyk_bin:
+        ctx.log(f"Snyk IaC: checking {len(iac_files)} infrastructure file(s) for risky settings")
+        argv = iac.argv(snyk_bin, [f for f, _ in iac_files])
+        p = await run_cmd(argv, root, timeout=600)
+        res.commands.append(p.record("snyk-iac", argv, ctx.raw_dir))
+        err, found, meta = iac.parse(p.stdout, p.stderr, p.exit_code)
+        if err:
+            not_run["snyk-iac"] = err + snyk.org_hint(err)
+        else:
+            iac_findings = found
+            res.data["iac"].update(meta)
+            scanners["snyk-iac"] = f"{meta.get('files_scanned', 0)} file(s), {len(found)} issue(s)"
+    else:
+        not_run["snyk-iac"] = "Snyk not installed: call svd_setup to download it and sign in (one-time)"
+
     # --- Secrets: Snyk Secrets, else Semgrep fallback ---------------------------------
     secrets_scanner = None
     if snyk_bin:
@@ -192,7 +215,7 @@ async def run(ctx: CheckContext) -> CheckResult:
     # --- Assemble ---------------------------------------------------------------------
     code_findings = merge_code_findings(code_findings)
     secrets = merge_secrets(secrets)
-    res.findings = code_findings + sorted(lib_findings, key=lambda f: -_sev(f))
+    res.findings = code_findings + iac_findings + sorted(lib_findings, key=lambda f: -_sev(f))
     res.secrets = secrets
     res.data["scanners"] = scanners
     res.data["snyk_org"] = snyk.org()
@@ -202,6 +225,7 @@ async def run(ctx: CheckContext) -> CheckResult:
     lib_crit = [f for f in lib_findings if f.category == "library" and f.severity == "critical"]
     lib_high = [f for f in lib_findings if f.category == "library" and f.severity == "high"]
     pkg_bad = [f for f in lib_findings if f.category == "package"]
+    iac_hi = [f for f in iac_findings if f.severity in ("critical", "high")]
 
     def sub(id_, label, failing, scanners_needed, ok_detail, bad_detail):
         missing = [s for s in scanners_needed if s in not_run]
@@ -221,6 +245,12 @@ async def run(ctx: CheckContext) -> CheckResult:
         sub("packages", "All libraries real and known (no unknown or brand-new packages)", pkg_bad,
             ["provenance"], f"{res.data.get('provenance', {}).get('checked', 0)} package(s) verified",
             f"{len(pkg_bad)} suspicious package(s)"),
+    ]
+    if iac_files:
+        res.subchecks.append(sub("iac", "0 critical or high risky settings in infrastructure files", iac_hi, ["snyk-iac"],
+                                 f"{len(iac_findings)} lower-severity setting(s) in {len(iac_files)} file(s)",
+                                 f"{len(iac_hi)} critical/high infrastructure issue(s)"))
+    res.subchecks += [
         SubCheck(id="own-data", label="Users see only their own data", status=Status.WARN,
                  detail="Manual: prove with wrong-case tests (user A can't read user B's data)"),
         SubCheck(id="review", label="Change reviewed by a second person", status=Status.WARN,
@@ -236,6 +266,8 @@ async def run(ctx: CheckContext) -> CheckResult:
     res.summary = (f"{len(secrets)} secret(s), {len(code_hi)} critical/high code issue(s), "
                    f"{len(lib_crit)} critical + {len(lib_high)} high library issue(s), "
                    f"{len(pkg_bad)} suspicious package(s)")
+    if iac_files:
+        res.summary += f", {len(iac_hi)} critical/high infrastructure issue(s)"
     if not_run:
         res.summary += f"; {len(not_run)} scanner(s) didn't run"
     res.finished_at = time.time()

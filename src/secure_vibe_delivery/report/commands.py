@@ -18,6 +18,10 @@ _RULES: list[tuple[str, str, str]] = [
     (r"\bsnyk\b.*\bcode\s+test\b", "Snyk Code: security flaws in your own code",
      "Reads your source code for dangerous patterns such as SQL injection, running user input as code, "
      "turned-off HTTPS checks and unsafe file access. Critical and high issues block go-live."),
+    (r"\bsnyk\b.*\biac\s+test\b", "Snyk IaC: risky infrastructure settings",
+     "Checks the project's infrastructure files (Terraform, Kubernetes, CloudFormation, Azure ARM) for risky "
+     "settings: storage buckets open to the public, databases reachable from the whole internet, containers "
+     "running as root or privileged, missing encryption. Critical and high issues block go-live."),
     (r"\bsnyk\b.*\btest\b", "Snyk Open Source: vulnerable libraries",
      "Checks every third-party library your project depends on (requirements, pyproject, package.json) against "
      "Snyk's database of known vulnerabilities. Critical issues in libraries block go-live."),

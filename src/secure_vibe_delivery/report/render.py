@@ -88,6 +88,7 @@ def build_summary(st: RunState, results: dict[str, CheckResult]) -> dict:
         "secrets": [s.model_dump(mode="json") for s in results["security"].secrets],
         "must_fix": must,
         "tool_versions": st.tool_versions,
+        "code_version": st.code_version,
     }
 
 
@@ -108,6 +109,8 @@ def render_report(st: RunState, results: dict[str, CheckResult], run_dir: Path, 
     libs = sorted([f for f in sec.findings if f.category == "library"],
                   key=lambda f: (-SEVERITY_ORDER.get(f.severity, 0), f.package, f.rule_id))
     pkgs = [f for f in sec.findings if f.category == "package"]
+    iac_issues = [f for f in sec.findings if f.category == "iac"]
+    iac_counts = {s: sum(1 for f in iac_issues if f.severity == s) for s in ("critical", "high", "medium", "low")}
     sev_counts = {s: sum(1 for f in code if f.severity == s) for s in ("critical", "high", "medium", "low")}
     lib_counts = {s: sum(1 for f in libs if f.severity == s) for s in ("critical", "high", "medium", "low")}
 
@@ -119,7 +122,8 @@ def render_report(st: RunState, results: dict[str, CheckResult], run_dir: Path, 
             {"label": "Our code", "counts": sev_counts,
              "notRun": "snyk-code" in not_run and "semgrep" in not_run},
             {"label": "Libraries", "counts": lib_counts, "notRun": "snyk-open-source" in not_run},
-        ],
+        ] + ([{"label": "Infrastructure", "counts": iac_counts, "notRun": "snyk-iac" in not_run}]
+             if sec.data.get("iac", {}).get("files") else []),
         "coverage": [{"label": f["file"], "value": f["pct"]} for f in fun.data.get("coverage_files", [])[:10]],
         "coverageTarget": fun.data.get("coverage_threshold"),
         "endpoints": [{"label": f"{e['type']} {e['name']}", "value": e["p95"]}
@@ -129,7 +133,7 @@ def render_report(st: RunState, results: dict[str, CheckResult], run_dir: Path, 
     commands = [(name, c) for name, r in results.items() for c in r.commands]
     html = _env.get_template("report.html.j2").render(
         st=st, opts=st.options, summary=summary, results=results, sec=sec, fun=fun, perf=perf,
-        code=code, libs=libs, pkgs=pkgs, sev_counts=sev_counts, lib_counts=lib_counts,
+        code=code, libs=libs, pkgs=pkgs, iac_issues=iac_issues, iac_counts=iac_counts, sev_counts=sev_counts, lib_counts=lib_counts,
         must_fix=summary["must_fix"], verdict=summary["verdict"], verdict_text=summary["verdict_text"],
         report_json=_json_script(report_data), native_rel=native_rel, checklist=checklist, commands=commands,
         Status=Status, generated=datetime.now().strftime("%d %b %Y, %H:%M"),

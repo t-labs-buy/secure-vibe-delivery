@@ -208,6 +208,17 @@ button.copy.done{border-color:var(--good);color:var(--good-ink)}
 .cmdtip b{display:block;margin-bottom:.25rem}
 .cmdtip .c{display:block;margin-top:.45rem;padding-top:.45rem;border-top:1px solid var(--tip-rule);color:var(--muted);font-size:12px;word-break:break-all}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.codever{border:1px solid var(--border);border-radius:12px;padding:1rem 1.3rem;background:var(--card);margin:1.1rem 0 0}
+.codever h4{margin:0 0 .6rem;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.cv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr));gap:.5rem 1.5rem;margin:0}
+.cv-grid div{min-width:0}.cv-grid .wide{grid-column:span 2}
+@media (max-width:640px){.cv-grid .wide{grid-column:auto}}
+.cv-grid dt{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.cv-grid dd{margin:.1rem 0 0;font-size:13.5px;overflow-wrap:anywhere}
+.cv-state{display:flex;gap:.6rem;align-items:flex-start;margin-top:.85rem;font-size:13.5px}
+.cv-state .badge{flex:none;margin-top:.1rem}
+details.cv-files{margin:.7rem 0 0}
+details.cv-files pre{margin:.5rem 0 0;max-height:14rem}
 details{border:1px solid var(--border);border-radius:10px;padding:.6rem .9rem;margin:.6rem 0;background:var(--card);transition:border-color .15s ease}
 details:hover{border-color:var(--axis)}
 details summary{cursor:pointer;font-weight:600}
@@ -247,6 +258,36 @@ details summary{cursor:pointer;font-weight:600}
 </style>
 </head>
 <body>
+{% set cv = st.code_version or {} %}
+{% macro code_version_card() -%}
+<div class="codever card-lift" id="code-version">
+  <h4>Code checked</h4>
+  {% if not cv %}
+  <p class="muted">Not recorded: this run was made by a version of secure-vibe-delivery that didn't record the code version.</p>
+  {% elif not cv.is_git %}
+  <div class="cv-state">{{ status_badge("WARN") }} <span>{{ cv.reason }}. Put the project under git and re-run, so the sign-off names what it covers.</span></div>
+  {% else %}
+  <dl class="cv-grid">
+    <div><dt>Commit</dt><dd>{% if cv.commit %}<code title="{{ cv.commit }}">{{ cv.short }}</code> <button type="button" class="copy" data-copy="{{ cv.commit }}" aria-label="Copy the full commit ID">Copy</button>{% else %}<span class="muted">none yet</span>{% endif %}</dd></div>
+    <div><dt>Branch</dt><dd>{% if cv.branch %}<code>{{ cv.branch }}</code>{% elif cv.detached %}detached HEAD{% else %}-{% endif %}</dd></div>
+    {% if cv.subject %}<div class="wide"><dt>Message</dt><dd>{{ cv.subject }}</dd></div>{% endif %}
+    {% if cv.committed_at %}<div><dt>Committed</dt><dd>{{ cv.committed_at|replace("T", " ") }}</dd></div>{% endif %}
+    {% if cv.remote %}<div class="wide"><dt>Repository</dt><dd><code>{{ cv.remote }}</code></dd></div>{% endif %}
+    {% if cv.subfolder %}<div class="wide"><dt>Project folder in the repository</dt><dd><code>{{ cv.subfolder }}/</code> <span class="muted">(only changes in this folder count)</span></dd></div>{% endif %}
+  </dl>
+  {% if cv.changed_during_run %}
+  <div class="cv-state">{{ status_badge("FAIL") }} <span><b>The code changed while the checks were running</b>{% if cv.end and cv.end.short and cv.end.short != cv.short %} (commit {{ cv.short }} → {{ cv.end.short }}){% endif %}. The results may mix two versions; re-run before relying on this report.</span></div>
+  {% elif cv.dirty %}
+  <div class="cv-state">{{ status_badge("WARN") }} <span><b>{{ cv.changed_count }} uncommitted change(s)</b>{% if cv.untracked_count %}, including {{ cv.untracked_count }} new file(s){% endif %}. This report covers the files as they were on disk, which no commit records. Commit and re-run before sign-off.</span></div>
+  <details class="cv-files"><summary>Uncommitted files{% if cv.changed_count > cv.changed|length %} (first {{ cv.changed|length }} of {{ cv.changed_count }}){% endif %}</summary>
+    <pre>{% for c in cv.changed %}{{ c }}
+{% endfor %}</pre></details>
+  {% else %}
+  <div class="cv-state">{{ status_badge("PASS") }} <span>No uncommitted changes: this report covers exactly commit <code>{{ cv.short }}</code>.</span></div>
+  {% endif %}
+  {% endif %}
+</div>
+{%- endmacro %}
 {% set VERDICT_TIPS = {
   "GO": "Ready for go-live. Every automated check passed. The Delivery Lead still signs off the manual items on the Go-live checklist.",
   "PROVISIONAL": "Nearly there. Every automated check passed, but performance only ran the 2-minute quick test. Run mode='gate' (15 minutes at 1.5x peak) to turn this into GO.",
@@ -264,6 +305,8 @@ details summary{cursor:pointer;font-weight:600}
     <span>Run <code>{{ st.run_id }}</code></span>
     <span>Mode <b>{{ opts.mode }}</b>{% if opts.mode == "quick" %} (indicative){% endif %}</span>
     <span>Took {{ duration }}</span>
+    {% if cv.is_git and cv.commit %}<span>Code <a href="#code-version"><code>{{ cv.short }}</code></a>{% if cv.branch %} on <b>{{ cv.branch }}</b>{% endif %}{% if cv.changed_during_run %} · <b>changed during run</b>{% elif cv.dirty %} · <b>+{{ cv.changed_count }} uncommitted</b>{% endif %}</span>
+    {% elif cv and not cv.is_git %}<span>Code version <b>not recorded</b> (not a git repository)</span>{% endif %}
   </div>
 </div></header>
 
@@ -295,6 +338,7 @@ details summary{cursor:pointer;font-weight:600}
     <div class="ico" aria-hidden="true">{{ {"NO-GO":"✕","PROVISIONAL":"!","GO":"✓"}[verdict] }}</div>
     <div><div class="big">{{ vword(verdict) }}</div><p>{{ verdict_text }}</p></div>
   </div>
+  {{ code_version_card() }}
   {% macro band(v) -%}{{ "band-good" if v >= 80 else "band-warn" if v >= 60 else "band-bad" }}{%- endmacro %}
   <div class="ov-grid">
     <div class="scorecard card-lift">
@@ -416,12 +460,14 @@ details summary{cursor:pointer;font-weight:600}
 <section class="card panel" id="security" role="tabpanel" aria-labelledby="tab-security">
   <h2>Security: is it safe?</h2>
   <p class="lede">Two scanners look at the code from different angles (Snyk Code and Semgrep with the bundled AI-mistake rules);
-  Snyk Open Source checks libraries; a provenance check confirms every dependency is real and not brand-new.</p>
+  Snyk Open Source checks libraries; a provenance check confirms every dependency is real and not brand-new;
+  Snyk IaC checks infrastructure files (Terraform, Kubernetes, CloudFormation, Azure ARM) for risky settings when the project has any.</p>
   <div class="kpis">
     <div class="kpi"><div class="v">{{ sev_counts.critical + sev_counts.high }}</div><div class="l">critical + high in our code</div><div class="d muted">{{ sev_counts.medium }} medium · {{ sev_counts.low }} low</div></div>
     <div class="kpi"><div class="v">{{ lib_counts.critical }}</div><div class="l">critical in libraries</div><div class="d muted">{{ lib_counts.high }} high · {{ lib_counts.medium }} medium</div></div>
     <div class="kpi"><div class="v">{{ sec.secrets|length }}</div><div class="l">exposed secrets</div></div>
     <div class="kpi"><div class="v">{{ pkgs|length }}</div><div class="l">suspicious packages</div><div class="d muted">{{ sec.data.get("provenance", {}).get("checked", 0) }} verified</div></div>
+    {% if sec.data.get("iac", {}).get("files") %}<div class="kpi"><div class="v">{{ iac_counts.critical + iac_counts.high }}</div><div class="l">critical + high in infrastructure</div><div class="d muted">{{ iac_counts.medium }} medium · {{ iac_counts.low }} low · {{ sec.data.iac.files|length }} file(s)</div></div>{% endif %}
   </div>
   <h3>Scanners</h3>
   <div class="tablewrap"><table><thead><tr><th>Scanner</th><th>Result</th></tr></thead><tbody>
@@ -457,6 +503,27 @@ details summary{cursor:pointer;font-weight:600}
       <td>{{ f.fix_hint }}</td></tr>{% endfor %}
     </tbody></table></div>
   {% else %}<p class="empty">{{ "Snyk Open Source didn't run." if "snyk-open-source" in sec.data.get("not_run", {}) else "No vulnerable libraries found." }}</p>{% endif %}
+
+  {% set iac_data = sec.data.get("iac", {}) %}
+  <h3>Infrastructure settings ({{ iac_issues|length }})</h3>
+  {% if not iac_data.get("files") %}
+  <p class="empty">No infrastructure files (Terraform, Kubernetes, CloudFormation or Azure ARM) in this project, so Snyk IaC had nothing to check.</p>
+  {% elif "snyk-iac" in sec.data.get("not_run", {}) %}
+  <p class="empty">Snyk IaC didn't run: {{ sec.data.not_run["snyk-iac"] }}</p>
+  {% elif iac_issues %}
+  <p class="muted">Checked {{ iac_data.files|length }} file(s): {{ iac_data.get("kinds", [])|join(", ") }}.</p>
+  <div class="filters" data-for="iacTable"><input type="search" placeholder="Filter by file, rule or text" aria-label="Filter infrastructure issues">
+    <select aria-label="Severity"><option value="">All severities</option><option>critical</option><option>high</option><option>medium</option><option>low</option></select></div>
+  <div class="tablewrap"><table id="iacTable">
+    <thead><tr><th>Severity</th><th>Issue</th><th>Location</th><th>Fix</th></tr></thead><tbody>
+    {% for f in iac_issues %}<tr data-sev="{{ f.severity }}">
+      <td>{{ sev(f.severity) }}</td>
+      <td>{% if f.url %}<a href="{{ f.url }}" rel="noopener"><b>{{ f.title }}</b></a>{% else %}<b>{{ f.title }}</b>{% endif %}<span class="sub">{{ f.message|truncate(300) }}</span><span class="sub">{{ f.rule_id }}</span></td>
+      <td class="where">{{ f.file }}{% if f.line %}:{{ f.line }}{% endif %}</td><td>{{ f.fix_hint|truncate(300) }}</td></tr>{% endfor %}
+    </tbody></table></div>
+  {% else %}
+  <p class="empty">No risky settings found in {{ iac_data.files|length }} infrastructure file(s) ({{ iac_data.get("kinds", [])|join(", ") }}).</p>
+  {% endif %}
 
   <h3>Package provenance ({{ pkgs|length }} flagged)</h3>
   {% if pkgs %}<div class="tablewrap"><table><thead><tr><th>Severity</th><th>Package</th><th>Problem</th><th>Fix</th></tr></thead><tbody>
@@ -585,6 +652,8 @@ details summary{cursor:pointer;font-weight:600}
   <h2>The go-live checklist</h2>
   <p class="lede">Signed by the Delivery Lead before every release. Every box must be ticked, or covered by an approved exception
   (a written reason, a named owner, an end date at most 90 days away, and the Delivery Lead's approval).</p>
+  <h3>Code version this sign-off covers</h3>
+  {{ code_version_card() }}
   {% for name, r in checklist %}
   <h3>{{ name|title }} {{ "(must pass)" if name == "security" else "" }}</h3>
   <ul class="check-list">
@@ -594,7 +663,7 @@ details summary{cursor:pointer;font-weight:600}
     {% endfor %}
   </ul>
   {% endfor %}
-  <div class="signoff"><div>Delivery Lead</div><div>Date</div><div>Exceptions approved (IDs)</div></div>
+  <div class="signoff"><div>Delivery Lead</div><div>Date</div><div>Exceptions approved (IDs)</div>{% if cv.commit %}<div>Commit {{ cv.short }}</div>{% endif %}</div>
 </section>
 
 <section class="card panel" id="logs" role="tabpanel" aria-labelledby="tab-logs">

@@ -1,0 +1,30 @@
+[
+  {
+    "meta": {"isPrivate": true, "isLicensesEnabled": false, "org": "t-labs-buy"},
+    "filesystemPolicy": false, "vulnerabilities": [], "dependencyCount": 0, "licensesPolicy": null,
+    "targetFile": "main.tf", "projectName": "iacsample", "projectType": "terraformconfig",
+    "targetFilePath": "/tmp/iacsample/main.tf", "packageManager": "terraformconfig", "path": "main.tf", "ok": false,
+    "infrastructureAsCodeIssues": [
+      {"severity": "high", "id": "SNYK-CC-TF-127", "publicId": "SNYK-CC-TF-127", "title": "S3 bucket is publicly readable",
+       "issue": "The S3 bucket ACL grants read access to everyone", "impact": "Anyone on the internet can read the bucket's objects",
+       "resolve": "Set `acl` to `private`", "msg": "resource.aws_s3_bucket[data].acl", "subType": "S3",
+       "path": ["resource", "aws_s3_bucket[data]", "acl"], "lineNumber": 3, "isIgnored": false,
+       "documentation": "https://security.snyk.io/rules/cloud/SNYK-CC-TF-127",
+       "iacDescription": {"issue": "The S3 bucket ACL grants read access to everyone", "impact": "Anyone can read it", "resolve": "Set `acl` to `private`"}},
+      {"severity": "medium", "id": "SNYK-CC-TF-1", "publicId": "SNYK-CC-TF-1", "title": "Security group allows open ingress",
+       "issue": "", "impact": "", "resolve": "",
+       "iacDescription": {"issue": "Port 5432 is open to 0.0.0.0/0", "impact": "The database can be reached from the internet", "resolve": "Restrict `cidr_blocks` to known networks"},
+       "msg": "resource.aws_security_group[db].ingress", "path": ["resource", "aws_security_group[db]", "ingress"], "lineNumber": 7, "isIgnored": false},
+      {"severity": "low", "id": "SNYK-CC-TF-999", "title": "Ignored one", "isIgnored": true, "lineNumber": 1, "path": []}
+    ]
+  },
+  {
+    "targetFile": "k8s/deploy.yaml", "projectType": "k8sconfig", "ok": false,
+    "infrastructureAsCodeIssues": [
+      {"severity": "critical", "id": "SNYK-CC-K8S-1", "publicId": "SNYK-CC-K8S-1", "title": "Container is running in privileged mode",
+       "iacDescription": {"issue": "privileged: true", "impact": "The container has full access to the host", "resolve": "Set `securityContext.privileged` to `false`"},
+       "path": ["[DocId: 0]", "spec", "template", "spec", "containers[web]", "securityContext", "privileged"], "lineNumber": 16, "isIgnored": false}
+    ]
+  },
+  {"ok": false, "error": "Failed to parse YAML file", "path": "k8s/broken.yaml", "code": 1021}
+]

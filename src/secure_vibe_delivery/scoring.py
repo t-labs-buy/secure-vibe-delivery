@@ -38,9 +38,11 @@ def _security(r: CheckResult) -> list[dict]:
     code = [f for f in r.findings if f.category == "code"]
     libs = [f for f in r.findings if f.category == "library"]
     pkgs = [f for f in r.findings if f.category == "package"]
+    iac = [f for f in r.findings if f.category == "iac"]
+    ic = {s: sum(1 for f in iac if f.severity == s) for s in ("critical", "high", "medium", "low")}
     c = {s: sum(1 for f in code if f.severity == s) for s in ("critical", "high", "medium", "low")}
     lb = {s: sum(1 for f in libs if f.severity == s) for s in ("critical", "high", "medium", "low")}
-    return [
+    comps = [
         _component("No exposed secrets", 30, 0.0 if r.secrets else 1.0,
                    f"{len(r.secrets)} exposed secret(s)" if r.secrets else "None found", _not_run(r, "secrets")),
         _component("Issues in our code", 30,
@@ -54,6 +56,12 @@ def _security(r: CheckResult) -> list[dict]:
         _component("Real, established packages", 15, 0.0 if pkgs else 1.0,
                    f"{len(pkgs)} suspicious package(s)" if pkgs else "All verified", _not_run(r, "packages")),
     ]
+    if _sub(r, "iac") is not None:  # only projects with Terraform / Kubernetes / CloudFormation / ARM files
+        comps.append(_component("Safe infrastructure settings", 15,
+                                1 - (ic["critical"] * 0.5 + ic["high"] * 0.25 + ic["medium"] * 0.03 + ic["low"] * 0.01),
+                                f"{ic['critical']} critical, {ic['high']} high, {ic['medium']} medium, {ic['low']} low "
+                                "(each critical −50%, high −25%, medium −3%, low −1%)", _not_run(r, "iac")))
+    return comps
 
 
 def _functional(r: CheckResult) -> list[dict]:

@@ -25,8 +25,8 @@ from .proc import resolve_tool
 from . import skills as skill_store
 
 INSTRUCTIONS = """Secure Vibe Delivery runs three kinds of check on an AI-built project before go-live:
-security (Snyk Open Source, Snyk Code, Snyk Secrets or a Semgrep fallback, Semgrep with AI-mistake rules,
-package provenance), functional (pytest or Jest with a 70% coverage gate) and performance (Locust at 1.5x
+security (Snyk Open Source, Snyk Code, Snyk Secrets or a Semgrep fallback, Snyk IaC when the project has
+Terraform / Kubernetes / CloudFormation / ARM files, Semgrep with AI-mistake rules, package provenance), functional (pytest or Jest with a 70% coverage gate) and performance (Locust at 1.5x
 the expected peak). It writes an HTML report with a GO / PROVISIONAL / NO-GO verdict.
 
 First use: if svd_doctor or svd_run reports that setup is needed (Snyk missing or not signed in), offer

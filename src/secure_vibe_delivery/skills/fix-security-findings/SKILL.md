@@ -1,13 +1,13 @@
 ---
 name: fix-security-findings
-description: Fix the security issues in a secure-vibe-delivery report the right way, one finding at a time, with the fix pattern for each kind of issue (SQL injection, code injection, disabled HTTPS checks, SSRF, vulnerable or suspicious libraries) and the exception process when a fix has to wait. Use when working through a report's must-fix list.
+description: Fix the security issues in a secure-vibe-delivery report the right way, one finding at a time, with the fix pattern for each kind of issue (SQL injection, code injection, disabled HTTPS checks, SSRF, risky infrastructure settings, vulnerable or suspicious libraries) and the exception process when a fix has to wait. Use when working through a report's must-fix list.
 ---
 
 # Fix security findings
 
 Work through the report's must-fix list in its order: exposed secrets first (use the
-`rotate-exposed-secrets` skill), then critical and high issues in our own code, then critical
-library issues, then suspicious packages. One finding at a time.
+`rotate-exposed-secrets` skill), then critical and high issues in our own code and in
+infrastructure files, then critical library issues, then suspicious packages. One finding at a time.
 
 ## For each finding
 
@@ -28,6 +28,7 @@ library issues, then suspicious packages. One finding at a time.
 | CWE-94, CWE-95 | Text run as code (`eval`, `exec`, `new Function`) | `references/code-injection.md` |
 | CWE-295 | HTTPS / TLS certificate checks switched off | `references/tls-verification.md` |
 | CWE-918 | Server fetches a URL the user chose (SSRF) | `references/ssrf.md` |
+| Infrastructure finding (Snyk IaC) | Risky setting in Terraform, Kubernetes, CloudFormation or ARM | `references/infrastructure-settings.md` |
 | Library or package finding | Vulnerable, unknown or brand-new dependency | `references/dependency-upgrades.md` |
 | Anything else | Follow the finding's own link and rule text | `references/other-findings.md` |
 

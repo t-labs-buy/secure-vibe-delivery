@@ -38,7 +38,7 @@ def verdict(results: dict[str, CheckResult]) -> str:
 
 
 def must_fix(results: dict[str, CheckResult], limit: int | None = None) -> list[dict]:
-    """Roadmap order: leaked keys → critical/high code → critical libraries → packages → tests → perf."""
+    """Roadmap order: leaked keys → critical/high code and infrastructure → critical libraries → packages → tests → perf."""
     items: list[dict] = []
     sec = results.get("security")
     if sec:
@@ -53,6 +53,11 @@ def must_fix(results: dict[str, CheckResult], limit: int | None = None) -> list[
                 items.append({"priority": 2, "severity": f.severity, "check": "security", "kind": "Code issue",
                               "title": f.title or f.rule_id, "where": f"{f.file}:{f.line}",
                               "detail": f.message, "fix": f.fix_hint, "sources": f.sources, "cwe": f.cwe})
+        for f in sec.findings:
+            if f.category == "iac" and f.severity in ("critical", "high"):
+                items.append({"priority": 2, "severity": f.severity, "check": "security", "kind": "Infrastructure",
+                              "title": f.title or f.rule_id, "where": f"{f.file}:{f.line}" if f.line else f.file,
+                              "detail": f.message, "fix": f.fix_hint, "sources": f.sources})
         for f in sec.findings:
             if f.category == "library" and f.severity == "critical":
                 items.append({"priority": 3, "severity": "critical", "check": "security", "kind": "Library",

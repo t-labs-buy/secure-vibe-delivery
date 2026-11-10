@@ -128,3 +128,4 @@ class RunState(BaseModel):
     created_at: float = 0.0
     finished_at: Optional[float] = None
     tool_versions: dict[str, str] = Field(default_factory=dict)
+    code_version: dict = Field(default_factory=dict)  # git commit/branch/uncommitted changes (vcs.snapshot)

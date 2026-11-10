@@ -1745,7 +1745,7 @@
         </p>
         <div class="meta-strip">
           <span><strong>Audience</strong> — everyone: developers, testers, delivery leads, managers</span>
-          <span><strong>Version</strong> — v0.1.7</span>
+          <span><strong>Version</strong> — v0.1.8</span>
           <span><strong>Install steps only</strong> — <a href="install.html">install guide</a></span>
           <span><strong>Repo</strong> — <a href="https://github.com/t-labs-buy/secure-vibe-delivery">t-labs-buy/secure-vibe-delivery</a></span>
         </div>
@@ -1920,6 +1920,7 @@
                   <tr><td>Snyk Open Source</td><td>Security</td><td>Checks every library your project uses against a database of known security holes.</td><td>Free Snyk account (required)</td></tr>
                   <tr><td>Snyk Code</td><td>Security</td><td>Reads the code you and the AI wrote, looking for risky patterns such as SQL injection.</td><td>Same Snyk account</td></tr>
                   <tr><td>Snyk Secrets</td><td>Security</td><td>Looks for passwords and API keys left in the code. Only on some Snyk plans; Semgrep fills in otherwise.</td><td>Same Snyk account</td></tr>
+                  <tr><td>Snyk IaC</td><td>Security</td><td>Only if the project has infrastructure files (Terraform, Kubernetes, CloudFormation, Azure ARM): checks them for risky settings, such as a storage bucket anyone can read or a database open to the whole internet.</td><td>Same Snyk account</td></tr>
                   <tr><td>Semgrep</td><td>Security</td><td>A fast "spell-checker for risky code". Runs standard rules plus our own rules for mistakes AI tools often make, and secret-finding rules.</td><td>Free account recommended, not required</td></tr>
                   <tr><td>Package check</td><td>Security</td><td>Confirms every library really exists on the official registries (PyPI, npm) and isn't brand-new, which catches made-up and look-alike names.</td><td>None</td></tr>
                   <tr><td>pytest / Jest</td><td>Functional</td><td>Run the project's own automated tests: pytest for Python, Jest for JavaScript.</td><td>None</td></tr>
@@ -2065,7 +2066,7 @@ npm install -g @anthropic-ai/claude-code</pre>
             <div class="step-h"><span class="n">2</span>Add the server to Claude Code</div>
             <pre class="language-bash">
 claude mcp add --scope user secure-vibe-delivery -- \
-  uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.7 secure-vibe-delivery</pre>
+  uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.8 secure-vibe-delivery</pre>
             <p>Check it worked. You should see <code>Status: ✔ Connected</code>; the first check takes a few seconds while it downloads.</p>
             <pre class="language-bash">claude mcp get secure-vibe-delivery</pre>
             <div class="step-h"><span class="n">3</span>Do the one-time sign-up, with your assistant</div>
@@ -2113,7 +2114,7 @@ winget install --id Git.Git -e</pre>
             <pre class="language-bash">npm install -g @anthropic-ai/claude-code</pre>
             <div class="step-h"><span class="n">2</span>Add the server to Claude Code</div>
             <p>Paste this as one line:</p>
-            <pre class="language-bash">claude mcp add --scope user secure-vibe-delivery -- uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.7 secure-vibe-delivery</pre>
+            <pre class="language-bash">claude mcp add --scope user secure-vibe-delivery -- uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.8 secure-vibe-delivery</pre>
             <p>Check it worked:</p>
             <pre class="language-bash">claude mcp get secure-vibe-delivery</pre>
             <div class="step-h"><span class="n">3</span>Do the one-time sign-up, with your assistant</div>
@@ -2174,7 +2175,7 @@ winget install --id Git.Git -e</pre>
     "secure-vibe-delivery": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.7", "secure-vibe-delivery"]
+      "args": ["--from", "git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.8", "secure-vibe-delivery"]
     }
   }
 }</pre>
@@ -2251,13 +2252,13 @@ winget install --id Git.Git -e</pre>
               <table>
                 <thead><tr><th>Tab</th><th>What you'll find</th></tr></thead>
                 <tbody>
-                  <tr><td>Overview</td><td>The verdict; a <strong>secure-health score</strong> out of 100 with a grade (A to F); a <strong>summary</strong> written by your AI assistant of what went well, where the issues are and what needs immediate attention; a card per check (click one to jump to it); and a chart of security findings by severity.</td></tr>
+                  <tr><td>Overview</td><td>The verdict; the <strong>code version checked</strong> (git commit and branch, with a warning if there were uncommitted changes or the code changed during the run); a <strong>secure-health score</strong> out of 100 with a grade (A to F); a <strong>summary</strong> written by your AI assistant of what went well, where the issues are and what needs immediate attention; a card per check (click one to jump to it); and a chart of security findings by severity.</td></tr>
                   <tr><td>Must fix</td><td>Everything to fix, in the order to fix it, with how to fix each one. Filter by type or search.</td></tr>
                   <tr><td>Secrets</td><td>Any passwords or keys found, with their values masked (for example <code>AKIA********MPLE</code>).</td></tr>
                   <tr><td>Security</td><td>Which scanners ran, every code issue, every vulnerable library and its fix.</td></tr>
                   <tr><td>Functional</td><td>Test results, coverage against the 70% line, failing tests, wrong-case tests.</td></tr>
                   <tr><td>Performance</td><td>Speed and error charts over the run, results per page or API, and Locust's own report.</td></tr>
-                  <tr><td>Go-live checklist</td><td>Every pass mark ticked or crossed, plus the manual items for the Delivery Lead.</td></tr>
+                  <tr><td>Go-live checklist</td><td>The code version this sign-off covers, every pass mark ticked or crossed, plus the manual items for the Delivery Lead.</td></tr>
                   <tr><td>Logs</td><td>The full <strong>run log</strong>: every step and every exact command, in order, with where it ran, how long it took and whether it succeeded. You can search it, or download it as a text file to trace what was done.</td></tr>
                   <tr><td>History</td><td>Every <strong>command</strong> the run executed, in order, each with a <strong>Copy</strong> button. Hover over a command to see what it checks, tests or achieves.</td></tr>
                 </tbody>
@@ -2364,6 +2365,7 @@ winget install --id Git.Git -e</pre>
                 <tbody>
                   <tr><td>Snyk Code</td><td>Your source code, to Snyk's service for analysis, under your Snyk account.</td></tr>
                   <tr><td>Snyk Open Source</td><td>The list of libraries and versions your project uses.</td></tr>
+                  <tr><td>Snyk IaC</td><td>Scans your infrastructure files on your computer with rules downloaded from Snyk; it asks Snyk for your organisation's settings and sends usage data, not the files.</td></tr>
                   <tr><td>Semgrep</td><td>Scans your code on your computer. It downloads its rules and sends basic usage statistics; no findings are uploaded.</td></tr>
                   <tr><td>Package check</td><td>Only the names of your libraries, to the public PyPI and npm registries.</td></tr>
                   <tr><td>Locust</td><td>Traffic only to the test address you give it.</td></tr>

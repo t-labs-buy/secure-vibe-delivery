@@ -15,7 +15,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from . import gate
+from . import gate, vcs
 from .checks import functional, performance, security
 from .checks.context import CheckContext
 from .detect import detect
@@ -118,6 +118,9 @@ class RunManager:
                                   f"target_url={o.target_url or '(none)'} duration={o.duration or 'default'} "
                                   f"open_report={o.open_report}")
             journal_step("setup", f"Output folder: {d}")
+            st.code_version = await vcs.snapshot(root)
+            st.code_version["captured"] = "start"
+            journal_step("setup", vcs.describe(st.code_version))
             st.tool_versions = await tool_versions(root)
             journal_step("setup", "Tool versions: " + ", ".join(f"{k} {v}" for k, v in st.tool_versions.items()))
             info = detect(root)
@@ -138,6 +141,13 @@ class RunManager:
                 st.progress[name] = "done"
                 log(f"{name}: {st.results[name].status.value}: {st.results[name].summary}")
             st.current = "report"
+            if st.code_version.get("is_git"):
+                end = await vcs.snapshot(root)
+                st.code_version["changed_during_run"] = vcs.changed_during_run(st.code_version, end)
+                if st.code_version["changed_during_run"]:
+                    st.code_version["end"] = {k: end.get(k) for k in ("short", "commit", "changed_count", "changed")}
+                    journal_step("decision", "The code changed while the checks were running: "
+                                             + vcs.describe(end) + ". Results may mix the two versions.")
             results = gate.ensure_all(st)
             st.verdict = gate.verdict(results)
             reports = svd_dir(root) / "reports"

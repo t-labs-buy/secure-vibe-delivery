@@ -7,7 +7,7 @@ a go-live verdict: **GO**, **PROVISIONAL** or **NO-GO**, plus a fix list in prio
 
 | Check | Question | Tools | Must pass |
 |---|---|---|---|
-| Security (essential) | Is it safe? | Snyk Open Source, Snyk Code, Snyk Secrets (or Semgrep's secret rules), Semgrep with AI-mistake rules, a package-existence check | No leaked keys · no critical/high issues in our code · no critical library issues · no unknown or brand-new packages |
+| Security (essential) | Is it safe? | Snyk Open Source, Snyk Code, Snyk Secrets (or Semgrep's secret rules), Snyk IaC (when there are Terraform, Kubernetes, CloudFormation or ARM files), Semgrep with AI-mistake rules, a package-existence check | No leaked keys · no critical/high issues in our code or infrastructure files · no critical library issues · no unknown or brand-new packages |
 | Functional | Does it work? | pytest or Jest, with coverage | All tests pass · at least 70% coverage |
 | Performance | Can it cope? | Locust | 1.5× expected peak users for 15 min · under 1% failed requests · p95 within target · no crashes |
 
@@ -64,7 +64,8 @@ as MCP resources at `skill://<skill>/<file>`, following the Skills over MCP conv
 so the assistant reads only what the fix needs. They're instructions only (no scripts), and every
 file is listed with its SHA-256 digest. Updating the server updates the skills for everyone.
 
-The report's Overview also shows a secure-health score (0–100, graded A–F) and a summary your
+The report names the exact code it checked (git commit, branch, and any uncommitted changes), so a
+sign-off covers a known version. Its Overview also shows a secure-health score (0–100, graded A–F) and a summary your
 assistant writes. The Logs tab holds a full run log of every step, and the History tab lists every
 command in order, with a Copy button and a hover note on what each one checks.
 
@@ -76,7 +77,7 @@ committed files: this repository is public.
 
 ## Update or remove
 
-Releases are git tags; change `@v0.1.7` to a newer tag to update. To remove the server from Claude
+Releases are git tags; change `@v0.1.8` to a newer tag to update. To remove the server from Claude
 Code: `claude mcp remove secure-vibe-delivery -s user`. For Copilot, delete its `mcp.json` entry.
 
 ## Development
