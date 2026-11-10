@@ -65,7 +65,8 @@ so the assistant reads only what the fix needs. They're instructions only (no sc
 file is listed with its SHA-256 digest. Updating the server updates the skills for everyone.
 
 The report's Overview also shows a secure-health score (0–100, graded A–F) and a summary your
-assistant writes; the Appendix holds a full run log of every step and command.
+assistant writes. The Logs tab holds a full run log of every step, and the History tab lists every
+command in order, with a Copy button and a hover note on what each one checks.
 
 Useful `svd_run` options: `target_url`, `mode` (`quick`/`gate`), `peak_users` (default 100),
 `response_time_p95_ms` (default 1000), `checks`, `coverage_threshold` (default 70). Optional
@@ -75,7 +76,7 @@ committed files: this repository is public.
 
 ## Update or remove
 
-Releases are git tags; change `@v0.1.5` to a newer tag to update. To remove the server from Claude
+Releases are git tags; change `@v0.1.6` to a newer tag to update. To remove the server from Claude
 Code: `claude mcp remove secure-vibe-delivery -s user`. For Copilot, delete its `mcp.json` entry.
 
 ## Development

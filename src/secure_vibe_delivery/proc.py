@@ -5,7 +5,10 @@ import asyncio
 import contextvars
 import os
 import re
+import shlex
 import shutil
+import subprocess
+import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -78,6 +81,19 @@ def redact_arg(a: str) -> str:
     return re.sub(r"(token|password|secret)=\S+", r"\1=***", a, flags=re.I)
 
 
+def command_line(argv: list[str]) -> str:
+    """The command as a user would type it (quoted for this OS), so it can be copied and re-run."""
+    args = [redact_arg(str(a)) for a in argv]
+    if sys.platform == "win32":
+        return subprocess.list2cmdline(args)
+
+    def q(a: str) -> str:
+        if "'" in a and not re.search(r'["$`\\!]', a):
+            return f'"{a}"'  # easier to read than shlex's '"'"' escaping, and equivalent in a POSIX shell
+        return shlex.quote(a)
+    return " ".join(q(a) for a in args)
+
+
 async def run_cmd(
     argv: list[str],
     cwd: str | Path,
@@ -88,7 +104,7 @@ async def run_cmd(
     res = await _run_cmd(argv, cwd, timeout, env)
     j = JOURNAL.get()
     if j is not None:
-        j.append({"t": started_wall, "kind": "command", "text": " ".join(redact_arg(a) for a in argv),
+        j.append({"t": started_wall, "kind": "command", "text": command_line(argv),
                   "cwd": str(cwd), "exit_code": res.exit_code, "duration_s": round(res.duration_s, 2),
                   "timed_out": res.timed_out, "error": res.error})
     return res

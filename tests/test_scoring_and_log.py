@@ -1,3 +1,4 @@
+import shlex
 from pathlib import Path
 
 from secure_vibe_delivery import gate, scoring, summary
@@ -78,5 +79,5 @@ async def test_journal_records_every_command(tmp_path):
         await run_cmd(["python3", "-c", "print('hi')"], tmp_path, timeout=30)
     finally:
         JOURNAL.reset(token)
-    assert log and log[0]["kind"] == "command" and "print('hi')" in log[0]["text"] and log[0]["exit_code"] == 0
+    assert log and log[0]["kind"] == "command" and "print('hi')" in shlex.split(log[0]["text"]) and log[0]["exit_code"] == 0
     assert log[0]["cwd"] == str(tmp_path)
