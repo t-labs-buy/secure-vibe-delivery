@@ -134,3 +134,15 @@ def test_semgrep_token_hint(monkeypatch):
     assert "rejected SEMGREP_APP_TOKEN" in semgrep.token_hint(err)
     monkeypatch.delenv("SEMGREP_APP_TOKEN")
     assert semgrep.token_hint(err) == ""
+
+
+def test_venv_exe_finds_windows_layout(tmp_path):
+    from secure_vibe_delivery.detect import find_python, venv_exe
+    scripts = tmp_path / ".venv" / "Scripts"
+    scripts.mkdir(parents=True)
+    (scripts / "python.exe").write_text("")
+    (scripts / "locust.exe").write_text("")
+    assert venv_exe(tmp_path, "python") == scripts / "python.exe"
+    assert venv_exe(tmp_path, "locust") == scripts / "locust.exe"
+    assert find_python(tmp_path) == [str(scripts / "python.exe")]
+    assert venv_exe(tmp_path, "missing") is None

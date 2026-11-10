@@ -13,6 +13,7 @@ import httpx
 from ..models import CheckResult, Finding, Status, SubCheck
 from ..proc import resolve_tool, run_cmd
 from . import locustgen
+from ..detect import venv_exe
 from .context import CheckContext
 
 CRASH_ERRORS = re.compile(r"ConnectionRefused|RemoteDisconnected|ConnectionResetError|ConnectionError|"
@@ -93,10 +94,9 @@ async def _probe(url: str) -> tuple[bool, str]:
 
 
 def _locust_cmd(ctx: CheckContext) -> Optional[list[str]]:
-    for venv in (".venv", "venv"):
-        p = ctx.root / venv / "bin" / "locust"
-        if p.exists():
-            return [str(p)]
+    p = venv_exe(ctx.root, "locust")
+    if p:
+        return [str(p)]
     return resolve_tool("locust")
 
 

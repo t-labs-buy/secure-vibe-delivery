@@ -66,9 +66,19 @@ def render_report(st: RunState, results: dict[str, CheckResult], run_dir: Path, 
     sev_counts = {s: sum(1 for f in code if f.severity == s) for s in ("critical", "high", "medium", "low")}
     lib_counts = {s: sum(1 for f in libs if f.severity == s) for s in ("critical", "high", "medium", "low")}
 
-    perf_chart = {
+    not_run = sec.data.get("not_run", {})
+    report_data = {
         "series": perf.data.get("series", []),
         "target": perf.data.get("p95_target_ms"),
+        "severity": [
+            {"label": "Our code", "counts": sev_counts,
+             "notRun": "snyk-code" in not_run and "semgrep" in not_run},
+            {"label": "Libraries", "counts": lib_counts, "notRun": "snyk-open-source" in not_run},
+        ],
+        "coverage": [{"label": f["file"], "value": f["pct"]} for f in fun.data.get("coverage_files", [])[:10]],
+        "coverageTarget": fun.data.get("coverage_threshold"),
+        "endpoints": [{"label": f"{e['type']} {e['name']}", "value": e["p95"]}
+                      for e in sorted(perf.data.get("endpoints", []), key=lambda e: -e["p95"])[:12] if e["requests"]],
     }
     checklist = [(name, r) for name, r in results.items()]
     commands = [(name, c) for name, r in results.items() for c in r.commands]
@@ -76,7 +86,7 @@ def render_report(st: RunState, results: dict[str, CheckResult], run_dir: Path, 
         st=st, opts=st.options, summary=summary, results=results, sec=sec, fun=fun, perf=perf,
         code=code, libs=libs, pkgs=pkgs, sev_counts=sev_counts, lib_counts=lib_counts,
         must_fix=summary["must_fix"], verdict=summary["verdict"], verdict_text=summary["verdict_text"],
-        perf_json=_json_script(perf_chart), native_rel=native_rel, checklist=checklist, commands=commands,
+        report_json=_json_script(report_data), native_rel=native_rel, checklist=checklist, commands=commands,
         Status=Status, generated=datetime.now().strftime("%d %b %Y, %H:%M"),
         duration=_fmt_dur((st.finished_at or time.time()) - st.created_at),
         project_name=Path(st.options.project_path).name,

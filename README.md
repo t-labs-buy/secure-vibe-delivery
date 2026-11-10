@@ -132,7 +132,7 @@ For all your projects:
 
 ```bash
 claude mcp add --scope user secure-vibe-delivery -- \
-  uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.1 secure-vibe-delivery
+  uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.2 secure-vibe-delivery
 ```
 
 For one project, shared with the team: copy [`examples/claude-code/.mcp.json`](examples/claude-code/.mcp.json)
@@ -158,7 +158,7 @@ If you added it while a chat was open, run *Developer: Reload Window* and start 
 ```toml
 [mcp_servers.secure-vibe-delivery]
 command = "uvx"
-args = ["--from", "git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.1", "secure-vibe-delivery"]
+args = ["--from", "git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.2", "secure-vibe-delivery"]
 startup_timeout_sec = 60
 ```
 

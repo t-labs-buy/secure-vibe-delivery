@@ -123,7 +123,8 @@ async def doctor(project_path: str) -> dict:
             report["actions"].append("Snyk Open Source needs pip inside the project venv: "
                                      f"{info.python_cmd[0]} -m ensurepip (or uv pip install pip)")
     elif info.test_runner == "jest":
-        det["jest_installed"] = (root / "node_modules" / ".bin" / "jest").exists()
+        bin_dir = root / "node_modules" / ".bin"
+        det["jest_installed"] = (bin_dir / "jest").exists() or (bin_dir / "jest.cmd").exists()
         if not det["jest_installed"]:
             report["actions"].append("Install Jest: npm install --save-dev jest")
     else:

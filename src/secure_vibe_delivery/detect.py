@@ -45,14 +45,27 @@ class ProjectInfo:
     svd_rules_dir: Optional[Path] = None
 
 
+VENV_DIRS = (".venv", "venv", "env")
+
+
+def venv_exe(root: Path, name: str) -> Optional[Path]:
+    """A program inside the project's virtual environment: bin/<name> on macOS and Linux,
+    Scripts\\<name>.exe on Windows."""
+    for venv in VENV_DIRS:
+        for candidate in (root / venv / "bin" / name, root / venv / "Scripts" / f"{name}.exe"):
+            if candidate.exists():
+                return candidate
+    return None
+
+
 def find_python(root: Path) -> list[str]:
-    for venv in (".venv", "venv", "env"):
-        py = root / venv / "bin" / "python"
-        if py.exists():
-            return [str(py)]
+    py = venv_exe(root, "python")
+    if py:
+        return [str(py)]
     if (root / "uv.lock").exists() and shutil.which("uv"):
         return [shutil.which("uv"), "run", "--project", str(root), "python"]
-    return [shutil.which("python3") or "python3"]
+    # Windows usually has "python" (or the "py" launcher) rather than "python3"
+    return [shutil.which("python3") or shutil.which("python") or shutil.which("py") or "python3"]
 
 
 def detect(root: str | Path) -> ProjectInfo:

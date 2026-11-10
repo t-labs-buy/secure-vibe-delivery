@@ -25,7 +25,7 @@ OMIT_DIRS = (".venv", "venv", "env", "tests", "test", "node_modules", ".svd", "b
 def coveragerc(root: Path) -> str:
     """Omit patterns anchored at the project root. Unanchored ones like */tests/* would also omit
     every file of a project that happens to live under some directory called tests."""
-    r = str(root)
+    r = root.as_posix()  # coverage matches "/" against either separator, so this works on Windows too
     lines = ["[run]", "omit ="]
     lines += [f"    {r}/{d}/*" for d in OMIT_DIRS]
     lines += ["    */site-packages/*", f"    {r}/test_*.py", f"    {r}/*/test_*.py", f"    {r}/*_test.py",
