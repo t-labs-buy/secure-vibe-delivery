@@ -1,0 +1,70 @@
+# Secure Vibe Delivery — rules for mistakes AI coding tools often make.
+# Starter set from the Secure Vibe Delivery guide, extended for JavaScript/TypeScript.
+rules:
+  - id: svd-eval-of-text
+    languages: [python]
+    severity: ERROR
+    message: Running text as code (eval/exec). Never evaluate input; parse it explicitly instead.
+    metadata: {cwe: ["CWE-95"], category: security}
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: exec(...)
+
+  - id: svd-https-check-off
+    languages: [python]
+    severity: ERROR
+    message: HTTPS certificate check switched off (verify=False). Remove it, or pass a CA bundle path.
+    metadata: {cwe: ["CWE-295"], category: security}
+    pattern-either:
+      - pattern: requests.$M(..., verify=False, ...)
+      - pattern: httpx.$M(..., verify=False, ...)
+      - pattern: httpx.Client(..., verify=False, ...)
+
+  - id: svd-sql-string-join
+    languages: [python]
+    severity: ERROR
+    message: SQL query built by joining strings; use parameters (cursor.execute(sql, params)).
+    metadata: {cwe: ["CWE-89"], category: security}
+    pattern-either:
+      - pattern: $C.execute("..." + $X, ...)
+      - pattern: $C.execute(f"...", ...)
+      - pattern: $C.execute("..." % $X, ...)
+      - pattern: $C.execute("...".format(...), ...)
+
+  - id: svd-js-eval-of-text
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: Running text as code (eval / new Function). Parse input explicitly instead.
+    metadata: {cwe: ["CWE-95"], category: security}
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: new Function(...)
+
+  - id: svd-js-tls-check-off
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: TLS certificate check switched off (rejectUnauthorized false / NODE_TLS_REJECT_UNAUTHORIZED=0).
+    metadata: {cwe: ["CWE-295"], category: security}
+    pattern-either:
+      - pattern: "{..., rejectUnauthorized: false, ...}"
+      - pattern: process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
+
+  - id: svd-js-sql-string-join
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: SQL query built by joining strings; use placeholders and a parameter array.
+    metadata: {cwe: ["CWE-89"], category: security}
+    pattern-either:
+      - pattern: $DB.query("..." + $X, ...)
+      - pattern: $DB.query(`...${$X}...`, ...)
+      - pattern: $DB.execute("..." + $X, ...)
+      - pattern: $DB.execute(`...${$X}...`, ...)
+
+  - id: svd-debug-mode-on
+    languages: [python]
+    severity: WARNING
+    message: Debug mode switched on; it leaks stack traces and sometimes a code console.
+    metadata: {cwe: ["CWE-489"], category: security}
+    pattern-either:
+      - pattern: $APP.run(..., debug=True, ...)
+      - pattern: DEBUG = True

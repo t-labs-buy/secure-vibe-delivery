@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "secure-vibe-delivery": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.0",
+        "secure-vibe-delivery"
+      ]
+    }
+  }
+}

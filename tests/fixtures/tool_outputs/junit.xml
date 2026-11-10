@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="4" time="0.443" timestamp="2026-11-10T12:46:07.640555+05:30" hostname="TI-MAC-168.local"><testcase classname="tests.fixtures.vulnapp.tests.test_app" name="test_index" file="tests/fixtures/vulnapp/tests/test_app.py" line="7" time="0.005" /><testcase classname="tests.fixtures.vulnapp.tests.test_app" name="test_products" file="tests/fixtures/vulnapp/tests/test_app.py" line="11" time="0.003" /><testcase classname="tests.fixtures.vulnapp.tests.test_app" name="test_discount" file="tests/fixtures/vulnapp/tests/test_app.py" line="15" time="0.000" /><testcase classname="tests.fixtures.vulnapp.tests.test_app" name="test_discount_bug" file="tests/fixtures/vulnapp/tests/test_app.py" line="19" time="0.001"><failure message="assert 75.0 == 70&#10; +  where 75.0 = discount(100, 25)">def test_discount_bug():
+        # Planted failing test
+&gt;       assert discount(100, 25) == 70
+E       assert 75.0 == 70
+E        +  where 75.0 = discount(100, 25)
+
+tests/test_app.py:22: AssertionError</failure></testcase></testsuite></testsuites>

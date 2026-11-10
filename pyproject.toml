@@ -1,0 +1,32 @@
+[project]
+name = "secure-vibe-delivery"
+version = "0.1.0"
+description = "MCP server that runs the Secure Vibe Delivery pipeline (security, functional, performance) and writes an HTML go-live report"
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+  "mcp>=1.9",
+  "pydantic>=2.6",
+  "jinja2>=3.1",
+  "httpx>=0.27",
+  "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-asyncio>=0.23"]
+
+[project.scripts]
+secure-vibe-delivery = "secure_vibe_delivery.server:main"
+svd = "secure_vibe_delivery.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/secure_vibe_delivery"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+norecursedirs = ["tests/fixtures"]
+asyncio_mode = "auto"

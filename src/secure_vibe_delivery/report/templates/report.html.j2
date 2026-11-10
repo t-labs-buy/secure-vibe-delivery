@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Secure Vibe Delivery report: {{ project_name }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  color-scheme:light;
+  --bg:#f6f8f8;--head-bg:#efefed;--card:#ffffff;--ink:#1c2529;--muted:#56676d;--faint:#898781;
+  --accent:#0e6e68;--accent-soft:#e2efed;--border:#d8e0e0;--code-bg:#eef2f2;--code-ink:#17332f;
+  --grid:#e1e0d9;--axis:#c3c2b7;
+  --good:#0ca30c;--good-ink:#006300;--warning:#fab219;--serious:#ec835a;--critical:#d03b3b;
+  --good-bg:#e8f3ea;--warn-bg:#faf3e0;--bad-bg:#fbeaea;--notrun-bg:#fcefe8;
+  --series-1:#2a78d6;--series-2:#eb6834;
+}
+@media (prefers-color-scheme:dark){
+  :root:where(:not([data-theme="light"])){
+    color-scheme:dark;
+    --bg:#303446;--head-bg:#292c3c;--card:#414559;--ink:#c6d0f5;--muted:#a5adce;--faint:#949cbb;
+    --accent:#81c8be;--accent-soft:#51576d;--border:#51576d;--code-bg:#292c3c;--code-ink:#99d1db;
+    --grid:#4a4f63;--axis:#626880;--good-ink:#a6d189;
+    --good-bg:#3b4a45;--warn-bg:#4a4536;--bad-bg:#4d3a42;--notrun-bg:#4d4038;
+    --series-1:#3987e5;--series-2:#d95926;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#303446;--head-bg:#292c3c;--card:#414559;--ink:#c6d0f5;--muted:#a5adce;--faint:#949cbb;
+  --accent:#81c8be;--accent-soft:#51576d;--border:#51576d;--code-bg:#292c3c;--code-ink:#99d1db;
+  --grid:#4a4f63;--axis:#626880;--good-ink:#a6d189;
+  --good-bg:#3b4a45;--warn-bg:#4a4536;--bad-bg:#4d3a42;--notrun-bg:#4d4038;
+  --series-1:#3987e5;--series-2:#d95926;
+}
+html{scroll-behavior:smooth;scroll-padding-top:4rem}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 "JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+a{color:var(--accent)}
+code,pre{font-family:inherit;background:var(--code-bg);color:var(--code-ink);border-radius:4px}
+code{padding:.05em .35em;font-size:.92em}
+pre{padding:.75rem 1rem;overflow:auto;font-size:12.5px;white-space:pre-wrap;word-break:break-word;max-height:22rem}
+header.mast{background:var(--head-bg);border-bottom:1px solid var(--border);padding:2rem 16px 1.5rem}
+.wrap{max-width:76rem;margin:0 auto;padding:0 16px}
+header.mast .wrap{padding:0}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:700}
+h1{font-size:clamp(1.4rem,3vw,2rem);margin:.3rem 0 .4rem;line-height:1.25}
+h2{font-size:1.2rem;margin:0 0 .25rem}
+h3{font-size:1rem;margin:1.5rem 0 .5rem}
+.meta{color:var(--muted);font-size:12.5px;display:flex;flex-wrap:wrap;gap:.25rem 1.25rem}
+nav.toc{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--border)}
+nav.toc .wrap{display:flex;gap:.25rem;overflow-x:auto;padding-top:.5rem;padding-bottom:.5rem;align-items:center}
+nav.toc a{white-space:nowrap;text-decoration:none;color:var(--muted);padding:.3rem .6rem;border-radius:6px;font-size:13px}
+nav.toc a:hover{background:var(--accent-soft);color:var(--ink)}
+nav.toc .sp{flex:1}
+button.theme{font:inherit;font-size:13px;background:var(--card);color:var(--ink);border:1px solid var(--border);border-radius:6px;padding:.3rem .7rem;cursor:pointer;white-space:nowrap}
+main{padding:1.5rem 0 4rem}
+section.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.5rem;margin:0 0 1.25rem}
+@media (max-width:640px){section.card{padding:1rem}}
+.lede{color:var(--muted);margin:.2rem 0 1rem;max-width:62rem}
+.verdict{display:flex;gap:1.25rem;align-items:center;flex-wrap:wrap;padding:1.25rem;border-radius:10px;border:2px solid}
+.verdict.NO-GO{background:var(--bad-bg);border-color:var(--critical)}
+.verdict.PROVISIONAL{background:var(--warn-bg);border-color:var(--warning)}
+.verdict.GO{background:var(--good-bg);border-color:var(--good)}
+.verdict .big{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:800;letter-spacing:.02em;line-height:1}
+.verdict .ico{font-size:2rem;width:3rem;height:3rem;display:grid;place-items:center;border-radius:50%;color:#fff;flex:none}
+.verdict.NO-GO .ico{background:var(--critical)}.verdict.PROVISIONAL .ico{background:#9a6a00}.verdict.GO .ico{background:var(--good)}
+.verdict p{margin:.25rem 0 0;max-width:46rem}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:1rem;margin-top:1rem}
+.tile{border:1px solid var(--border);border-radius:8px;padding:1rem;background:var(--bg)}
+.tile h4{margin:0 0 .4rem;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);display:flex;justify-content:space-between;gap:.5rem;align-items:center}
+.tile p{margin:.3rem 0 0;font-size:13px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr));gap:.75rem;margin:1rem 0}
+.kpi{border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;background:var(--bg)}
+.kpi .v{font-size:1.5rem;font-weight:700;line-height:1.2}
+.kpi .l{font-size:12px;color:var(--muted)}
+.kpi .d{font-size:12px;margin-top:.2rem}
+.badge{display:inline-flex;align-items:center;gap:.35rem;font-size:11.5px;font-weight:700;padding:.1rem .5rem;border-radius:999px;border:1px solid var(--border);white-space:nowrap;background:var(--card);color:var(--ink)}
+.badge i{font-style:normal}
+.st-PASS{border-color:var(--good)}.st-PASS i{color:var(--good)}
+.st-FAIL{border-color:var(--critical)}.st-FAIL i{color:var(--critical)}
+.st-WARN{border-color:var(--warning)}.st-WARN i{color:#9a6a00}
+.st-NOT_RUN{border-color:var(--serious)}.st-NOT_RUN i{color:var(--serious)}
+:root[data-theme="dark"] .st-WARN i{color:var(--warning)}
+@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])) .st-WARN i{color:var(--warning)}}
+.sev{display:inline-flex;align-items:center;gap:.4rem;font-size:12px;white-space:nowrap}
+.sev::before{content:"";width:.6rem;height:.6rem;border-radius:2px;background:var(--faint)}
+.sev-critical::before{background:var(--critical)}.sev-high::before{background:var(--serious)}
+.sev-medium::before{background:var(--warning)}.sev-low::before,.sev-info::before{background:var(--faint)}
+.tablewrap{overflow-x:auto;border:1px solid var(--border);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{text-align:left;padding:.5rem .65rem;border-bottom:1px solid var(--border);vertical-align:top}
+th{background:var(--bg);font-weight:700;color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;position:sticky;top:0}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+td .sub{color:var(--muted);font-size:12px;display:block;margin-top:.15rem}
+.where{color:var(--accent);word-break:break-all}
+.filters{display:flex;gap:.5rem;flex-wrap:wrap;margin:.5rem 0 .75rem}
+.filters input,.filters select{font:inherit;font-size:13px;padding:.35rem .6rem;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--ink);min-width:0}
+.filters input{flex:1 1 14rem}
+.callout{border-left:4px solid var(--accent);background:var(--accent-soft);padding:.75rem 1rem;border-radius:0 8px 8px 0;margin:1rem 0;font-size:13px}
+.callout.warn{border-color:var(--warning);background:var(--warn-bg)}
+.callout.bad{border-color:var(--critical);background:var(--bad-bg)}
+details{border:1px solid var(--border);border-radius:8px;padding:.5rem .8rem;margin:.5rem 0;background:var(--bg)}
+details summary{cursor:pointer;font-weight:600}
+.covbar{position:relative;height:1.1rem;background:var(--code-bg);border-radius:4px;margin:.6rem 0 1.6rem;border:1px solid var(--border)}
+.covbar .fill{position:absolute;inset:0 auto 0 0;border-radius:3px 0 0 3px}
+.covbar .mark{position:absolute;top:-.35rem;bottom:-.35rem;width:2px;background:var(--ink)}
+.covbar .mark span{position:absolute;top:1.55rem;transform:translateX(-50%);font-size:11px;color:var(--muted);white-space:nowrap}
+.chartcard{border:1px solid var(--border);border-radius:8px;padding:1rem;background:var(--bg);margin:0 0 1rem;position:relative}
+.chartcard h4{margin:0;font-size:13px}
+.chartcard .cap{color:var(--muted);font-size:12px;margin:.1rem 0 .4rem}
+.legend{display:flex;gap:1rem;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-bottom:.25rem}
+.legend span{display:inline-flex;align-items:center;gap:.4rem}
+.legend b{display:inline-block;width:14px;height:2px;border-radius:1px}
+.legend b.dash{background:none!important;border-top:2px dashed var(--muted);height:0}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart text{fill:var(--faint);font-size:11px;font-family:inherit;font-variant-numeric:tabular-nums}
+.tip{position:absolute;pointer-events:none;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:.4rem .6rem;font-size:12px;box-shadow:0 4px 14px rgba(0,0,0,.12);display:none;z-index:3;min-width:9rem}
+.tip .row{display:flex;align-items:center;gap:.4rem}
+.tip .row b{font-weight:700;color:var(--ink)}
+.tip .row span{color:var(--muted)}
+.tip .key{width:12px;height:2px;border-radius:1px;display:inline-block}
+.tip .t{color:var(--muted);margin-bottom:.15rem}
+.check-list{list-style:none;padding:0;margin:0}
+.check-list li{display:flex;gap:.75rem;align-items:flex-start;padding:.55rem 0;border-bottom:1px solid var(--border)}
+.check-list li:last-child{border-bottom:0}
+.check-list .lab{flex:1}
+.check-list .lab small{display:block;color:var(--muted)}
+.check-list input{margin-top:.25rem;width:1rem;height:1rem;accent-color:var(--accent)}
+.signoff{display:grid;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));gap:1rem;margin-top:1rem}
+.signoff div{border-bottom:1px solid var(--ink);padding:1.6rem 0 .2rem;color:var(--muted);font-size:12px}
+.muted{color:var(--muted)}
+.empty{color:var(--muted);font-style:italic;padding:.5rem 0}
+.masked{font-weight:700;letter-spacing:.03em}
+@media print{nav.toc,.filters,button.theme{display:none}section.card{break-inside:avoid-page}body{background:#fff}}
+</style>
+</head>
+<body>
+<header class="mast"><div class="wrap">
+  <div class="eyebrow">Secure Vibe Delivery · go-live analysis</div>
+  <h1>{{ project_name }}: {{ verdict }}</h1>
+  <div class="meta">
+    <span>Project <code>{{ opts.project_path }}</code></span>
+    <span>Generated {{ generated }}</span>
+    <span>Run <code>{{ st.run_id }}</code></span>
+    <span>Mode <b>{{ opts.mode }}</b>{% if opts.mode == "quick" %} (indicative){% endif %}</span>
+    <span>Took {{ duration }}</span>
+  </div>
+</div></header>
+<nav class="toc"><div class="wrap">
+  <a href="#verdict">Verdict</a><a href="#mustfix">Must fix ({{ must_fix|length }})</a>
+  <a href="#secrets">Secrets ({{ sec.secrets|length }})</a><a href="#security">Security</a>
+  <a href="#functional">Functional</a><a href="#performance">Performance</a>
+  <a href="#checklist">Go-live checklist</a><a href="#appendix">Appendix</a>
+  <span class="sp"></span><button class="theme" id="themeBtn" type="button">◐ Theme</button>
+</div></nav>
+
+{% macro status_badge(s) -%}
+{%- set v = s.value if s.value is defined else s -%}
+<span class="badge st-{{ v }}"><i>{{ {"PASS":"✓","FAIL":"✕","WARN":"!","NOT_RUN":"⊘"}[v] }}</i>{{ {"PASS":"Pass","FAIL":"Fail","WARN":"Warning","NOT_RUN":"Didn't run"}[v] }}</span>
+{%- endmacro %}
+{% macro sev(s) %}<span class="sev sev-{{ s }}">{{ s }}</span>{% endmacro %}
+
+<main><div class="wrap">
+
+<section class="card" id="verdict">
+  <div class="verdict {{ verdict }}">
+    <div class="ico" aria-hidden="true">{{ {"NO-GO":"✕","PROVISIONAL":"!","GO":"✓"}[verdict] }}</div>
+    <div><div class="big">{{ verdict }}</div><p>{{ verdict_text }}</p></div>
+  </div>
+  <div class="grid3">
+    {% for name, label, question in [("security","Security","Is it safe?"),("functional","Functional","Does it work?"),("performance","Performance","Can it cope?")] %}
+    {% set r = results[name] %}
+    <div class="tile">
+      <h4><span>{{ label }} · <span style="text-transform:none;letter-spacing:0">{{ question }}</span></span>{{ status_badge(r.status) }}</h4>
+      <p>{{ r.summary or r.reason_not_run }}</p>
+      <p class="muted">{{ "Essential: blocks go-live on its own" if name == "security" else "Required: must pass" }}</p>
+    </div>
+    {% endfor %}
+  </div>
+  <p class="callout">The rule that matters most: <b>a scan that didn't run counts as a failure, never as a pass.</b>
+  A security failure is never traded off against functional or performance results.</p>
+</section>
+
+<section class="card" id="mustfix">
+  <h2>What needs fixing, in order</h2>
+  <p class="lede">The roadmap's order: leaked keys first, then critical and high issues in our own code, then critical issues in
+  libraries, then suspicious packages, failing tests, coverage and performance. After fixing, run everything again.</p>
+  {% if must_fix %}
+  <div class="tablewrap"><table>
+    <thead><tr><th class="num">#</th><th>Severity</th><th>Type</th><th>Issue</th><th>How to fix</th></tr></thead>
+    <tbody>
+    {% for i in must_fix %}
+    <tr>
+      <td class="num">{{ loop.index }}</td><td>{{ sev(i.severity) }}</td><td>{{ i.kind }}</td>
+      <td><b>{{ i.title }}</b>{% if i.where %}<span class="sub where">{{ i.where }}</span>{% endif %}
+        {% if i.detail %}<span class="sub">{{ i.detail|truncate(260) }}</span>{% endif %}
+        {% if i.sources %}<span class="sub">Reported by {{ i.sources|join(", ") }}</span>{% endif %}</td>
+      <td>{{ i.fix or "-" }}</td>
+    </tr>
+    {% endfor %}
+    </tbody></table></div>
+  {% else %}<p class="empty">Nothing to fix. Every automated check passed.</p>{% endif %}
+</section>
+
+<section class="card" id="secrets">
+  <h2>Exposed secrets</h2>
+  <p class="lede">Scanned by <b>{{ sec.data.secrets_scanner or "no scanner (didn't run)" }}</b>{% if sec.data.snyk_secrets_unavailable %}.
+  Snyk Secrets wasn't available ({{ sec.data.snyk_secrets_unavailable|truncate(160) }}), so the Semgrep fallback ran{% endif %}.
+  Values are masked in this report. Snyk Code's hard-coded-secret findings are included.</p>
+  {% if sec.secrets %}
+  <div class="callout bad"><b>Rotate every key listed here</b>: issue a new one and cancel the old one. Deleting the line isn't enough:
+  the old value stays in git history, where anyone with a copy of the repository can read it.</div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Type</th><th>Location</th><th>Masked value</th><th>Found by</th></tr></thead>
+    <tbody>{% for s in sec.secrets %}
+      <tr><td>{{ s.kind }}{% if s.message %}<span class="sub">{{ s.message|truncate(140) }}</span>{% endif %}</td>
+      <td class="where">{{ s.file }}:{{ s.line }}</td><td><code class="masked">{{ s.masked_value }}</code></td>
+      <td>{{ s.sources|join(", ") }}</td></tr>
+    {% endfor %}</tbody></table></div>
+  {% elif sec.data.secrets_scanner %}<p class="empty">No secrets found.</p>
+  {% else %}<div class="callout bad">The secret scan didn't run, so this check fails.</div>{% endif %}
+</section>
+
+<section class="card" id="security">
+  <h2>Security: is it safe?</h2>
+  <p class="lede">Two scanners look at the code from different angles (Snyk Code and Semgrep with the bundled AI-mistake rules);
+  Snyk Open Source checks libraries; a provenance check confirms every dependency is real and not brand-new.</p>
+  <div class="kpis">
+    <div class="kpi"><div class="v">{{ sev_counts.critical + sev_counts.high }}</div><div class="l">critical + high in our code</div><div class="d muted">{{ sev_counts.medium }} medium · {{ sev_counts.low }} low</div></div>
+    <div class="kpi"><div class="v">{{ lib_counts.critical }}</div><div class="l">critical in libraries</div><div class="d muted">{{ lib_counts.high }} high · {{ lib_counts.medium }} medium</div></div>
+    <div class="kpi"><div class="v">{{ sec.secrets|length }}</div><div class="l">exposed secrets</div></div>
+    <div class="kpi"><div class="v">{{ pkgs|length }}</div><div class="l">suspicious packages</div><div class="d muted">{{ sec.data.get("provenance", {}).get("checked", 0) }} verified</div></div>
+  </div>
+  <h3>Scanners</h3>
+  <div class="tablewrap"><table><thead><tr><th>Scanner</th><th>Result</th></tr></thead><tbody>
+    {% for k, v in sec.data.get("scanners", {}).items() %}<tr><td>{{ k }}</td><td>{{ status_badge("PASS") }} ran · {{ v }}</td></tr>{% endfor %}
+    {% if sec.data.secrets_scanner %}<tr><td>secrets</td><td>{{ status_badge("PASS") }} ran · {{ sec.data.secrets_scanner }}</td></tr>{% endif %}
+    {% for k, v in sec.data.get("not_run", {}).items() %}<tr><td>{{ k }}</td><td>{{ status_badge("NOT_RUN") }} {{ v }}</td></tr>{% endfor %}
+  </tbody></table></div>
+
+  <h3>Issues in our code ({{ code|length }})</h3>
+  {% if code %}
+  <div class="filters" data-for="codeTable"><input type="search" placeholder="Filter by file, rule or text" aria-label="Filter code issues">
+    <select aria-label="Severity"><option value="">All severities</option><option>critical</option><option>high</option><option>medium</option><option>low</option></select></div>
+  <div class="tablewrap"><table id="codeTable">
+    <thead><tr><th>Severity</th><th>Issue</th><th>Location</th><th>Found by</th></tr></thead><tbody>
+    {% for f in code %}<tr data-sev="{{ f.severity }}">
+      <td>{{ sev(f.severity) }}</td>
+      <td><b>{{ f.title or f.rule_id }}</b><span class="sub">{{ f.message|truncate(300) }}</span>
+        {% if f.fix_hint %}<span class="sub"><b>Fix:</b> {{ f.fix_hint|truncate(300) }}</span>{% endif %}
+        {% if f.cwe %}<span class="sub">{{ f.cwe|join(", ") }}</span>{% endif %}</td>
+      <td class="where">{{ f.file }}:{{ f.line }}</td><td>{{ f.sources|join(", ") }}</td></tr>{% endfor %}
+    </tbody></table></div>
+  {% else %}<p class="empty">No code issues found{% if "snyk-code" in sec.data.get("not_run", {}) or "semgrep" in sec.data.get("not_run", {}) %} by the scanners that ran{% endif %}.</p>{% endif %}
+
+  <h3>Vulnerable libraries ({{ libs|length }})</h3>
+  {% if libs %}
+  <div class="filters" data-for="libTable"><input type="search" placeholder="Filter by package or CVE" aria-label="Filter libraries">
+    <select aria-label="Severity"><option value="">All severities</option><option>critical</option><option>high</option><option>medium</option><option>low</option></select></div>
+  <div class="tablewrap"><table id="libTable">
+    <thead><tr><th>Severity</th><th>Package</th><th>Vulnerability</th><th>Fix</th></tr></thead><tbody>
+    {% for f in libs %}<tr data-sev="{{ f.severity }}">
+      <td>{{ sev(f.severity) }}</td><td><b>{{ f.package }}</b> {{ f.version }}{% if f.message %}<span class="sub">via {{ f.message|truncate(120) }}</span>{% endif %}</td>
+      <td>{% if f.url %}<a href="{{ f.url }}" rel="noopener">{{ f.title }}</a>{% else %}{{ f.title }}{% endif %}<span class="sub">{{ f.identifiers|join(", ") }}</span></td>
+      <td>{{ f.fix_hint }}</td></tr>{% endfor %}
+    </tbody></table></div>
+  {% else %}<p class="empty">{{ "Snyk Open Source didn't run." if "snyk-open-source" in sec.data.get("not_run", {}) else "No vulnerable libraries found." }}</p>{% endif %}
+
+  <h3>Package provenance ({{ pkgs|length }} flagged)</h3>
+  {% if pkgs %}<div class="tablewrap"><table><thead><tr><th>Severity</th><th>Package</th><th>Problem</th><th>Fix</th></tr></thead><tbody>
+    {% for f in pkgs %}<tr><td>{{ sev(f.severity) }}</td><td><b>{{ f.package }}</b></td><td>{{ f.message }}</td><td>{{ f.fix_hint }}</td></tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}<p class="empty">Every direct dependency exists on its public registry and is over 30 days old.</p>{% endif %}
+</section>
+
+<section class="card" id="functional">
+  <h2>Functional: does it work?</h2>
+  {% set c = fun.data.get("counts", {}) %}
+  {% if fun.status.value == "NOT_RUN" and not c.get("total") %}
+    <div class="callout bad">{{ fun.reason_not_run or fun.summary }}</div>
+  {% else %}
+  <p class="lede">{{ fun.data.runner }} with coverage. Coverage is the share of code lines a test actually ran; the roadmap's pass mark
+  is {{ fun.data.coverage_threshold|int }}%.</p>
+  <div class="kpis">
+    <div class="kpi"><div class="v">{{ c.get("passed", 0) }}/{{ c.get("total", 0) }}</div><div class="l">tests passed</div></div>
+    <div class="kpi"><div class="v">{{ c.get("failed", 0) + c.get("errors", 0) }}</div><div class="l">failed or errored</div></div>
+    <div class="kpi"><div class="v">{{ c.get("skipped", 0) }}</div><div class="l">skipped</div></div>
+    <div class="kpi"><div class="v">{{ "%.1f"|format(fun.data.coverage_pct) ~ "%" if fun.data.coverage_pct is not none else "-" }}</div><div class="l">line coverage</div></div>
+  </div>
+  {% if fun.data.coverage_pct is not none %}
+  {% set cov = fun.data.coverage_pct %}
+  <div class="covbar" role="img" aria-label="Coverage {{ cov }} percent against a {{ fun.data.coverage_threshold|int }} percent target">
+    <div class="fill" style="width:{{ [cov,100]|min }}%;background:{{ 'var(--good)' if cov >= fun.data.coverage_threshold else 'var(--critical)' }}"></div>
+    <div class="mark" style="left:{{ fun.data.coverage_threshold }}%"><span>target {{ fun.data.coverage_threshold|int }}%</span></div>
+  </div>
+  {% elif fun.data.coverage_note %}<div class="callout warn">{{ fun.data.coverage_note }}</div>{% endif %}
+  {% if fun.reason_not_run %}<div class="callout bad">{{ fun.reason_not_run|truncate(600) }}</div>{% endif %}
+  {% endif %}
+  {% if fun.findings %}
+  <h3>Failing tests ({{ fun.findings|length }})</h3>
+  {% for f in fun.findings %}
+  <details><summary>{{ f.title }} <span class="muted">{{ f.file }}{% if f.line %}:{{ f.line }}{% endif %}</span></summary><pre>{{ f.message }}</pre></details>
+  {% endfor %}
+  <p class="muted">AI-written tests often check what the code <i>does</i>, not what it was meant to do. Check each failure against the original request.</p>
+  {% endif %}
+  {% if fun.data.get("coverage_files") %}
+  <details><summary>Least-covered files</summary>
+  <div class="tablewrap"><table><thead><tr><th>File</th><th class="num">Coverage</th><th class="num">Uncovered lines</th></tr></thead><tbody>
+    {% for f in fun.data.coverage_files[:20] %}<tr><td class="where">{{ f.file }}</td><td class="num">{{ f.pct }}%</td><td class="num">{{ f.missing }}</td></tr>{% endfor %}
+  </tbody></table></div></details>
+  {% endif %}
+  <h3>Wrong-case tests</h3>
+  {% if fun.data.get("wrong_case_test_files") %}
+  <p>Found tests that look for refused requests in: {% for f in fun.data.wrong_case_test_files[:8] %}<code>{{ f }}</code>{{ ", " if not loop.last }}{% endfor %}.
+  Check that they cover all three cases.</p>
+  {% else %}
+  <div class="callout warn">No tests found for requests that should fail. For every page and API, add tests where a logged-out visitor is refused,
+  user A asking for user B's data gets nothing, and a basic user is turned away from admin actions. These also prove the security rule
+  that users only see their own data.</div>
+  {% endif %}
+</section>
+
+<section class="card" id="performance">
+  <h2>Performance: can it cope?</h2>
+  {% set a = perf.data.get("aggregate") %}
+  {% if not a %}
+    <div class="callout bad">{{ perf.reason_not_run or perf.summary }}</div>
+    <p class="muted">Run again with <code>target_url</code> set to the test environment (never production), for example
+    <code>svd_run(project_path=..., target_url="http://127.0.0.1:8000")</code>.</p>
+  {% else %}
+  <p class="lede">Locust played <b>{{ perf.data.users }}</b> users (1.5 × the expected peak of {{ perf.data.peak_users }}), adding
+  {{ perf.data.spawn_rate }} a second, for <b>{{ perf.data.duration }}</b> against <code>{{ perf.data.target_url }}</code>.
+  Locustfile: {{ perf.data.locustfile_source }}.
+  {% if native_rel %}<a href="{{ native_rel }}">Open Locust's own report</a>.{% endif %}</p>
+  {% if opts.mode != "gate" %}<div class="callout warn">Quick mode: these numbers are indicative. The go-live run holds 1.5× peak for 15 minutes
+  (<code>mode="gate"</code>).</div>{% endif %}
+  <div class="kpis">
+    <div class="kpi"><div class="v">{{ "{:,}".format(a.requests) }}</div><div class="l">requests</div></div>
+    <div class="kpi"><div class="v">{{ "%.1f"|format(a.rps) }}</div><div class="l">requests / second</div></div>
+    <div class="kpi"><div class="v">{{ a.failure_pct }}%</div><div class="l">failed</div><div class="d">{{ status_badge("PASS" if a.failure_pct < 1 else "FAIL") }} target &lt; 1%</div></div>
+    <div class="kpi"><div class="v">{{ a.p50|int }} ms</div><div class="l">median (p50)</div></div>
+    <div class="kpi"><div class="v">{{ a.p95|int }} ms</div><div class="l">p95</div><div class="d">{{ status_badge("PASS" if a.p95 <= perf.data.p95_target_ms else "FAIL") }} target ≤ {{ perf.data.p95_target_ms }} ms</div></div>
+    <div class="kpi"><div class="v">{{ a.p99|int }} ms</div><div class="l">p99</div><div class="d muted">max {{ a.max|int }} ms</div></div>
+  </div>
+  <div class="chartcard"><h4>Response time</h4><div class="cap">Milliseconds, all requests. Dashed line is the agreed p95 target.</div>
+    <div class="legend"><span><b style="background:var(--series-1)"></b>p50 (median)</span><span><b style="background:var(--series-2)"></b>p95</span><span><b class="dash"></b>p95 target</span></div>
+    <div class="chart" id="chartLatency"></div></div>
+  <div class="chartcard"><h4>Throughput</h4><div class="cap">Requests per second, all requests.</div>
+    <div class="legend"><span><b style="background:var(--series-1)"></b>requests/s</span><span><b style="background:var(--series-2)"></b>failures/s</span></div>
+    <div class="chart" id="chartRps"></div></div>
+  <div class="chartcard"><h4>Simulated users</h4><div class="cap">Users running at each moment: the ramp, then the hold.</div>
+    <div class="chart" id="chartUsers"></div></div>
+
+  <h3>Per endpoint</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Endpoint</th><th class="num">Requests</th><th class="num">Failed</th><th class="num">req/s</th><th class="num">p50</th><th class="num">p95</th><th class="num">p99</th><th class="num">max</th></tr></thead><tbody>
+    {% for e in perf.data.endpoints %}<tr><td><b>{{ e.type }}</b> {{ e.name }}</td><td class="num">{{ "{:,}".format(e.requests) }}</td>
+      <td class="num">{% if e.failure_pct >= 1 %}<span class="sev sev-critical">{{ e.failure_pct }}%</span>{% else %}{{ e.failure_pct }}%{% endif %}</td>
+      <td class="num">{{ "%.1f"|format(e.rps) }}</td><td class="num">{{ e.p50|int }}</td>
+      <td class="num">{% if e.p95 > perf.data.p95_target_ms %}<span class="sev sev-high">{{ e.p95|int }}</span>{% else %}{{ e.p95|int }}{% endif %}</td>
+      <td class="num">{{ e.p99|int }}</td><td class="num">{{ e.max|int }}</td></tr>{% endfor %}
+    <tr><td><b>All requests</b></td><td class="num"><b>{{ "{:,}".format(a.requests) }}</b></td><td class="num"><b>{{ a.failure_pct }}%</b></td><td class="num"><b>{{ "%.1f"|format(a.rps) }}</b></td><td class="num"><b>{{ a.p50|int }}</b></td><td class="num"><b>{{ a.p95|int }}</b></td><td class="num"><b>{{ a.p99|int }}</b></td><td class="num"><b>{{ a.max|int }}</b></td></tr>
+  </tbody></table></div>
+  {% if perf.data.failures %}
+  <h3>Failures</h3>
+  <div class="tablewrap"><table><thead><tr><th>Request</th><th>Error</th><th class="num">Count</th></tr></thead><tbody>
+    {% for f in perf.data.failures %}<tr><td><b>{{ f.method }}</b> {{ f.name }}</td><td>{{ f.error|truncate(300) }}</td><td class="num">{{ f.count }}</td></tr>{% endfor %}
+  </tbody></table></div>{% endif %}
+  {% if perf.data.exceptions %}
+  <h3>Exceptions in the locustfile</h3>
+  {% for e in perf.data.exceptions %}<details><summary>{{ e.count }} × {{ e.message|truncate(140) }}</summary><pre>{{ e.traceback }}</pre></details>{% endfor %}
+  {% endif %}
+  <details><summary>Time-series data table</summary>
+  <div class="tablewrap" style="max-height:20rem;overflow:auto"><table><thead><tr><th class="num">t (s)</th><th class="num">users</th><th class="num">req/s</th><th class="num">fail/s</th><th class="num">p50</th><th class="num">p95</th></tr></thead><tbody>
+    {% for s in perf.data.series %}<tr><td class="num">{{ s.t }}</td><td class="num">{{ s.users }}</td><td class="num">{{ s.rps }}</td><td class="num">{{ s.fps }}</td><td class="num">{{ s.p50|int if s.p50 is not none else "-" }}</td><td class="num">{{ s.p95|int if s.p95 is not none else "-" }}</td></tr>{% endfor %}
+  </tbody></table></div></details>
+  {% endif %}
+  <p class="muted">If the app calls an AI model, a load test is also a cost test: check usage limits and spend for this run.</p>
+</section>
+
+<section class="card" id="checklist">
+  <h2>The go-live checklist</h2>
+  <p class="lede">Signed by the Delivery Lead before every release. Every box must be ticked, or covered by an approved exception
+  (a written reason, a named owner, an end date at most 90 days away, and the Delivery Lead's approval).</p>
+  {% for name, r in checklist %}
+  <h3>{{ name|title }} {{ "(must pass)" if name == "security" else "" }}</h3>
+  <ul class="check-list">
+    {% for s in r.subchecks %}
+    <li>{% if s.id in ["own-data","review"] %}<input type="checkbox" aria-label="Attest: {{ s.label }}">{% else %}{{ status_badge(s.status) }}{% endif %}
+      <div class="lab">{{ s.label }}<small>{{ s.detail|truncate(300) }}</small></div></li>
+    {% endfor %}
+  </ul>
+  {% endfor %}
+  <div class="signoff"><div>Delivery Lead</div><div>Date</div><div>Exceptions approved (IDs)</div></div>
+</section>
+
+<section class="card" id="appendix">
+  <h2>Appendix: what ran</h2>
+  <h3>Commands</h3>
+  <div class="tablewrap"><table><thead><tr><th>Check</th><th>Command</th><th class="num">Exit</th><th class="num">Time</th></tr></thead><tbody>
+    {% for name, c in commands %}<tr><td>{{ name }}</td><td><code>{{ c.argv|join(" ")|truncate(400) }}</code>{% if c.error %}<span class="sub">{{ c.error }}</span>{% endif %}</td>
+      <td class="num">{{ c.exit_code if c.exit_code is not none else "-" }}</td><td class="num">{{ c.duration_s }}s</td></tr>{% endfor %}
+  </tbody></table></div>
+  <h3>Tool versions</h3>
+  <p>{% for k, v in st.tool_versions.items() %}<code>{{ k }} {{ v }}</code> {% endfor %}</p>
+  <h3>Settings</h3>
+  <p class="muted">peak users {{ opts.peak_users }} · p95 target {{ opts.response_time_p95_ms }} ms · coverage target {{ opts.coverage_threshold|int }}% ·
+  checks {{ opts.checks|join(", ") }}</p>
+  <details><summary>Run log</summary><pre>{{ st.messages|join("\n") }}</pre></details>
+  <p class="muted">Raw tool output: <code>{{ opts.project_path }}/.svd/runs/{{ st.run_id }}/raw/</code>. Secret-scanner output is stored masked.
+  Generated by secure-vibe-delivery, following the Secure Vibe Delivery roadmap (T-Labs Buy, Oct 2026).</p>
+</section>
+
+</div></main>
+
+<script type="application/json" id="perfData">{{ perf_json }}</script>
+<script>
+(function(){
+  // Theme toggle: light ↔ dark, remembered per viewer when storage is available.
+  var root=document.documentElement, KEY="svd-theme";
+  try{var saved=localStorage.getItem(KEY); if(saved) root.setAttribute("data-theme",saved);}catch(e){}
+  document.getElementById("themeBtn").addEventListener("click",function(){
+    var cur=root.getAttribute("data-theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
+    var next=cur==="dark"?"light":"dark"; root.setAttribute("data-theme",next);
+    try{localStorage.setItem(KEY,next);}catch(e){}
+  });
+
+  // Table filters
+  document.querySelectorAll(".filters").forEach(function(f){
+    var table=document.getElementById(f.dataset.for); if(!table) return;
+    var input=f.querySelector("input"), sel=f.querySelector("select");
+    function apply(){
+      var q=(input.value||"").toLowerCase(), s=sel?sel.value:"";
+      table.querySelectorAll("tbody tr").forEach(function(tr){
+        var ok=(!q||tr.textContent.toLowerCase().indexOf(q)>=0)&&(!s||tr.dataset.sev===s);
+        tr.style.display=ok?"":"none";
+      });
+    }
+    input.addEventListener("input",apply); if(sel) sel.addEventListener("change",apply);
+  });
+
+  // Charts
+  var data=JSON.parse(document.getElementById("perfData").textContent||"{}");
+  var series=data.series||[]; if(!series.length) return;
+  var NS="http://www.w3.org/2000/svg";
+  function el(tag,attrs,parent){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+  function niceMax(v){if(v<=0)return 1;var p=Math.pow(10,Math.floor(Math.log10(v)));var n=v/p;return (n<=1?1:n<=2?2:n<=5?5:10)*p;}
+  function fmtT(s){var m=Math.floor(s/60),r=s%60;return m?m+"m"+(r?(r<10?"0":"")+r+"s":""):r+"s";}
+  function fmtV(v,unit){if(v==null)return "-";return (unit==="ms"?Math.round(v).toLocaleString():(Math.round(v*10)/10).toLocaleString())+(unit?" "+unit:"");}
+
+  function lineChart(host,cfg){
+    var card=host.parentElement;
+    var tip=document.createElement("div"); tip.className="tip"; card.appendChild(tip);
+    function draw(){
+      host.innerHTML="";
+      var W=Math.max(300,host.clientWidth), H=Math.round(Math.min(240,Math.max(170,W*0.28)));
+      var m={l:52,r:16,t:10,b:26}, iw=W-m.l-m.r, ih=H-m.t-m.b;
+      var svg=el("svg",{viewBox:"0 0 "+W+" "+H,role:"img","aria-label":cfg.label},host);
+      var xs=series.map(function(d){return d.t}), xmax=Math.max(1,xs[xs.length-1]);
+      var vals=[]; cfg.lines.forEach(function(l){series.forEach(function(d){if(d[l.key]!=null)vals.push(d[l.key]);});});
+      if(cfg.ref!=null) vals.push(cfg.ref*1.08);
+      var ymax=niceMax(Math.max.apply(null,vals.concat([0]))*1.05);
+      function X(t){return m.l+iw*t/xmax} function Y(v){return m.t+ih-ih*v/ymax}
+      for(var i=0;i<=4;i++){var v=ymax*i/4,y=Y(v);
+        el("line",{x1:m.l,x2:W-m.r,y1:y,y2:y,stroke:i===0?"var(--axis)":"var(--grid)","stroke-width":1},svg);
+        var tx=el("text",{x:m.l-8,y:y+4,"text-anchor":"end"},svg); tx.textContent=fmtV(v,"").trim();}
+      var ticks=5; for(var j=0;j<=ticks;j++){var t=Math.round(xmax*j/ticks);var tx2=el("text",{x:X(t),y:H-6,"text-anchor":j===0?"start":j===ticks?"end":"middle"},svg);tx2.textContent=fmtT(t);}
+      if(cfg.ref!=null){var ry=Y(cfg.ref);el("line",{x1:m.l,x2:W-m.r,y1:ry,y2:ry,stroke:"var(--muted)","stroke-width":1.5,"stroke-dasharray":"6 4"},svg);
+        var rl=el("text",{x:W-m.r,y:ry-6,"text-anchor":"end"},svg); rl.textContent="target "+cfg.ref+" ms";}
+      cfg.lines.forEach(function(l){
+        var d="",pen=false; series.forEach(function(p){var v=p[l.key]; if(v==null){pen=false;return;} d+=(pen?"L":"M")+X(p.t).toFixed(1)+","+Y(v).toFixed(1); pen=true;});
+        el("path",{d:d,fill:"none",stroke:l.color,"stroke-width":2,"stroke-linejoin":"round","stroke-linecap":"round"},svg);
+      });
+      if(cfg.lines.length>1){ // direct labels at line ends
+        var last=series[series.length-1];
+        cfg.lines.forEach(function(l){var v=last[l.key]; if(v==null) return; var t=el("text",{x:X(last.t)-4,y:Y(v)-6,"text-anchor":"end"},svg); t.textContent=l.short;});
+      }
+      var cross=el("line",{x1:0,x2:0,y1:m.t,y2:m.t+ih,stroke:"var(--muted)","stroke-width":1,visibility:"hidden"},svg);
+      var dots=cfg.lines.map(function(l){return el("circle",{r:4,fill:l.color,stroke:"var(--bg)","stroke-width":2,visibility:"hidden"},svg)});
+      var hit=el("rect",{x:m.l,y:m.t,width:iw,height:ih,fill:"transparent",tabindex:0},svg);
+      function show(idx){
+        var p=series[idx], x=X(p.t); cross.setAttribute("x1",x); cross.setAttribute("x2",x); cross.setAttribute("visibility","visible");
+        tip.innerHTML=""; var h=document.createElement("div"); h.className="t"; h.textContent=fmtT(p.t)+" · "+p.users+" users"; tip.appendChild(h);
+        cfg.lines.forEach(function(l,k){var v=p[l.key];
+          if(v==null){dots[k].setAttribute("visibility","hidden");}else{dots[k].setAttribute("cx",x);dots[k].setAttribute("cy",Y(v));dots[k].setAttribute("visibility","visible");}
+          var row=document.createElement("div"); row.className="row"; var key=document.createElement("i"); key.className="key"; key.style.background=l.color;
+          var b=document.createElement("b"); b.textContent=fmtV(v,cfg.unit); var s=document.createElement("span"); s.textContent=l.label;
+          row.appendChild(key); row.appendChild(b); row.appendChild(s); tip.appendChild(row);});
+        if(cfg.ref!=null){var rr=document.createElement("div"); rr.className="row"; var sp=document.createElement("span"); sp.textContent="target "+cfg.ref+" ms"; rr.appendChild(sp); tip.appendChild(rr);}
+        tip.style.display="block";
+        var scale=host.clientWidth/W, left=host.offsetLeft+x*scale+12;
+        if(left+tip.offsetWidth>card.clientWidth-8) left=host.offsetLeft+x*scale-tip.offsetWidth-12;
+        tip.style.left=Math.max(4,left)+"px"; tip.style.top=(host.offsetTop+8)+"px";
+      }
+      function hide(){cross.setAttribute("visibility","hidden"); dots.forEach(function(d){d.setAttribute("visibility","hidden")}); tip.style.display="none";}
+      function nearest(clientX){var r=svg.getBoundingClientRect(); var t=((clientX-r.left)*(W/r.width)-m.l)/iw*xmax; var best=0,bd=1e18;
+        series.forEach(function(p,i){var dd=Math.abs(p.t-t); if(dd<bd){bd=dd;best=i;}}); return best;}
+      var cur=-1;
+      hit.addEventListener("pointermove",function(e){cur=nearest(e.clientX); show(cur);});
+      hit.addEventListener("pointerleave",hide);
+      hit.addEventListener("focus",function(){cur=series.length-1; show(cur);});
+      hit.addEventListener("blur",hide);
+      hit.addEventListener("keydown",function(e){if(e.key==="ArrowLeft"){cur=Math.max(0,cur-1);show(cur);e.preventDefault();}if(e.key==="ArrowRight"){cur=Math.min(series.length-1,cur+1);show(cur);e.preventDefault();}});
+    }
+    draw(); var rt; window.addEventListener("resize",function(){clearTimeout(rt); rt=setTimeout(draw,120);});
+  }
+  lineChart(document.getElementById("chartLatency"),{label:"Response time over the run",unit:"ms",ref:data.target,
+    lines:[{key:"p50",label:"p50 (median)",short:"p50",color:"var(--series-1)"},{key:"p95",label:"p95",short:"p95",color:"var(--series-2)"}]});
+  lineChart(document.getElementById("chartRps"),{label:"Requests and failures per second",unit:"/s",
+    lines:[{key:"rps",label:"requests/s",short:"req/s",color:"var(--series-1)"},{key:"fps",label:"failures/s",short:"fail/s",color:"var(--series-2)"}]});
+  lineChart(document.getElementById("chartUsers"),{label:"Simulated users over the run",unit:"users",
+    lines:[{key:"users",label:"users",short:"users",color:"var(--series-1)"}]});
+})();
+</script>
+</body>
+</html>

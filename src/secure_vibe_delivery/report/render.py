@@ -1,0 +1,90 @@
+"""Render the self-contained HTML report and summary.json."""
+from __future__ import annotations
+
+import json
+import shutil
+import time
+from datetime import datetime
+from pathlib import Path
+
+from jinja2 import Environment, PackageLoader, select_autoescape
+from markupsafe import Markup
+
+from .. import gate
+from ..models import SEVERITY_ORDER, CheckResult, RunState, Status
+
+_env = Environment(loader=PackageLoader("secure_vibe_delivery", "report/templates"),
+                   autoescape=select_autoescape(["html", "j2"]), trim_blocks=True, lstrip_blocks=True)
+
+
+def _json_script(data) -> Markup:
+    """JSON safe to embed inside <script type="application/json">."""
+    s = json.dumps(data, default=str).replace("</", "<\\/").replace("<!--", "<\\!--")
+    return Markup(s)
+
+
+def _fmt_dur(seconds: float | None) -> str:
+    if not seconds:
+        return "-"
+    m, s = divmod(int(seconds), 60)
+    return f"{m}m {s:02d}s" if m else f"{s}s"
+
+
+_env.filters["dur"] = _fmt_dur
+_env.filters["sevrank"] = lambda s: SEVERITY_ORDER.get(s, 0)
+
+
+def build_summary(st: RunState, results: dict[str, CheckResult]) -> dict:
+    v = st.verdict or gate.verdict(results)
+    return {
+        "tool": "secure-vibe-delivery", "run_id": st.run_id, "project": st.options.project_path,
+        "generated_at": datetime.now().isoformat(timespec="seconds"), "mode": st.options.mode,
+        "verdict": v, "verdict_text": gate.VERDICT_TEXT[v],
+        "checks": {k: {"status": r.status.value, "summary": r.summary,
+                       "subchecks": [s.model_dump(mode="json") for s in r.subchecks]} for k, r in results.items()},
+        "secrets": [s.model_dump(mode="json") for s in results["security"].secrets],
+        "must_fix": gate.must_fix(results),
+        "tool_versions": st.tool_versions,
+    }
+
+
+def render_report(st: RunState, results: dict[str, CheckResult], run_dir: Path, reports_dir: Path) -> tuple[Path, Path]:
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    summary = build_summary(st, results)
+    sec, fun, perf = results["security"], results["functional"], results["performance"]
+
+    native_rel = ""
+    if perf.data.get("native_report") and Path(perf.data["native_report"]).exists():
+        native = reports_dir / f"svd-report-{stamp}-locust.html"
+        shutil.copyfile(perf.data["native_report"], native)
+        native_rel = native.name
+
+    code = [f for f in sec.findings if f.category == "code"]
+    libs = sorted([f for f in sec.findings if f.category == "library"],
+                  key=lambda f: (-SEVERITY_ORDER.get(f.severity, 0), f.package, f.rule_id))
+    pkgs = [f for f in sec.findings if f.category == "package"]
+    sev_counts = {s: sum(1 for f in code if f.severity == s) for s in ("critical", "high", "medium", "low")}
+    lib_counts = {s: sum(1 for f in libs if f.severity == s) for s in ("critical", "high", "medium", "low")}
+
+    perf_chart = {
+        "series": perf.data.get("series", []),
+        "target": perf.data.get("p95_target_ms"),
+    }
+    checklist = [(name, r) for name, r in results.items()]
+    commands = [(name, c) for name, r in results.items() for c in r.commands]
+    html = _env.get_template("report.html.j2").render(
+        st=st, opts=st.options, summary=summary, results=results, sec=sec, fun=fun, perf=perf,
+        code=code, libs=libs, pkgs=pkgs, sev_counts=sev_counts, lib_counts=lib_counts,
+        must_fix=summary["must_fix"], verdict=summary["verdict"], verdict_text=summary["verdict_text"],
+        perf_json=_json_script(perf_chart), native_rel=native_rel, checklist=checklist, commands=commands,
+        Status=Status, generated=datetime.now().strftime("%d %b %Y, %H:%M"),
+        duration=_fmt_dur((st.finished_at or time.time()) - st.created_at),
+        project_name=Path(st.options.project_path).name,
+    )
+    html_path = reports_dir / f"svd-report-{stamp}.html"
+    html_path.write_text(html)
+    summary["report_path"] = str(html_path)
+    summary_path = reports_dir / f"svd-report-{stamp}.summary.json"
+    summary_path.write_text(json.dumps(summary, indent=1, default=str))
+    (run_dir / "report.html").write_text(html)
+    return html_path, summary_path
