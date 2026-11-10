@@ -11,14 +11,14 @@
 *,*::before,*::after{box-sizing:border-box}
 :root{
   color-scheme:light;
-  --bg:#f6f8f8;--head-bg:#efefed;--card:#ffffff;--ink:#1c2529;--muted:#56676d;--faint:#898781;
-  --accent:#0e6e68;--accent-soft:#e2efed;--border:#d8e0e0;--code-bg:#eef2f2;--code-ink:#17332f;
-  --grid:#e1e0d9;--axis:#c3c2b7;
+  --bg:#f4f4f4;--head-bg:#ededed;--card:#ffffff;--ink:#1c2529;--muted:#56676d;--faint:#898781;
+  --accent:#0e6e68;--accent-soft:#eeeeee;--border:#dddddd;--code-bg:#f0f0f0;--code-ink:#1f2328;
+  --grid:#e4e4e4;--axis:#c4c4c4;
   --good:#0ca30c;--good-ink:#006300;--warning:#fab219;--serious:#ec835a;--critical:#d03b3b;
   --good-bg:#e8f3ea;--warn-bg:#faf3e0;--bad-bg:#fbeaea;--notrun-bg:#fcefe8;
   --series-1:#2a78d6;--series-2:#eb6834;
-  --tab-bg:#e9e7f7;--tab-ink:#4f46b8;--tab-border:#c9c4ec;--shell:#fbfbfa;
-  --lift:0 10px 28px rgba(28,37,41,.10);--row-hover:#f1f5f5;
+  --tab-bg:#e9e7f7;--tab-ink:#4f46b8;--tab-border:#c9c4ec;--shell:#fbfbfb;
+  --lift:0 10px 28px rgba(28,37,41,.10);--row-hover:#f5f5f5;
 }
 @media (prefers-color-scheme:dark){
   :root:where(:not([data-theme="light"])){
@@ -178,6 +178,20 @@ td.fixcol{min-width:26ch}
 .callout{background:var(--accent-soft);padding:.85rem 1.15rem;border-radius:10px;margin:1rem 0;font-size:14px}
 .callout.warn{background:var(--warn-bg)}
 .callout.bad{background:var(--bad-bg)}
+.vtip{position:relative;cursor:help;text-decoration:underline dotted;text-decoration-thickness:2px;text-underline-offset:.18em;outline:none}
+.vtip-pop{position:absolute;left:0;top:calc(100% + .5rem);z-index:20;width:min(24rem,80vw);background:var(--card);color:var(--ink);
+  border:1px solid var(--border);border-radius:10px;box-shadow:var(--lift);padding:.75rem .9rem;font-size:13px;font-weight:400;
+  line-height:1.5;letter-spacing:0;text-transform:none;white-space:normal;opacity:0;visibility:hidden;transform:translateY(-4px);
+  transition:opacity .15s ease,transform .15s ease,visibility .15s}
+.vtip:hover .vtip-pop,.vtip:focus .vtip-pop,.vtip:focus-within .vtip-pop{opacity:1;visibility:visible;transform:none}
+.vtip-all{display:block;margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--border);color:var(--muted);font-size:12px}
+.vtip-all span{display:block}
+.vtip-all b{color:var(--ink)}
+details.scoremath{margin:1.1rem 0 0;padding:.8rem 1.1rem}
+details.scoremath[open]{border-color:var(--axis)}
+details.scoremath summary{font-size:14px}
+details.scoremath[open] .hint{display:none}
+details.scoremath .tablewrap{margin-top:.6rem}
 details{border:1px solid var(--border);border-radius:10px;padding:.6rem .9rem;margin:.6rem 0;background:var(--card);transition:border-color .15s ease}
 details:hover{border-color:var(--axis)}
 details summary{cursor:pointer;font-weight:600}
@@ -217,10 +231,17 @@ details summary{cursor:pointer;font-weight:600}
 </style>
 </head>
 <body>
+{% set VERDICT_TIPS = {
+  "GO": "Ready for go-live. Every automated check passed. The Delivery Lead still signs off the manual items on the Go-live checklist.",
+  "PROVISIONAL": "Nearly there. Every automated check passed, but performance only ran the 2-minute quick test. Run mode='gate' (15 minutes at 1.5x peak) to turn this into GO.",
+  "NO-GO": "Not ready for go-live. At least one must-pass check failed, or didn't run (a skipped check counts as a failure). Start with the Must fix tab."} %}
+{% macro vword(v) -%}
+<span class="vtip" tabindex="0">{{ v }}<span class="vtip-pop" role="tooltip"><b>{{ v }}</b> {{ VERDICT_TIPS[v] }}<span class="vtip-all">{% for k in ["GO","PROVISIONAL","NO-GO"] if k != v %}<span><b>{{ k }}</b>: {{ VERDICT_TIPS[k].split(".")[0] }}.</span>{% endfor %}</span></span></span>
+{%- endmacro %}
 <header class="mast"><div class="wrap">
   <div class="top"><div class="eyebrow">Secure Vibe Delivery · go-live analysis</div>
   <button class="theme" id="themeBtn" type="button">◐ Theme</button></div>
-  <h1>{{ project_name }}: {{ verdict }}</h1>
+  <h1>{{ project_name }}: {{ vword(verdict) }}</h1>
   <div class="meta">
     <span>Project <code>{{ opts.project_path }}</code></span>
     <span>Generated {{ generated }}</span>
@@ -255,7 +276,7 @@ details summary{cursor:pointer;font-weight:600}
 <section class="card panel" id="verdict" role="tabpanel" aria-labelledby="tab-verdict">
   <div class="verdict {{ verdict }}">
     <div class="ico" aria-hidden="true">{{ {"NO-GO":"✕","PROVISIONAL":"!","GO":"✓"}[verdict] }}</div>
-    <div><div class="big">{{ verdict }}</div><p>{{ verdict_text }}</p></div>
+    <div><div class="big">{{ vword(verdict) }}</div><p>{{ verdict_text }}</p></div>
   </div>
   {% macro band(v) -%}{{ "band-good" if v >= 80 else "band-warn" if v >= 60 else "band-bad" }}{%- endmacro %}
   <div class="ov-grid">
@@ -273,16 +294,6 @@ details summary{cursor:pointer;font-weight:600}
       </div>
       {% for cap in score.caps %}<p class="caps">Capped: {{ cap }}.</p>{% endfor %}
       {% if score.note %}<p class="caps">{{ score.note }}</p>{% endif %}
-      <details><summary>How the score is worked out</summary>
-        <p class="muted" style="font-size:13px">{{ score.method }} An exposed secret or a critical issue holds the score at 59 or below; a check
-        that didn't run holds it at 79 or below. Grades: A 90+, B 80+, C 70+, D 60+, F below 60.</p>
-        <div class="tablewrap"><table><thead><tr><th>Part</th><th class="num">Points</th><th>Why</th></tr></thead><tbody>
-          {% for name in ["security","functional","performance"] %}{% for comp in score.checks[name].components %}
-          <tr><td>{{ name|title }} · {{ comp.label }}</td><td class="num">{{ comp.points }} / {{ comp.max_points }}</td><td>{{ comp.detail }}</td></tr>
-          {% endfor %}{% endfor %}
-          <tr><td><b>Total before caps</b></td><td class="num"><b>{{ score.raw_score }} / 100</b></td><td></td></tr>
-        </tbody></table></div>
-      </details>
     </div>
     <div class="sumcard card-lift">
       <h4>Summary</h4>
@@ -298,6 +309,16 @@ details summary{cursor:pointer;font-weight:600}
       </div>
     </div>
   </div>
+  <details class="scoremath" id="scoremath"><summary>How the score is worked out <span class="muted hint">(click to expand the full breakdown)</span></summary>
+    <p class="muted" style="font-size:13px">{{ score.method }} An exposed secret or a critical issue holds the score at 59 or below; a check
+    that didn't run holds it at 79 or below. Grades: A 90+, B 80+, C 70+, D 60+, F below 60.</p>
+    <div class="tablewrap"><table><thead><tr><th>Part</th><th class="num">Points</th><th>Why</th></tr></thead><tbody>
+      {% for name in ["security","functional","performance"] %}{% for comp in score.checks[name].components %}
+      <tr><td>{{ name|title }} · {{ comp.label }}</td><td class="num">{{ comp.points }} / {{ comp.max_points }}</td><td>{{ comp.detail }}</td></tr>
+      {% endfor %}{% endfor %}
+      <tr><td><b>Total before caps</b></td><td class="num"><b>{{ score.raw_score }} / 100</b></td><td></td></tr>
+    </tbody></table></div>
+  </details>
   <div class="grid3">
     {% for name, label, question in [("security","Security","Is it safe?"),("functional","Functional","Does it work?"),("performance","Performance","Can it cope?")] %}
     {% set r = results[name] %}
