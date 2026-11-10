@@ -13,13 +13,13 @@ a go-live verdict: **GO**, **PROVISIONAL** or **NO-GO**, plus a fix list in prio
 
 A check that didn't run counts as a failure, never as a pass.
 
-**New here?** Read the plain-English [tutorial](docs/tutorial.html).
+**New here?** Read the plain-English [tutorial](https://t-labs-buy.github.io/secure-vibe-delivery/tutorial.html).
 
 ## Install
 
-Follow the **[install guide](docs/install.html)**. It walks through setup on a Mac or Windows, for
-Claude Code (terminal or VS Code extension) and GitHub Copilot Chat in VS Code, with
-troubleshooting. GitHub shows HTML files as source, so download the file and open it in a browser.
+Follow the **[install guide](https://t-labs-buy.github.io/secure-vibe-delivery/install.html)**. It walks through setup on a Mac or Windows,
+for Claude Code (terminal or VS Code extension) and GitHub Copilot Chat in VS Code, with
+troubleshooting. Tip: Ctrl-click (⌘-click on a Mac) a link to open it in a new tab.
 
 ## First run
 
