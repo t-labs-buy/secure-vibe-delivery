@@ -20,6 +20,7 @@
   --tab-bg:#e9e7f7;--tab-ink:#4f46b8;--tab-border:#c9c4ec;--shell:#fbfbfb;
   --lift:0 10px 28px rgba(28,37,41,.10);--row-hover:#f5f5f5;
   --tip-bg:#fff9e0;--tip-border:#efdf9f;--tip-rule:#f1e5b4;
+  --tl-security:#2a78d6;--tl-functional:#eb6834;--tl-performance:#1baf7a;--tl-setup:#8b9296;--tl-skipped:#fab219;--tl-skipped-ink:#c98a00;
 }
 @media (prefers-color-scheme:dark){
   :root:where(:not([data-theme="light"])){
@@ -32,6 +33,7 @@
     --tab-bg:#454063;--tab-ink:#babbf1;--tab-border:#6c6896;--shell:#3a3e52;
     --lift:0 10px 28px rgba(0,0,0,.35);--row-hover:#464a5e;
     --tip-bg:#4b4838;--tip-border:#6e6848;--tip-rule:#5f5a44;
+    --tl-security:#3987e5;--tl-functional:#d95926;--tl-performance:#199e70;--tl-setup:#8c93ad;--tl-skipped:#fab219;--tl-skipped-ink:#a87400;
   }
 }
 :root[data-theme="dark"]{
@@ -44,6 +46,7 @@
   --tab-bg:#454063;--tab-ink:#babbf1;--tab-border:#6c6896;--shell:#3a3e52;
   --lift:0 10px 28px rgba(0,0,0,.35);--row-hover:#464a5e;
     --tip-bg:#4b4838;--tip-border:#6e6848;--tip-rule:#5f5a44;
+    --tl-security:#3987e5;--tl-functional:#d95926;--tl-performance:#199e70;--tl-setup:#8c93ad;--tl-skipped:#fab219;--tl-skipped-ink:#a87400;
 }
 html{scroll-behavior:smooth;scroll-padding-top:4rem}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.65 "JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
@@ -219,6 +222,105 @@ button.copy.done{border-color:var(--good);color:var(--good-ink)}
 .cv-state .badge{flex:none;margin-top:.1rem}
 details.cv-files{margin:.7rem 0 0}
 details.cv-files pre{margin:.5rem 0 0;max-height:14rem}
+.tl-head{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap}
+.tl-head h2{margin-bottom:.2rem}
+.tl-legend{list-style:none;display:flex;flex-wrap:wrap;gap:.4rem 1.1rem;margin:.35rem 0 0;padding:0;font-size:13px;color:var(--muted)}
+.tl-legend li{display:flex;align-items:center;gap:.45rem}
+.tl-legend .sw{display:inline-block;width:1.1rem;height:.3rem;border-radius:2px}
+.tl{margin:1rem 0 .5rem}
+.tl-row{display:grid;grid-template-columns:minmax(9rem,15rem) minmax(0,1fr);gap:1rem;align-items:center;margin:0 0 .5rem}
+.tl-label{font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tl-track{position:relative;height:1.6rem;background:var(--code-bg);border-radius:7px}
+.tl-bar{position:absolute;top:.2rem;bottom:.2rem;min-width:.6rem;border:0;border-radius:5px;padding:0 .45rem;cursor:pointer;
+  font:inherit;display:flex;align-items:center;overflow:hidden;transition:filter .15s ease,box-shadow .15s ease}
+.tl-bar:hover{filter:brightness(1.08)}
+.tl-bar[aria-pressed=true]{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--ink)}
+.tl-bar:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.tl-dur{font-size:12px;white-space:nowrap;color:var(--muted);position:absolute;top:50%;transform:translateY(-50%);pointer-events:none}
+.tl-dur.after{margin-left:.4rem}.tl-dur.before{margin-right:.4rem}
+.tl-dur.in{position:static;transform:none;color:#fff;font-weight:600}
+.tl-security{background:var(--tl-security)}.tl-functional{background:var(--tl-functional)}
+.tl-performance{background:var(--tl-performance)}.tl-setup{background:var(--tl-setup)}
+.tl-functional .tl-dur.in,.tl-performance .tl-dur.in{color:#14191b}
+.tl-skipped{background:repeating-linear-gradient(45deg,var(--tl-skipped) 0 3px,var(--tl-skipped-ink) 3px 5px)}
+.tl-skipped .tl-dur.in{color:#14191b;background:var(--tl-skipped);border-radius:3px;padding:0 .25rem}
+.tl-legend .sw.tl-skipped{height:.55rem}
+.tl-axisrow{margin-top:.15rem}
+.tl-axis{position:relative;height:1.2rem;font-size:12px;color:var(--muted)}
+.tl-axis span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.tl-axis span.start{transform:none}.tl-axis span.end{transform:translateX(-100%)}
+.tl-detail{background:var(--code-bg);border-radius:12px;padding:1rem 1.2rem;margin:1rem 0 1.5rem}
+.tl-dtitle{font-size:15px;margin-bottom:.35rem}
+.tl-what{margin:.35rem 0;color:var(--muted);font-size:13.5px}
+.tl-cmd+.tl-cmd{border-top:1px solid var(--border);margin-top:.6rem;padding-top:.5rem}
+.tl-cmdline{display:flex;gap:.8rem;align-items:flex-start;justify-content:space-between}
+.tl-cmdline code{background:none;padding:0;white-space:pre-wrap;word-break:break-all;font-size:13px;color:var(--ink)}
+.tl-cmdline .copy{flex:none}
+@media (max-width:700px){.tl-row{grid-template-columns:minmax(0,1fr);gap:.2rem}.tl-axisrow>div:first-child{display:none}}
+.hero{display:grid;grid-template-columns:minmax(0,1fr);gap:1.5rem;align-items:start}
+@media (min-width:1100px){.hero{grid-template-columns:minmax(0,1.45fr) minmax(22rem,1fr)}}
+.vpill{display:inline-flex;align-items:center;gap:.5rem;font-size:12.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:.35rem .8rem;border-radius:999px}
+.vpill i{width:.5rem;height:.5rem;border-radius:50%;display:inline-block;background:currentColor}
+.vpill .vtip{text-decoration-thickness:1px}
+.v-PROVISIONAL{background:var(--warn-bg);color:#9a6a00}.v-NO-GO{background:var(--bad-bg);color:var(--critical)}.v-GO{background:var(--good-bg);color:var(--good-ink)}
+:root[data-theme="dark"] .v-PROVISIONAL{color:var(--warning)}
+@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])) .v-PROVISIONAL{color:var(--warning)}}
+.hero-h{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Inter,Roboto,sans-serif;font-size:clamp(2.2rem,5.2vw,4.1rem);
+  font-weight:800;letter-spacing:-.03em;line-height:1.02;margin:1rem 0 .9rem}
+.acc-accent{color:var(--tl-security)}.acc-good{color:var(--good-ink)}.acc-bad{color:var(--critical)}
+:root[data-theme="dark"] .acc-good{color:var(--good)}
+@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])) .acc-good{color:var(--good)}}
+.hero-p{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Inter,Roboto,sans-serif;font-size:clamp(1rem,1.5vw,1.2rem);
+  line-height:1.55;color:var(--muted);margin:0 0 1.1rem;max-width:44rem}
+.hero-meta{display:flex;flex-wrap:wrap;gap:.35rem 1.4rem;font-size:13px;color:var(--muted)}
+.hero-meta b{color:var(--ink)}.hero-meta code{background:none;padding:0}
+.hero-meta .br{flex-basis:100%}
+.path{border:1px solid var(--border);border-radius:14px;background:var(--card);padding:1rem 1.2rem 1.1rem;margin-top:1.4rem}
+.path-head{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:.9rem}
+.path-head h4{margin:0;font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.path-count{font-size:12.5px;font-weight:700;padding:.2rem .65rem;border-radius:999px;background:var(--warn-bg);color:#9a6a00}
+.path-count.all{background:var(--good-bg);color:var(--good-ink)}
+.gates{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr))}
+.gates li{position:relative;text-align:center;display:flex;flex-direction:column;align-items:center;gap:.15rem;font-size:13px}
+.gates li small{color:var(--muted);font-size:12px}
+.gates li:not(:last-child)::after{content:"";position:absolute;top:1.15rem;left:calc(50% + 1.3rem);right:calc(-50% + 1.3rem);height:3px;
+  border-radius:2px;background:repeating-linear-gradient(90deg,var(--axis) 0 6px,transparent 6px 11px)}
+.gates li.g-done.to-done::after{background:var(--good)}
+.gates li.g-done.to-pending::after{background:linear-gradient(90deg,var(--good),var(--warning))}
+.gates li.g-done.to-fail::after{background:linear-gradient(90deg,var(--good),var(--critical))}
+.g-node{width:2.3rem;height:2.3rem;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;text-decoration:none;
+  margin-bottom:.35rem;position:relative;z-index:1;transition:transform .15s ease}
+.g-node:hover{transform:scale(1.08)}
+.g-done .g-node{background:#1d8a4e;color:#fff}
+.g-fail .g-node{background:var(--critical);color:#fff}
+.g-pending .g-node{background:var(--warn-bg);color:#9a6a00;border:2px solid #c98a00}
+.g-notrun .g-node{background:var(--card);color:var(--muted);border:2px solid var(--faint)}
+.g-signoff .g-node{background:var(--card);color:var(--muted);border:2px dashed var(--faint);font-size:12px}
+@media (max-width:560px){.gates{grid-template-columns:repeat(5,minmax(3.6rem,1fr));overflow-x:auto}.gates li small{display:none}}
+.scoredark{background:radial-gradient(120% 90% at 85% 100%,#1d3170 0%,rgba(29,49,112,0) 60%),linear-gradient(160deg,#0f1729,#141d33);
+  color:#e8ecf5;border-radius:18px;padding:1.6rem 1.6rem 1.4rem;min-height:100%}
+.sd-top{display:flex;gap:1.4rem;align-items:center;flex-wrap:wrap}
+.ring{width:9.5rem;height:9.5rem;flex:none}
+.ring-track{fill:none;stroke:#2a3352;stroke-width:10}
+.ring-arc{fill:none;stroke-width:10;stroke-linecap:round}
+.ring-arc.band-good{stroke:#3fbf6f;background:none}.ring-arc.band-warn{stroke:#fab219;background:none}.ring-arc.band-bad{stroke:#ef6b6b;background:none}
+.ring-num{font:800 36px ui-sans-serif,system-ui,-apple-system,"Segoe UI",Inter,sans-serif;fill:#fff}
+.ring-of{font:500 11px ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;fill:#9aa4bd}
+.sd-text{flex:1;min-width:12rem}
+.sd-eyebrow{font-size:13px;color:#9aa4bd}
+.sd-grade{font:800 1.45rem/1.2 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Inter,sans-serif;margin:.25rem 0 .5rem}
+.sd-note{margin:0;color:#aab3c8;font-size:13.5px;line-height:1.5}
+.sd-bars{display:grid;gap:.85rem;margin-top:1.5rem}
+.sd-row{display:grid;grid-template-columns:7rem minmax(0,1fr) 4.2rem;gap:.9rem;align-items:center;font-size:13.5px}
+.sd-track{height:.45rem;border-radius:999px;background:#2a3352;overflow:hidden}
+.sd-track b{display:block;height:100%;border-radius:999px}
+.sd-security{background:#3987e5}.sd-functional{background:#d95926}.sd-performance{background:#199e70}
+.sd-val{text-align:right;color:#c9d0e0;font-variant-numeric:tabular-nums}
+.sd-foot{margin:1rem 0 0;font-size:12.5px;color:#9aa4bd}
+.sd-link{display:inline-block;margin-top:1.1rem;color:#9fc0ff;font-size:13px;text-decoration:none}
+.sd-link:hover{text-decoration:underline}
+.ov-summary{margin-top:1.1rem}
 details{border:1px solid var(--border);border-radius:10px;padding:.6rem .9rem;margin:.6rem 0;background:var(--card);transition:border-color .15s ease}
 details:hover{border-color:var(--axis)}
 details summary{cursor:pointer;font-weight:600}
@@ -301,10 +403,6 @@ details summary{cursor:pointer;font-weight:600}
   <h1>{{ project_name }}: {{ vword(verdict) }}</h1>
   <div class="meta">
     <span>Project <code>{{ opts.project_path }}</code></span>
-    <span>Generated {{ generated }}</span>
-    <span>Run <code>{{ st.run_id }}</code></span>
-    <span>Mode <b>{{ opts.mode }}</b>{% if opts.mode == "quick" %} (indicative){% endif %}</span>
-    <span>Took {{ duration }}</span>
     {% if cv.is_git and cv.commit %}<span>Code <a href="#code-version"><code>{{ cv.short }}</code></a>{% if cv.branch %} on <b>{{ cv.branch }}</b>{% endif %}{% if cv.changed_during_run %} · <b>changed during run</b>{% elif cv.dirty %} · <b>+{{ cv.changed_count }} uncommitted</b>{% endif %}</span>
     {% elif cv and not cv.is_git %}<span>Code version <b>not recorded</b> (not a git repository)</span>{% endif %}
   </div>
@@ -334,28 +432,59 @@ details summary{cursor:pointer;font-weight:600}
 </div>
 
 <section class="card panel" id="verdict" role="tabpanel" aria-labelledby="tab-verdict">
-  <div class="verdict {{ verdict }}">
-    <div class="ico" aria-hidden="true">{{ {"NO-GO":"✕","PROVISIONAL":"!","GO":"✓"}[verdict] }}</div>
-    <div><div class="big">{{ vword(verdict) }}</div><p>{{ verdict_text }}</p></div>
-  </div>
-  {{ code_version_card() }}
+  {% set H = hero %}
   {% macro band(v) -%}{{ "band-good" if v >= 80 else "band-warn" if v >= 60 else "band-bad" }}{%- endmacro %}
-  <div class="ov-grid">
-    <div class="scorecard card-lift">
-      <h4>Secure-health score</h4>
-      <div class="score-hero"><span class="num">{{ score.score }}</span><span class="of">/ 100</span>
-        <span class="grade"><i class="{{ band(score.score) }}"></i>Grade {{ score.grade }} · {{ score.grade_word }}</span></div>
-      <div class="meter" role="img" aria-label="Score {{ score.score }} out of 100"><b class="{{ band(score.score) }}" style="width:{{ score.score }}%"></b></div>
-      <div class="sc-rows">
-        {% for name, label in [("security","Security"),("functional","Functional"),("performance","Performance")] %}
-        {% set c = score.checks[name] %}
-        <div class="sc-row"><div class="top">{{ label }}<span>{{ c.points }} / {{ c.weight }} points</span></div>
-          <div class="meter" role="img" aria-label="{{ label }} {{ c.score }} percent"><b class="{{ band(c.score) }}" style="width:{{ c.score }}%"></b></div></div>
+  <div class="hero">
+    <div class="hero-main">
+      <span class="vpill v-{{ verdict }}"><i aria-hidden="true"></i>{{ vword(verdict) }}</span>
+      <h2 class="hero-h">{{ H.head[0] }}<span class="acc acc-{{ H.head[3] }}">{{ H.head[1] }}</span>{{ H.head[2] }}</h2>
+      <p class="hero-p">{{ H.text }}</p>
+      <div class="hero-meta">
+        <span>Run <b><code>{{ st.run_id }}</code></b></span>
+        <span>Generated <b>{{ generated }}</b></span>
+        <span>Took <b>{{ duration }}</b></span>
+        <span>Mode <b>{{ opts.mode }}</b>{% if opts.mode == "quick" %} (indicative){% endif %}</span>
+        <span class="br">Peak <b>{{ H.peak }} users</b>{% if H.tested_users %} <span aria-hidden="true">→</span> tested at <b>{{ H.tested_users }}</b>{% endif %}</span>
+      </div>
+      <div class="path">
+        <div class="path-head"><h4>Path to go-live</h4><span class="path-count {{ 'all' if H.cleared >= H.total - 1 and verdict == 'GO' else '' }}">{{ H.cleared }} of {{ H.total }} gates cleared</span></div>
+        <ol class="gates">
+          {% for g in H.gates %}{% set nxt = H.gates[loop.index] if not loop.last else none %}
+          <li class="g-{{ g.state }}{% if nxt %} to-{{ nxt.state }}{% endif %}">
+            <a href="#{{ g.tab }}" class="g-node" aria-label="{{ g.label }}: {{ {'done':'cleared','fail':'failed','pending':'still to do','notrun':'didn\'t run','signoff':'manual sign-off'}[g.state] }}, {{ g.sub }}">{{ {"done":"✓","fail":"✕","pending":"!","notrun":"⊘","signoff":"GO"}[g.state] }}</a>
+            <b>{{ g.label }}</b><small>{{ g.sub }}</small>
+          </li>{% endfor %}
+        </ol>
+      </div>
+    </div>
+    <div class="scoredark" role="group" aria-label="Secure-health score">
+      <div class="sd-top">
+        {% set C = 326.73 %}
+        <svg class="ring" viewBox="0 0 120 120" role="img" aria-label="Score {{ score.score }} out of 100">
+          <circle cx="60" cy="60" r="52" class="ring-track"/>
+          <circle cx="60" cy="60" r="52" class="ring-arc {{ band(score.score) }}" stroke-dasharray="{{ (score.score / 100 * C)|round(2) }} {{ C }}" transform="rotate(-90 60 60)"/>
+          <text x="60" y="62" class="ring-num" text-anchor="middle">{{ score.score }}</text>
+          <text x="60" y="82" class="ring-of" text-anchor="middle">of 100</text>
+        </svg>
+        <div class="sd-text">
+          <div class="sd-eyebrow">Secure-health score</div>
+          <div class="sd-grade">Grade {{ score.grade }} · {{ score.grade_word }}</div>
+          <p class="sd-note">{{ H.score_note }}</p>
+        </div>
+      </div>
+      <div class="sd-bars">
+        {% for name, label in [("security","Security"),("functional","Functional"),("performance","Performance")] %}{% set c = score.checks[name] %}
+        <div class="sd-row"><span>{{ label }}</span>
+          <div class="sd-track" role="img" aria-label="{{ label }} {{ c.points }} of {{ c.weight }} points"><b class="sd-{{ name }}" style="width:{{ (c.points / c.weight * 100)|round(1) if c.weight else 0 }}%"></b></div>
+          <span class="sd-val">{{ "%.1f"|format(c.points) }}/{{ c.weight }}</span></div>
         {% endfor %}
       </div>
-      {% for cap in score.caps %}<p class="caps">Capped: {{ cap }}.</p>{% endfor %}
-      {% if score.note %}<p class="caps">{{ score.note }}</p>{% endif %}
+      {% if score.note %}<p class="sd-foot">{{ score.note }}</p>{% endif %}
+      <a class="sd-link" href="#scoremath">How the score is worked out <span aria-hidden="true">↓</span></a>
     </div>
+  </div>
+  {{ code_version_card() }}
+  <div class="ov-summary">
     <div class="sumcard card-lift">
       <h4>Summary</h4>
       <p class="src">{% if overview.source == "ai" %}Written by your AI assistant from this run's results.{% else %}Automatic summary from the results. For a written one, ask your assistant to "write the summary for this report".{% endif %}</p>
@@ -667,10 +796,50 @@ details summary{cursor:pointer;font-weight:600}
 </section>
 
 <section class="card panel" id="logs" role="tabpanel" aria-labelledby="tab-logs">
-  <h2>Logs: what ran</h2>
-  <p class="lede">Every step and every exact command, in the order they happened, so you can trace what was done and repeat
-  any command yourself. Download the same log as a <a href="{{ runlog_rel }}">text file</a>.</p>
-  <h3>Run log ({{ journal|length }} entries)</h3>
+  {% set CHECK_NAMES = {"security": "Security", "functional": "Functional", "performance": "Performance", "setup": "Setup"} %}
+  <div class="tl-head">
+    <div><h2>What ran, and for how long</h2>
+    <p class="lede">{% if timeline.rows %}{{ timeline.total_text|capitalize }} end to end. Select a bar to see the exact command and copy it.{% else %}No steps were recorded for this run.{% endif %}</p></div>
+    {% if timeline.rows %}<ul class="tl-legend" aria-label="Colour key">
+      {% for c in ["security","functional","performance","setup"] if c in timeline.checks %}<li><i class="sw tl-{{ c }}"></i>{{ CHECK_NAMES[c] }}</li>{% endfor %}
+      {% if timeline.any_skipped %}<li><i class="sw tl-skipped"></i>Skipped</li>{% endif %}
+    </ul>{% endif %}
+  </div>
+  {% if timeline.rows %}
+  <div class="tl" id="timeline">
+    {% for r in timeline.rows %}
+    {% set outside_left = (r.left + r.width) > 88 and not r.label_inside %}
+    <div class="tl-row">
+      <div class="tl-label">{{ r.label }}</div>
+      <div class="tl-track">
+        <button type="button" class="tl-bar tl-{{ 'skipped' if r.skipped else r.check }}" data-row="{{ loop.index0 }}"
+          style="left:{{ r.left }}%;width:{{ r.width }}%" aria-pressed="{{ 'true' if loop.first else 'false' }}"
+          aria-label="{{ r.label }}: starts at {{ r.start_text }}, {{ r.dur_text }}{{ ', skipped' if r.skipped else '' }}">{% if r.label_inside %}<span class="tl-dur in">{{ r.dur_text }}{{ " · skipped" if r.skipped else "" }}</span>{% endif %}</button>
+        {% if not r.label_inside %}<span class="tl-dur {{ 'before' if outside_left else 'after' }}" style="{{ ('right:' ~ (100 - r.left)|round(3) ~ '%') if outside_left else ('left:' ~ (r.left + r.width)|round(3) ~ '%') }}" aria-hidden="true">{{ r.dur_text }}{{ " · skipped" if r.skipped else "" }}</span>{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+    <div class="tl-row tl-axisrow" aria-hidden="true"><div></div><div class="tl-axis">
+      {% for t in timeline.ticks %}<span class="{{ 'end' if t.end else ('start' if loop.first else '') }}" style="left:{{ t.pct }}%">{{ t.label }}</span>{% endfor %}
+    </div></div>
+  </div>
+  {% for r in timeline.rows %}
+  <div class="tl-detail" data-row="{{ loop.index0 }}" {% if not loop.first %}hidden{% endif %} aria-live="polite">
+    <div class="tl-dtitle"><b>{{ r.label }}</b> <span class="muted">· starts at {{ r.start_text }} · {{ r.dur_text }}{% if r.exit_text %} · {{ r.exit_text }}{% endif %}{% if r.skipped %} · skipped{% endif %}</span></div>
+    {% if r.note %}<p class="tl-what">{{ r.note }}. Only package names are sent to the public registries; no command to copy.</p>{% endif %}
+    {% if r.skipped %}<p class="tl-what"><b>Skipped:</b> this step ran but didn't produce results. {{ r.why }}</p>{% endif %}
+    {% for c in r.commands %}
+    <div class="tl-cmd">
+      <p class="tl-what">{{ c.what }} {{ c.exit_text }}</p>
+      <div class="tl-cmdline"><code>{{ c.text }}</code><button type="button" class="copy" data-copy="{{ c.text }}" aria-label="Copy this command">Copy</button></div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  <h3>Every step, in order ({{ journal|length }} entries)</h3>
+  <p class="muted">The full log, including the decisions taken along the way. Download it as a <a href="{{ runlog_rel }}">text file</a>.</p>
   <div class="filters" data-for="journalTable"><input type="search" placeholder="Search the log: a command, a tool, a file" aria-label="Search the run log"></div>
   <div class="tablewrap"><table class="jt" id="journalTable"><thead><tr><th class="num">#</th><th>Time</th><th>Type</th><th>What happened</th><th class="num">Exit</th><th class="num">Took</th></tr></thead><tbody>
     {% for e in journal %}<tr>
@@ -756,6 +925,23 @@ details summary{cursor:pointer;font-weight:600}
     window.addEventListener("scroll",hideTip,true);
     document.addEventListener("keydown",function(e){if(e.key==="Escape")hideTip();});
   }
+
+
+  // Logs timeline: select a bar to show its command; arrow keys move between bars.
+  var tlBars=[].slice.call(document.querySelectorAll(".tl-bar"));
+  var tlDetails=[].slice.call(document.querySelectorAll(".tl-detail"));
+  function tlSelect(i,focus){
+    tlBars.forEach(function(b,j){b.setAttribute("aria-pressed",j===i?"true":"false");});
+    tlDetails.forEach(function(d){d.hidden=d.getAttribute("data-row")!==String(i);});
+    if(focus) tlBars[i].focus();
+  }
+  tlBars.forEach(function(b,i){
+    b.addEventListener("click",function(){tlSelect(i);});
+    b.addEventListener("keydown",function(e){
+      if(e.key==="ArrowDown"||e.key==="ArrowRight"){e.preventDefault();tlSelect(Math.min(i+1,tlBars.length-1),true);}
+      if(e.key==="ArrowUp"||e.key==="ArrowLeft"){e.preventDefault();tlSelect(Math.max(i-1,0),true);}
+    });
+  });
 
   // Tabs: one section at a time, synced with the URL hash, with Previous/Next links.
   var tabs=[].slice.call(document.querySelectorAll('[role=tab]'));

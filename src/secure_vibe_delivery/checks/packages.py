@@ -8,6 +8,7 @@ from __future__ import annotations
 import asyncio
 import json
 import re
+import time
 import tomllib
 from datetime import datetime, timezone
 from pathlib import Path
@@ -101,6 +102,7 @@ async def _npm(client: httpx.AsyncClient, name: str) -> tuple[str, str, int | No
 
 
 async def check(root: Path) -> tuple[list[Finding], dict]:
+    started = time.time()
     py, js = sorted(python_deps(root)), sorted(js_deps(root))
     meta = {"python_packages": len(py), "npm_packages": len(js), "lookup_errors": []}
     if not py and not js:
@@ -137,5 +139,6 @@ async def check(root: Path) -> tuple[list[Finding], dict]:
     from ..proc import journal_step
     journal_step("network", f"Looked up {len(py)} Python package name(s) on pypi.org and {len(js)} on "
                             f"registry.npmjs.org (names only); {meta['checked']} answered, "
-                            f"{len(meta['lookup_errors'])} lookup error(s)")
+                            f"{len(meta['lookup_errors'])} lookup error(s)",
+                 t=started, duration_s=round(time.time() - started, 2), step="provenance")
     return findings, meta

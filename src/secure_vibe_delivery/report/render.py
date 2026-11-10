@@ -13,6 +13,8 @@ from markupsafe import Markup
 from .. import gate, scoring
 from .. import summary as summaries
 from .commands import history as command_history
+from .commands import timeline as command_timeline
+from .overview import hero as overview_hero
 from ..models import SEVERITY_ORDER, CheckResult, RunState, Status
 
 _env = Environment(loader=PackageLoader("secure_vibe_delivery", "report/templates"),
@@ -141,7 +143,8 @@ def render_report(st: RunState, results: dict[str, CheckResult], run_dir: Path, 
         project_name=Path(st.options.project_path).name,
         score=summary["score"], overview=summary["overview_summary"],
         journal=sorted(st.journal, key=lambda e: e["t"]), hms=_hms, runlog_rel=f"svd-report-{stamp}-runlog.txt",
-        server_version=server_version(), history=command_history(st.journal),
+        server_version=server_version(), history=command_history(st.journal), timeline=command_timeline(st, results),
+        hero=overview_hero(st, results, summary["verdict"], summary["score"], summary["must_fix"]),
     )
     html_path = reports_dir / f"svd-report-{stamp}.html"
     html_path.write_text(html)

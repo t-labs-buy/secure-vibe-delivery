@@ -1,6 +1,6 @@
 [project]
 name = "secure-vibe-delivery"
-version = "0.1.8"
+version = "0.1.9"
 description = "MCP server that runs the Secure Vibe Delivery pipeline (security, functional, performance) and writes an HTML go-live report"
 readme = "README.md"
 requires-python = ">=3.11,<3.14"
