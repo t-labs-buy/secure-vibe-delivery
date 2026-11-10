@@ -90,7 +90,7 @@ async def run(ctx: CheckContext) -> CheckResult:
             scanners["snyk-open-source"] = f"{meta.get('dependency_count', 0)} dependencies"
             res.data["snyk_open_source"] = meta
     else:
-        not_run["snyk-open-source"] = "Snyk CLI not installed (brew tap snyk/tap && brew install snyk)"
+        not_run["snyk-open-source"] = "Snyk not installed: call svd_setup to download it and sign in (one-time)"
 
     # --- Snyk Code --------------------------------------------------------------------
     if snyk_bin:

@@ -61,15 +61,16 @@ async def doctor(project_path: str) -> dict:
     # Snyk
     tools["snyk"] = {"version": versions["snyk"]}
     if versions["snyk"] == "missing":
-        report["actions"].append("Install Snyk CLI: brew tap snyk/tap && brew install snyk (or npm i -g snyk)")
+        report["actions"].append("Install Snyk: call svd_setup and it downloads Snyk for you (one-time), "
+                                 "or install it yourself with brew tap snyk/tap && brew install snyk")
     else:
         snyk = resolve_tool("snyk")
         who = await run_cmd([*snyk, "whoami", "--experimental"], root, timeout=60)
         authed = who.exit_code == 0 and bool(who.stdout.strip())
         tools["snyk"]["authenticated"] = authed or bool(os.environ.get("SNYK_TOKEN"))
         if not tools["snyk"]["authenticated"]:
-            report["actions"].append("Authenticate Snyk: sign up for a free account at https://app.snyk.io/signup, "
-                                     "then run `snyk auth` (a browser window opens to log in)")
+            report["actions"].append("Authenticate Snyk: call svd_setup for the one-time sign-up / sign-in "
+                                     "(it opens the browser), or run `snyk auth` yourself")
         from .checks import snyk as snyk_mod
         tools["snyk"]["org"] = snyk_mod.org() or "account default (set SVD_SNYK_ORG to pin one)"
         sec = await run_cmd([*snyk, "secrets", "test", "--json", *snyk_mod.org_args()], root, timeout=180)
@@ -89,8 +90,8 @@ async def doctor(project_path: str) -> dict:
     else:
         tools["semgrep"].update(await semgrep_account(root))
         if not tools["semgrep"].get("logged_in") and not tools["semgrep"].get("token_rejected"):
-            report["actions"].append("Recommended: sign up for a free Semgrep account at https://semgrep.dev/login, "
-                                     "then run `semgrep login`. Scans work without it, but with less detail.")
+            report["actions"].append("Recommended: a free Semgrep sign-in gives more detailed results. Call "
+                                     "svd_setup with sign_in_semgrep=true, or run `semgrep login` yourself.")
         if tools["semgrep"].get("token_rejected"):
             report["actions"].append("Semgrep rejected SEMGREP_APP_TOKEN (HTTP 403: invalid or revoked). The code scan "
                                      "will fail until it's fixed. Get the current company token, or unset it.")

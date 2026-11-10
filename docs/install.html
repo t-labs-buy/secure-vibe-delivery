@@ -1746,7 +1746,7 @@
         <div class="meta-strip">
           <span><strong>Audience</strong> — developers using Claude Code or GitHub Copilot in VS Code</span>
           <span><strong>Needs first</strong> — Homebrew on a Mac, or winget on Windows 10/11</span>
-          <span><strong>Version</strong> — v0.1.2</span>
+          <span><strong>Version</strong> — v0.1.3</span>
           <span><strong>Repo</strong> — <a href="https://github.com/t-labs-buy/secure-vibe-delivery">t-labs-buy/secure-vibe-delivery</a></span>
         </div>
       </header>
@@ -1781,13 +1781,12 @@
                 <span class="ct">Claude Code</span>
                 The Claude Code extension panel in VS Code, or <code>claude</code> in
                 a terminal. Its servers live in Claude Code's own configuration,
-                added with the <code>claude mcp add</code> command. Follow steps 1 to 4.
+                added with the <code>claude mcp add</code> command. Do steps 1 and 2, then 4 and 5.
               </div>
               <div class="choice-box b">
                 <span class="ct">GitHub Copilot Chat</span>
                 VS Code's built-in Copilot Chat in Agent mode. Its servers live in
-                VS Code's <code>mcp.json</code> file. Do steps 1 and 2, then jump to
-                step 5.
+                VS Code's <code>mcp.json</code> file. Do steps 1 and 3, then 4 and 5.
               </div>
             </div>
             <div class="why">
@@ -1838,21 +1837,20 @@
             </div>
             <p>
               The server is downloaded and started by <code>uv</code>, so that is the
-              one thing it needs. Snyk does the library and code scanning. Semgrep
-              and Locust are fetched by the server itself when they aren't installed.
-              For Claude Code you also need the <code>claude</code> command, which
-              adds servers to Claude Code; the VS Code extension and the command
-              share one server list.
+              one thing it needs. Everything else is fetched for you: Semgrep and
+              Locust run through <code>uv</code>, and if Snyk isn't installed the
+              one-time setup in step 4 downloads it. For Claude Code you also need the
+              <code>claude</code> command, which adds servers to Claude Code; the VS Code
+              extension and the command share one server list.
             </p>
 
             <h3>On a Mac</h3>
             <p>In Terminal, using <a href="https://brew.sh">Homebrew</a>:</p>
             <pre class="language-bash">
 brew install uv node
-brew tap snyk/tap &amp;&amp; brew install snyk
 npm install -g @anthropic-ai/claude-code</pre>
             <p>Check everything is in place. Each name should print a path:</p>
-            <pre class="language-bash">which uvx snyk claude</pre>
+            <pre class="language-bash">which uvx claude</pre>
 
             <h3>On Windows</h3>
             <p>
@@ -1865,13 +1863,11 @@ winget install --id OpenJS.NodeJS.LTS -e
 winget install --id Git.Git -e</pre>
             <p>
               <strong>Close PowerShell and open a new window</strong>, so it picks up
-              the new programs, then install Snyk and Claude Code:
+              the new programs, then install Claude Code:
             </p>
-            <pre class="language-bash">
-npm install -g snyk
-npm install -g @anthropic-ai/claude-code</pre>
+            <pre class="language-bash">npm install -g @anthropic-ai/claude-code</pre>
             <p>Check everything is in place. Each name should print a path:</p>
-            <pre class="language-bash">where.exe uvx snyk claude</pre>
+            <pre class="language-bash">where.exe uvx claude</pre>
             <div class="why">
               <span class="label">Restart VS Code after installing</span>
               <p>
@@ -1884,55 +1880,13 @@ npm install -g @anthropic-ai/claude-code</pre>
             <div class="win">
               <span class="label">What you have now</span>
               <p>
-                <code>uvx</code> and <code>snyk</code> installed, plus
-                <code>claude</code> if you use Claude Code.
+                <code>uvx</code> installed, plus <code>claude</code> if you use Claude Code.
               </p>
-            </div>
-          </section>
-
-          <section class="phase" id="accounts">
-            <span class="phase-tag">Step 2 · Accounts</span>
-            <h2>Sign in to Snyk and Semgrep</h2>
-            <div class="phase-meta">
-              <span class="chip">Who — <strong>each developer, with their own free accounts</strong></span>
-            </div>
-            <div class="step-h"><span class="n">1</span>Snyk (required)</div>
-            <p>
-              Sign up for a free account at
-              <a href="https://app.snyk.io/signup">app.snyk.io/signup</a>, then
-              connect the command-line tool to it. A browser window opens; log in
-              there.
-            </p>
-            <pre class="language-bash">snyk auth</pre>
-            <div class="warn">
-              <span class="label">Without Snyk, every report says NO-GO</span>
-              <p>
-                The three Snyk scans (libraries, code and secrets) can't run
-                without a login, and a scan that didn't run counts as a failure,
-                never as a pass. The server checks this first and tells you if it's
-                missing.
-              </p>
-            </div>
-            <div class="step-h"><span class="n">2</span>Semgrep (recommended)</div>
-            <p>
-              Sign up at <a href="https://semgrep.dev/login">semgrep.dev/login</a>,
-              then:
-            </p>
-            <pre class="language-bash">semgrep login</pre>
-            <p>
-              If <code>semgrep</code> isn't installed, use <code>uvx semgrep login</code>
-              instead (or <code>brew install semgrep</code> on a Mac). Or skip this
-              step: scans still work without a Semgrep account, just with less detail. Either way, scans run on your Mac and nothing is
-              uploaded to Semgrep's dashboard.
-            </p>
-            <div class="win">
-              <span class="label">What you have now</span>
-              <p>Snyk logged in, and ideally Semgrep too.</p>
             </div>
           </section>
 
           <section class="phase" id="claude-add">
-            <span class="phase-tag">Step 3 · Claude Code</span>
+            <span class="phase-tag">Step 2 · Claude Code</span>
             <h2>Add the server to Claude Code</h2>
             <div class="phase-meta">
               <span class="chip">Who — <strong>Claude Code users</strong></span>
@@ -1944,12 +1898,12 @@ npm install -g @anthropic-ai/claude-code</pre>
             </p>
             <pre class="language-bash">
 claude mcp add --scope user secure-vibe-delivery -- \
-  uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.2 secure-vibe-delivery</pre>
+  uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.3 secure-vibe-delivery</pre>
             <p>
               On Windows, in PowerShell, put it on one line (PowerShell doesn't use
               <code>\</code> to continue a line):
             </p>
-            <pre class="language-bash">claude mcp add --scope user secure-vibe-delivery -- uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.2 secure-vibe-delivery</pre>
+            <pre class="language-bash">claude mcp add --scope user secure-vibe-delivery -- uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.3 secure-vibe-delivery</pre>
             <p>Then check it connected:</p>
             <pre class="language-bash">claude mcp get secure-vibe-delivery</pre>
             <p>The output should include:</p>
@@ -1974,20 +1928,125 @@ claude mcp add --scope user secure-vibe-delivery -- \
             </div>
             <div class="win">
               <span class="label">What you have now</span>
-              <p><code>secure-vibe-delivery</code> showing as <strong>✔ Connected</strong> in Claude Code.</p>
+              <p><code>secure-vibe-delivery</code> showing as <strong>✔ Connected</strong> in Claude Code. Next: the one-time sign-up in step 4.</p>
+            </div>
+          </section>
+
+          <section class="phase" id="copilot">
+            <span class="phase-tag">Step 3 · Copilot Chat</span>
+            <h2>Set it up for GitHub Copilot Chat</h2>
+            <div class="phase-meta">
+              <span class="chip">Who — <strong>Copilot Chat users</strong></span>
+              <span class="chip">Needs first — <strong>Copilot signed in, VS Code 1.99 or later</strong></span>
+            </div>
+            <h3>Add it to mcp.json</h3>
+            <p>
+              Open the Command Palette (<code>⇧⌘P</code> on a Mac,
+              <code>Ctrl+Shift+P</code> on Windows) and run
+              <strong>MCP: Open User Configuration</strong>. Add this entry inside
+              <code>"servers"</code>, then save:
+            </p>
+            <pre class="language-json">
+{
+  "servers": {
+    "secure-vibe-delivery": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.3", "secure-vibe-delivery"]
+    }
+  }
+}</pre>
+            <div class="warn">
+              <span class="label">If the file already lists servers</span>
+              <p>
+                Paste only the <code>"secure-vibe-delivery": { … }</code> entry inside
+                the existing <code>"servers"</code> block, with a comma after the
+                server before it. Pasting a second <code>"servers"</code> block makes
+                VS Code ignore one of them.
+              </p>
+            </div>
+            <h3>Start it and use it</h3>
+            <ol class="steps">
+              <li><strong>Start the server.</strong> Click the <em>Start</em> link above the entry, or run <strong>MCP: List Servers</strong>, choose <code>secure-vibe-delivery</code>, then <em>Start Server</em>. It should show <em>Running · 5 tools · 1 prompts</em>.</li>
+              <li><strong>Reload if a chat was open.</strong> Run <strong>Developer: Reload Window</strong>, then start a new chat with <strong>+</strong>. A chat opened earlier keeps its old server list.</li>
+              <li><strong>Switch to Agent mode.</strong> The tools only appear in Agent mode, not Ask or Edit. The tools icon next to the mode dropdown should list five <code>svd_*</code> tools.</li>
+            </ol>
+            <div class="win">
+              <span class="label">What you have now</span>
+              <p>The server running in Copilot Chat. Next: the one-time sign-up in step 4.</p>
+            </div>
+          </section>
+
+          <section class="phase" id="accounts">
+            <span class="phase-tag">Step 4 · One-time setup</span>
+            <h2>Sign up, guided by your assistant</h2>
+            <div class="phase-meta">
+              <span class="chip">Who — <strong>each developer, once, with their own free accounts</strong></span>
+              <span class="chip">Works in — <strong>Claude Code and Copilot Chat</strong></span>
+            </div>
+            <p>
+              Snyk needs a free account, and Semgrep gives more detailed results with one.
+              You don't have to install or configure anything for this: the server does it
+              with you. In Claude Code (a new conversation) or Copilot Chat (Agent mode), type:
+            </p>
+            <pre>Set up secure-vibe-delivery for me</pre>
+            <p>
+              Or pick the ready-made prompt: <code>/mcp__secure-vibe-delivery__setup</code> in
+              Claude Code, <code>/mcp.secure-vibe-delivery.setup</code> in Copilot Chat.
+            </p>
+            <ol class="steps">
+              <li><strong>Snyk is fetched if needed.</strong> If it isn't installed, the server downloads the official version from snyk.io, checks it against Snyk's published checksum, and keeps it in its own folder. Nothing is installed system-wide.</li>
+              <li><strong>A browser window opens for Snyk.</strong> Sign up (it's free) or log in. If no window opens, your assistant gives you the link.</li>
+              <li><strong>Optionally, the same for Semgrep.</strong> Say yes if your assistant offers it.</li>
+              <li><strong>Your assistant checks until you're signed in</strong>, then tells you you're ready.</li>
+            </ol>
+            <div class="why">
+              <span class="label">Your password stays in the browser</span>
+              <p>
+                You only ever sign in on Snyk's and Semgrep's own websites. Your assistant
+                never asks for, sees or stores a password.
+              </p>
+            </div>
+            <div class="warn">
+              <span class="label">Without Snyk, every report says NO-GO</span>
+              <p>
+                The Snyk scans can't run without a sign-in, and a scan that didn't run counts
+                as a failure. That's why the server stops and offers this setup if you ask for
+                a check first.
+              </p>
+            </div>
+            <details class="disclose">
+              <summary>Prefer to do it by hand, or on Windows for Semgrep</summary>
+              <div class="disclose-body">
+                <p>
+                  Run these in a terminal. If Snyk isn't installed, install it first
+                  (<code>brew tap snyk/tap &amp;&amp; brew install snyk</code> on a Mac,
+                  <code>npm install -g snyk</code> on Windows).
+                </p>
+                <pre class="language-bash">snyk auth</pre>
+                <pre class="language-bash">uvx semgrep login</pre>
+                <p>
+                  On Windows, Semgrep's sign-in needs a terminal window, so guided setup asks
+                  you to run the second command yourself.
+                </p>
+              </div>
+            </details>
+            <div class="win">
+              <span class="label">What you have now</span>
+              <p>Snyk installed and signed in, and ideally Semgrep too. You're ready to run checks.</p>
             </div>
           </section>
 
           <section class="phase" id="claude-use">
-            <span class="phase-tag">Step 4 · Claude Code</span>
-            <h2>Use it in Claude Code</h2>
+            <span class="phase-tag">Step 5 · Run it</span>
+            <h2>Run your first check</h2>
             <div class="phase-meta">
-              <span class="chip">Who — <strong>Claude Code users</strong></span>
+              <span class="chip">Works in — <strong>Claude Code and Copilot Chat</strong></span>
             </div>
             <ol class="steps">
-              <li><strong>Start a new conversation</strong> in the Claude Code panel. A conversation that was already open won't see the new server.</li>
+              <li><strong>Open a fresh chat.</strong> In Claude Code, start a new conversation. In Copilot Chat, open a new chat in Agent mode. A chat opened before the server was added won't see it.</li>
               <li><strong>Check the server list</strong> (optional). Open MCP servers from the panel: <code>secure-vibe-delivery</code> should appear under <em>User</em> as Connected. In the terminal, type <code>/mcp</code>.</li>
-              <li><strong>Run the checks.</strong> Type <code>/</code>, search for <code>secure</code>, and pick the prompt below. Or ask in plain words.</li>
+              <li><strong>Run the checks.</strong> Pick the prompt below (Claude Code: type <code>/</code> and search for <code>secure</code>; Copilot: type <code>/mcp.</code>), or ask in plain words.</li>
             </ol>
             <pre>/mcp__secure-vibe-delivery__secure-vibe-delivery</pre>
             <p>Or ask:</p>
@@ -2008,52 +2067,6 @@ claude mcp add --scope user secure-vibe-delivery -- \
             </div>
           </section>
 
-          <section class="phase" id="copilot">
-            <span class="phase-tag">Step 5 · Copilot Chat</span>
-            <h2>Set it up for GitHub Copilot Chat</h2>
-            <div class="phase-meta">
-              <span class="chip">Who — <strong>Copilot Chat users</strong></span>
-              <span class="chip">Needs first — <strong>Copilot signed in, VS Code 1.99 or later</strong></span>
-            </div>
-            <h3>Add it to mcp.json</h3>
-            <p>
-              Open the Command Palette (<code>⇧⌘P</code> on a Mac,
-              <code>Ctrl+Shift+P</code> on Windows) and run
-              <strong>MCP: Open User Configuration</strong>. Add this entry inside
-              <code>"servers"</code>, then save:
-            </p>
-            <pre class="language-json">
-{
-  "servers": {
-    "secure-vibe-delivery": {
-      "type": "stdio",
-      "command": "uvx",
-      "args": ["--from", "git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.2", "secure-vibe-delivery"]
-    }
-  }
-}</pre>
-            <div class="warn">
-              <span class="label">If the file already lists servers</span>
-              <p>
-                Paste only the <code>"secure-vibe-delivery": { … }</code> entry inside
-                the existing <code>"servers"</code> block, with a comma after the
-                server before it. Pasting a second <code>"servers"</code> block makes
-                VS Code ignore one of them.
-              </p>
-            </div>
-            <h3>Start it and use it</h3>
-            <ol class="steps">
-              <li><strong>Start the server.</strong> Click the <em>Start</em> link above the entry, or run <strong>MCP: List Servers</strong>, choose <code>secure-vibe-delivery</code>, then <em>Start Server</em>. It should show <em>Running · 5 tools · 1 prompts</em>.</li>
-              <li><strong>Reload if a chat was open.</strong> Run <strong>Developer: Reload Window</strong>, then start a new chat with <strong>+</strong>. A chat opened earlier keeps its old server list.</li>
-              <li><strong>Switch to Agent mode.</strong> The tools only appear in Agent mode, not Ask or Edit. The tools icon next to the mode dropdown should list five <code>svd_*</code> tools.</li>
-              <li><strong>Run the checks.</strong> Type <code>/mcp.</code> and pick <code>/mcp.secure-vibe-delivery.secure-vibe-delivery</code>, or ask as in step 4. To test the connection, type <code>#svd_doctor check this project</code>.</li>
-            </ol>
-            <div class="win">
-              <span class="label">What you have now</span>
-              <p>Copilot Chat calling the <code>svd_*</code> tools and writing the report to <code>.svd/reports/</code>.</p>
-            </div>
-          </section>
-
           <section class="phase" id="trouble">
             <span class="phase-tag">If something's wrong</span>
             <h2>Troubleshooting</h2>
@@ -2062,7 +2075,7 @@ claude mcp add --scope user secure-vibe-delivery -- \
               <p>
                 Check that <code>uvx</code> is installed: <code>which uvx</code> on a
                 Mac, <code>where.exe uvx</code> on Windows. If it prints nothing,
-                install uv (step 1), then repeat step 3 or restart the server in VS
+                install uv (step 1), then repeat step 2 or restart the server in VS
                 Code. If VS Code was open while you installed uv, close it completely
                 (<code>⌘Q</code>, or <strong>File → Exit</strong> on Windows) and
                 reopen it so it finds the new program.
@@ -2095,7 +2108,7 @@ claude mcp add --scope user secure-vibe-delivery -- \
             </div>
             <div class="qa">
               <p class="q">The doctor says Snyk isn't authenticated.</p>
-              <p>Run <code>snyk auth</code> (step 2) and try again.</p>
+              <p>Ask your assistant to set up secure-vibe-delivery (step 4), or run <code>snyk auth</code> yourself, and try again.</p>
             </div>
             <div class="qa">
               <p class="q">On Windows, PowerShell says running scripts is disabled.</p>
@@ -2132,7 +2145,7 @@ claude mcp add --scope user secure-vibe-delivery -- \
             <span class="phase-tag">Later</span>
             <h2>Update to a new version</h2>
             <p>
-              Each release is a version tag such as <code>v0.1.2</code>. Installs stay
+              Each release is a version tag such as <code>v0.1.3</code>. Installs stay
               on the tag they name until you change it, so nobody's setup changes
               without them knowing.
             </p>
@@ -2141,11 +2154,11 @@ claude mcp add --scope user secure-vibe-delivery -- \
             <pre class="language-bash">
 claude mcp remove secure-vibe-delivery -s user
 claude mcp add --scope user secure-vibe-delivery -- \
-  uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.2 secure-vibe-delivery</pre>
+  uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.3 secure-vibe-delivery</pre>
             <p>On Windows, in PowerShell:</p>
             <pre class="language-bash">
 claude mcp remove secure-vibe-delivery -s user
-claude mcp add --scope user secure-vibe-delivery -- uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.2 secure-vibe-delivery</pre>
+claude mcp add --scope user secure-vibe-delivery -- uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.3 secure-vibe-delivery</pre>
             <p>
               Then start a new conversation. Check the version with
               <code>claude mcp get secure-vibe-delivery</code>: the command it shows
@@ -2154,7 +2167,7 @@ claude mcp add --scope user secure-vibe-delivery -- uvx --from git+https://githu
             <h3>In Copilot Chat</h3>
             <p>
               Change the tag in <code>mcp.json</code> (for example
-              <code>@v0.1.1</code> to <code>@v0.1.2</code>), save, then click
+              <code>@v0.1.2</code> to <code>@v0.1.3</code>), save, then click
               <em>Restart</em> above the entry.
             </p>
           </section>

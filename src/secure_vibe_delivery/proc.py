@@ -21,6 +21,12 @@ def resolve_tool(name: str) -> Optional[list[str]]:
     path = shutil.which(name)
     if path:
         return [path]
+    if name == "snyk":
+        # downloaded by svd_setup into this server's own cache folder
+        from .installer import cached_snyk
+        cached = cached_snyk()
+        if cached:
+            return [str(cached)]
     if name in UVX_FALLBACK and shutil.which("uvx"):
         return [shutil.which("uvx"), "--python", "3.12", UVX_FALLBACK[name]]
     return None

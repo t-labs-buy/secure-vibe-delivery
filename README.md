@@ -34,12 +34,13 @@ call after about 60 seconds, so the server works like a coat-check ticket: `svd_
 pipeline in the background and returns a `run_id` at once, and the agent polls with that ticket.
 
 - `svd_doctor`: checks that Snyk (and its login), Semgrep, Locust and the project's own test tools are present, and lists what to install.
+- `svd_setup`: one-time setup for new users: downloads Snyk if it's missing and starts the free Snyk (and optionally Semgrep) sign-in in the browser.
 - `svd_run`: starts the pipeline and returns a `run_id`.
 - `svd_status`: shows which check is running, results so far and recent log lines.
 - `svd_report`: returns the verdict, the report path and the top must-fix items.
 - `svd_generate_locustfile`: writes a starter load-test script from the project's OpenAPI spec or routes, for review.
 
-There is also a prompt, `secure-vibe-delivery`, that walks the agent through all of these in order.
+There are also two prompts: `secure-vibe-delivery` walks the agent through a full check, and `setup` through the one-time sign-up.
 In Claude Code it appears as `/mcp__secure-vibe-delivery__secure-vibe-delivery`.
 
 Our example endpoint shows the order of play. Security runs first. Snyk Code traces the `expr`
@@ -83,43 +84,50 @@ second copy of the key.
 
 ## Install
 
-You need [uv](https://docs.astral.sh/uv/) (which supplies `uvx`) and the Snyk CLI. `uvx` downloads
-a suitable Python (3.11–3.13) for the server by itself. Semgrep and Locust are used from your `PATH`
-if present, otherwise they run through `uvx` automatically.
+The only thing you need to install yourself is [uv](https://docs.astral.sh/uv/), which supplies
+`uvx` and downloads a suitable Python (3.11–3.13) for the server by itself.
 
 ```bash
-brew install uv
-brew tap snyk/tap && brew install snyk   # once per laptop
-brew install semgrep                     # optional: otherwise uvx runs it
+brew install uv                              # Mac
+winget install --id astral-sh.uv -e          # Windows
 ```
 
-### Accounts: Snyk and Semgrep
+Everything else is handled for you. Semgrep and Locust run through `uvx` when they aren't installed.
+If the Snyk CLI isn't installed, the server's one-time setup (below) downloads the official build
+from snyk.io, checks it against Snyk's published SHA-256 checksum, and keeps it in the server's own
+cache folder. Nothing is installed system-wide. If you already have Snyk or Semgrep installed, those
+are used instead.
 
-Each developer uses their own free accounts, set up once per laptop.
+### One-time setup: guided sign-up
 
-**Snyk (required).** Sign up at [app.snyk.io/signup](https://app.snyk.io/signup), then connect the
-CLI to your account. A browser window opens; log in there.
+Snyk needs a free account, and Semgrep works better with one. After adding the server (below),
+ask your assistant to set it up:
 
-```bash
-snyk auth
-```
+> Set up secure-vibe-delivery for me
 
-Without this, the three Snyk scans (libraries, code, secrets) can't run, and a scan that didn't
-run counts as a failure, so every report would say NO-GO.
+or use the prompt: `/mcp__secure-vibe-delivery__setup` in Claude Code, `/mcp.secure-vibe-delivery.setup`
+in Copilot Chat. The assistant calls `svd_setup`, which:
 
-**Semgrep (recommended).** Sign up at [semgrep.dev/login](https://semgrep.dev/login), then:
+1. downloads Snyk if it's missing (see above);
+2. opens a browser window for a free Snyk sign-up or sign-in, and gives you the link in case no window
+   opens;
+3. optionally does the same for Semgrep;
+4. checks again until you're signed in, then tells you you're ready.
 
-```bash
-semgrep login
-```
+You sign in only in the browser; the assistant never sees or asks for a password. If you start a
+check before setting up, `svd_run` stops and offers the setup instead of producing a report that
+can only say NO-GO.
 
-Semgrep works without an account, so this one is optional. Logged in, Semgrep's output keeps the
-matched source lines instead of replacing them with `requires login`, and rules that need a login
-become available. Scans still run on your laptop with `semgrep scan`: nothing is uploaded to
-Semgrep's dashboard.
+On Windows, Semgrep's sign-in needs a terminal window, so setup asks you to run `uvx semgrep login`
+yourself. To do it all by hand instead: `snyk auth` and `semgrep login`.
 
-`svd_doctor` checks both and tells you what's missing. Snyk Secrets isn't included in every Snyk
-plan; where it's missing, the server uses Semgrep's secret rules instead (see above).
+Logged in to Semgrep, its output keeps the matched source lines instead of replacing them with
+`requires login`, and rules that need a login become available. Scans still run on your laptop:
+nothing is uploaded to Semgrep's dashboard. Snyk Secrets isn't included in every Snyk plan; where
+it's missing, the server uses Semgrep's secret rules instead (see above).
+
+`SVD_CACHE_DIR` changes where the downloaded Snyk is kept, for machines where the default cache
+folder isn't writable.
 
 The server is installed straight from the public repository
 [github.com/t-labs-buy/secure-vibe-delivery](https://github.com/t-labs-buy/secure-vibe-delivery),
@@ -132,7 +140,7 @@ For all your projects:
 
 ```bash
 claude mcp add --scope user secure-vibe-delivery -- \
-  uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.2 secure-vibe-delivery
+  uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.3 secure-vibe-delivery
 ```
 
 For one project, shared with the team: copy [`examples/claude-code/.mcp.json`](examples/claude-code/.mcp.json)
@@ -158,7 +166,7 @@ If you added it while a chat was open, run *Developer: Reload Window* and start 
 ```toml
 [mcp_servers.secure-vibe-delivery]
 command = "uvx"
-args = ["--from", "git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.2", "secure-vibe-delivery"]
+args = ["--from", "git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.3", "secure-vibe-delivery"]
 startup_timeout_sec = 60
 ```
 

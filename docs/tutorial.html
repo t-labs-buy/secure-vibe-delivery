@@ -1745,7 +1745,7 @@
         </p>
         <div class="meta-strip">
           <span><strong>Audience</strong> — everyone: developers, testers, delivery leads, managers</span>
-          <span><strong>Version</strong> — v0.1.2</span>
+          <span><strong>Version</strong> — v0.1.3</span>
           <span><strong>Install steps only</strong> — <a href="install.html">install guide</a></span>
           <span><strong>Repo</strong> — <a href="https://github.com/t-labs-buy/secure-vibe-delivery">t-labs-buy/secure-vibe-delivery</a></span>
         </div>
@@ -1925,7 +1925,7 @@
                   <tr><td>pytest / Jest</td><td>Functional</td><td>Run the project's own automated tests: pytest for Python, Jest for JavaScript.</td><td>None</td></tr>
                   <tr><td>Coverage</td><td>Functional</td><td>Measures how much of the code the tests actually exercised.</td><td>None</td></tr>
                   <tr><td>Locust</td><td>Performance</td><td>Pretends to be many users at once and measures how fast and how reliably the app responds.</td><td>None</td></tr>
-                  <tr><td>uv</td><td>Setup</td><td>The installer that downloads and starts the server for you, and fetches Semgrep and Locust when needed.</td><td>None</td></tr>
+                  <tr><td>uv</td><td>Setup</td><td>The installer that downloads and starts the server for you, and fetches Semgrep and Locust when needed. (If Snyk isn't installed, the server's setup downloads it.)</td><td>None</td></tr>
                 </tbody>
               </table>
             </div>
@@ -2027,7 +2027,7 @@
             <ol class="steps">
               <li><strong>A Mac or Windows 10/11 PC</strong> with permission to install software.</li>
               <li><strong>An AI assistant that supports MCP:</strong> Claude Code (in a terminal or in VS Code) or GitHub Copilot Chat in VS Code.</li>
-              <li><strong>A free Snyk account</strong> (required) and, ideally, a free Semgrep account. You'll create these during setup.</li>
+              <li><strong>A free Snyk account</strong> (required) and, ideally, a free Semgrep account. You don't need them yet: your assistant guides you through a one-time sign-up after installing.</li>
               <li><strong>A project with automated tests</strong> (pytest or Jest). Without tests, the functional check can't run, which counts as a failure.</li>
               <li><strong>A running test copy of the app</strong> and its web address, such as <code>http://127.0.0.1:8000</code>, for the load test. Without it, the performance check shows as "didn't run".</li>
               <li><strong>The expected peak number of users</strong> and the <strong>response-time target</strong> agreed with the client, for the load test.</li>
@@ -2056,31 +2056,29 @@
             </p>
             <div class="step-h"><span class="n">1</span>Install the tools</div>
             <p>
-              <code>uv</code> runs the server, Snyk scans for security problems, and
+              <code>uv</code> runs the server and fetches everything else it needs.
               <code>claude</code> lets you add servers to Claude Code.
             </p>
             <pre class="language-bash">
 brew install uv node
-brew tap snyk/tap &amp;&amp; brew install snyk
 npm install -g @anthropic-ai/claude-code</pre>
-            <div class="step-h"><span class="n">2</span>Sign in to Snyk, and optionally Semgrep</div>
-            <p>
-              Create a free account at <a href="https://app.snyk.io/signup">app.snyk.io/signup</a>,
-              then connect it. A browser window opens; log in there.
-            </p>
-            <pre class="language-bash">snyk auth</pre>
-            <p>For Semgrep, sign up at <a href="https://semgrep.dev/login">semgrep.dev/login</a>, then:</p>
-            <pre class="language-bash">uvx semgrep login</pre>
-            <div class="step-h"><span class="n">3</span>Add the server to Claude Code</div>
+            <div class="step-h"><span class="n">2</span>Add the server to Claude Code</div>
             <pre class="language-bash">
 claude mcp add --scope user secure-vibe-delivery -- \
-  uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.2 secure-vibe-delivery</pre>
-            <div class="step-h"><span class="n">4</span>Check it worked</div>
+  uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.3 secure-vibe-delivery</pre>
+            <p>Check it worked. You should see <code>Status: ✔ Connected</code>; the first check takes a few seconds while it downloads.</p>
             <pre class="language-bash">claude mcp get secure-vibe-delivery</pre>
-            <p>You should see <code>Status: ✔ Connected</code>. The first check takes a few seconds while it downloads.</p>
+            <div class="step-h"><span class="n">3</span>Do the one-time sign-up, with your assistant</div>
+            <p>Open Claude Code (start a new conversation) and type:</p>
+            <pre>Set up secure-vibe-delivery for me</pre>
+            <p>
+              Your assistant downloads Snyk if you don't have it, then opens a browser window for a
+              free Snyk account (and, if you like, a free Semgrep account). Sign up or log in there;
+              your assistant tells you when you're ready. You never type a password into the chat.
+            </p>
             <div class="win">
               <span class="label">What you have now</span>
-              <p>The server installed for all your projects, in Claude Code's terminal and its VS Code extension.</p>
+              <p>The server installed for all your projects, in Claude Code's terminal and its VS Code extension, and signed in.</p>
             </div>
           </section>
 
@@ -2102,18 +2100,20 @@ winget install --id astral-sh.uv -e
 winget install --id OpenJS.NodeJS.LTS -e
 winget install --id Git.Git -e</pre>
             <p><strong>Close PowerShell and open a new window</strong>, so it finds the new programs. Then:</p>
-            <pre class="language-bash">
-npm install -g snyk
-npm install -g @anthropic-ai/claude-code</pre>
-            <div class="step-h"><span class="n">2</span>Sign in to Snyk, and optionally Semgrep</div>
-            <p>Create free accounts as in the Mac steps, then:</p>
-            <pre class="language-bash">snyk auth</pre>
-            <pre class="language-bash">uvx semgrep login</pre>
-            <div class="step-h"><span class="n">3</span>Add the server to Claude Code</div>
+            <pre class="language-bash">npm install -g @anthropic-ai/claude-code</pre>
+            <div class="step-h"><span class="n">2</span>Add the server to Claude Code</div>
             <p>Paste this as one line:</p>
-            <pre class="language-bash">claude mcp add --scope user secure-vibe-delivery -- uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.2 secure-vibe-delivery</pre>
-            <div class="step-h"><span class="n">4</span>Check it worked</div>
+            <pre class="language-bash">claude mcp add --scope user secure-vibe-delivery -- uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.3 secure-vibe-delivery</pre>
+            <p>Check it worked:</p>
             <pre class="language-bash">claude mcp get secure-vibe-delivery</pre>
+            <div class="step-h"><span class="n">3</span>Do the one-time sign-up, with your assistant</div>
+            <p>Open Claude Code (start a new conversation) and type:</p>
+            <pre>Set up secure-vibe-delivery for me</pre>
+            <p>
+              As on a Mac, your assistant downloads Snyk if needed and opens the Snyk sign-up in your
+              browser. For Semgrep, Windows needs a terminal window, so your assistant will ask you
+              to run <code>uvx semgrep login</code> in PowerShell yourself (optional).
+            </p>
             <div class="warn">
               <span class="label">If PowerShell says scripts are disabled</span>
               <p>
@@ -2125,7 +2125,7 @@ npm install -g @anthropic-ai/claude-code</pre>
             </div>
             <div class="win">
               <span class="label">What you have now</span>
-              <p>The server installed for all your projects in Claude Code.</p>
+              <p>The server installed for all your projects in Claude Code, and signed in.</p>
             </div>
           </section>
 
@@ -2155,6 +2155,7 @@ npm install -g @anthropic-ai/claude-code</pre>
               <li><strong>Add the server</strong> inside <code>"servers"</code>, as below, and save. If other servers are already listed, add only the <code>"secure-vibe-delivery"</code> entry, with a comma after the one before it.</li>
               <li><strong>Start it.</strong> Click <em>Start</em> above the entry. It should say <em>Running · 5 tools · 1 prompts</em>.</li>
               <li><strong>Open a new chat in Agent mode.</strong> The tools only appear in Agent mode. If a chat was already open, run <strong>Developer: Reload Window</strong> first.</li>
+              <li><strong>Do the one-time sign-up</strong> if you haven't already: type "Set up secure-vibe-delivery for me".</li>
             </ol>
             <pre class="language-json">
 {
@@ -2162,7 +2163,7 @@ npm install -g @anthropic-ai/claude-code</pre>
     "secure-vibe-delivery": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.2", "secure-vibe-delivery"]
+      "args": ["--from", "git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.3", "secure-vibe-delivery"]
     }
   }
 }</pre>
@@ -2195,7 +2196,7 @@ npm install -g @anthropic-ai/claude-code</pre>
             </p>
             <h3>What happens next</h3>
             <ol class="steps">
-              <li><strong>Doctor check</strong>: it confirms Snyk, Semgrep and your test tools are ready, and tells you what's missing.</li>
+              <li><strong>Doctor check</strong>: it confirms Snyk, Semgrep and your test tools are ready. If you haven't done the one-time sign-up, it offers it first instead of running a check that can only fail.</li>
               <li><strong>The run starts in the background</strong>, in order: security, then functional, then performance.</li>
               <li><strong>Progress updates</strong> appear in the chat while it works. A quick run takes a few minutes; a gate run adds the 15-minute load test.</li>
               <li><strong>The result</strong>: the verdict, the top items to fix, and the path to the HTML report.</li>
@@ -2301,6 +2302,7 @@ npm install -g @anthropic-ai/claude-code</pre>
                   <tr><td>Semgrep</td><td>Scans your code on your computer. It downloads its rules and sends basic usage statistics; no findings are uploaded.</td></tr>
                   <tr><td>Package check</td><td>Only the names of your libraries, to the public PyPI and npm registries.</td></tr>
                   <tr><td>Locust</td><td>Traffic only to the test address you give it.</td></tr>
+                  <tr><td>One-time setup</td><td>Downloads Snyk from snyk.io (checked against Snyk's published checksum) into the server's own folder, and opens Snyk's and Semgrep's sign-in pages in your browser. Your password goes only to those websites, never through the chat.</td></tr>
                   <tr><td>The report</td><td>Nothing. It's a file on your computer, and secret values in it are always masked.</td></tr>
                 </tbody>
               </table>
@@ -2325,6 +2327,10 @@ npm install -g @anthropic-ai/claude-code</pre>
             <div class="qa">
               <p class="q">Does it change my code?</p>
               <p>No. It only reads, tests and reports. Your AI assistant may offer to fix things afterwards, but only if you ask.</p>
+            </div>
+            <div class="qa">
+              <p class="q">Do I have to install Snyk and Semgrep myself?</p>
+              <p>No. Install <code>uv</code>, add the server, and ask your assistant to "set up secure-vibe-delivery". It downloads Snyk if needed (into its own folder, nothing system-wide), runs Semgrep through <code>uv</code>, and walks you through the free sign-ups in your browser.</p>
             </div>
             <div class="qa">
               <p class="q">Do I need to be a security expert?</p>
