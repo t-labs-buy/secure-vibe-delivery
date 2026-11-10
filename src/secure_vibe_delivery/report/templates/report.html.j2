@@ -19,6 +19,7 @@
   --series-1:#2a78d6;--series-2:#eb6834;
   --tab-bg:#e9e7f7;--tab-ink:#4f46b8;--tab-border:#c9c4ec;--shell:#fbfbfb;
   --lift:0 10px 28px rgba(28,37,41,.10);--row-hover:#f5f5f5;
+  --tip-bg:#fff9e0;--tip-border:#efdf9f;--tip-rule:#f1e5b4;
 }
 @media (prefers-color-scheme:dark){
   :root:where(:not([data-theme="light"])){
@@ -30,6 +31,7 @@
     --series-1:#3987e5;--series-2:#d95926;
     --tab-bg:#454063;--tab-ink:#babbf1;--tab-border:#6c6896;--shell:#3a3e52;
     --lift:0 10px 28px rgba(0,0,0,.35);--row-hover:#464a5e;
+    --tip-bg:#4b4838;--tip-border:#6e6848;--tip-rule:#5f5a44;
   }
 }
 :root[data-theme="dark"]{
@@ -41,6 +43,7 @@
   --series-1:#3987e5;--series-2:#d95926;
   --tab-bg:#454063;--tab-ink:#babbf1;--tab-border:#6c6896;--shell:#3a3e52;
   --lift:0 10px 28px rgba(0,0,0,.35);--row-hover:#464a5e;
+    --tip-bg:#4b4838;--tip-border:#6e6848;--tip-rule:#5f5a44;
 }
 html{scroll-behavior:smooth;scroll-padding-top:4rem}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.65 "JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
@@ -200,10 +203,10 @@ button.copy{font:inherit;font-size:12px;background:var(--card);color:var(--ink);
   padding:.2rem .6rem;cursor:pointer;white-space:nowrap;transition:border-color .15s ease,background-color .15s ease}
 button.copy:hover{border-color:var(--axis);background:var(--row-hover)}
 button.copy.done{border-color:var(--good);color:var(--good-ink)}
-.cmdtip{position:fixed;z-index:30;width:min(26rem,86vw);background:var(--card);color:var(--ink);border:1px solid var(--border);
+.cmdtip{position:fixed;z-index:30;width:min(24rem,86vw);background:var(--tip-bg);color:var(--ink);border:1px solid var(--tip-border);
   border-radius:10px;box-shadow:var(--lift);padding:.75rem .9rem;font-size:13px;line-height:1.5;pointer-events:none}
 .cmdtip b{display:block;margin-bottom:.25rem}
-.cmdtip .c{display:block;margin-top:.45rem;padding-top:.45rem;border-top:1px solid var(--border);color:var(--muted);font-size:12px;word-break:break-all}
+.cmdtip .c{display:block;margin-top:.45rem;padding-top:.45rem;border-top:1px solid var(--tip-rule);color:var(--muted);font-size:12px;word-break:break-all}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 details{border:1px solid var(--border);border-radius:10px;padding:.6rem .9rem;margin:.6rem 0;background:var(--card);transition:border-color .15s ease}
 details:hover{border-color:var(--axis)}
@@ -662,14 +665,18 @@ details summary{cursor:pointer;font-weight:600}
   [].forEach.call(document.querySelectorAll("button.copy"),function(b){b.addEventListener("click",function(){copyText(b.getAttribute("data-copy"),b);});});
   var ctip=document.getElementById("cmdTip");
   if(ctip){
+    // The tab panel animates transform, which would make it the reference box for a fixed-position child;
+    // living directly under <body> keeps the pop-up positioned against the window.
+    document.body.appendChild(ctip);
     function showTip(c){
       ctip.querySelector(".t").textContent=c.getAttribute("data-tip-title");
       ctip.querySelector(".w").textContent=c.getAttribute("data-tip-what");
       ctip.querySelector(".c").textContent="Runs in: "+c.getAttribute("data-tip-cwd");
       ctip.hidden=false;
       var r=c.getBoundingClientRect(), tw=ctip.offsetWidth, th=ctip.offsetHeight;
-      var left=Math.max(8,Math.min(r.left,window.innerWidth-tw-8));
-      var top=r.bottom+8; if(top+th>window.innerHeight-8) top=Math.max(8,r.top-th-8);
+      // Beside the command, on its right; if the command runs too close to the edge, pin to the right of the screen.
+      var left=r.right+12; if(left+tw>window.innerWidth-12) left=Math.max(12,window.innerWidth-tw-12);
+      var top=Math.max(8,Math.min(r.top-4,window.innerHeight-th-8));
       ctip.style.left=left+"px"; ctip.style.top=top+"px";
     }
     function hideTip(){ctip.hidden=true;}

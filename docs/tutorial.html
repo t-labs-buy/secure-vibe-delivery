@@ -1745,7 +1745,7 @@
         </p>
         <div class="meta-strip">
           <span><strong>Audience</strong> — everyone: developers, testers, delivery leads, managers</span>
-          <span><strong>Version</strong> — v0.1.6</span>
+          <span><strong>Version</strong> — v0.1.7</span>
           <span><strong>Install steps only</strong> — <a href="install.html">install guide</a></span>
           <span><strong>Repo</strong> — <a href="https://github.com/t-labs-buy/secure-vibe-delivery">t-labs-buy/secure-vibe-delivery</a></span>
         </div>
@@ -2065,7 +2065,7 @@ npm install -g @anthropic-ai/claude-code</pre>
             <div class="step-h"><span class="n">2</span>Add the server to Claude Code</div>
             <pre class="language-bash">
 claude mcp add --scope user secure-vibe-delivery -- \
-  uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.6 secure-vibe-delivery</pre>
+  uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.7 secure-vibe-delivery</pre>
             <p>Check it worked. You should see <code>Status: ✔ Connected</code>; the first check takes a few seconds while it downloads.</p>
             <pre class="language-bash">claude mcp get secure-vibe-delivery</pre>
             <div class="step-h"><span class="n">3</span>Do the one-time sign-up, with your assistant</div>
@@ -2113,7 +2113,7 @@ winget install --id Git.Git -e</pre>
             <pre class="language-bash">npm install -g @anthropic-ai/claude-code</pre>
             <div class="step-h"><span class="n">2</span>Add the server to Claude Code</div>
             <p>Paste this as one line:</p>
-            <pre class="language-bash">claude mcp add --scope user secure-vibe-delivery -- uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.6 secure-vibe-delivery</pre>
+            <pre class="language-bash">claude mcp add --scope user secure-vibe-delivery -- uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.7 secure-vibe-delivery</pre>
             <p>Check it worked:</p>
             <pre class="language-bash">claude mcp get secure-vibe-delivery</pre>
             <div class="step-h"><span class="n">3</span>Do the one-time sign-up, with your assistant</div>
@@ -2174,7 +2174,7 @@ winget install --id Git.Git -e</pre>
     "secure-vibe-delivery": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.6", "secure-vibe-delivery"]
+      "args": ["--from", "git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.7", "secure-vibe-delivery"]
     }
   }
 }</pre>
