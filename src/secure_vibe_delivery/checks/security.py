@@ -49,6 +49,15 @@ def merge_secrets(secrets: list[SecretFinding]) -> list[SecretFinding]:
     return sorted(out, key=lambda s: (s.file, s.line))
 
 
+async def run_semgrep(argv: list[str], root, timeout: float):
+    """Run Semgrep; if this version rejects the project-root flags, run again without them."""
+    p = await run_cmd(argv, root, timeout=timeout)
+    if p.exit_code not in (0, 1) and semgrep.rejected_flag(p.stderr):
+        argv = semgrep.without_project_root(argv)
+        p = await run_cmd(argv, root, timeout=timeout)
+    return p, argv
+
+
 async def run(ctx: CheckContext) -> CheckResult:
     res = CheckResult(name="security", started_at=time.time())
     root = ctx.root
@@ -75,7 +84,7 @@ async def run(ctx: CheckContext) -> CheckResult:
                         "(e.g. `python -m venv .venv && .venv/bin/pip install -r requirements.txt`).")
             if "no supported" in err.lower() or p.exit_code == 3:
                 hint = " Snyk found no supported manifest (requirements.txt, package.json, ...)."
-            not_run["snyk-open-source"] = err[:400] + hint
+            not_run["snyk-open-source"] = err[:400] + (hint or snyk.org_hint(err))
         else:
             lib_findings = libs
             scanners["snyk-open-source"] = f"{meta.get('dependency_count', 0)} dependencies"
@@ -86,12 +95,13 @@ async def run(ctx: CheckContext) -> CheckResult:
     # --- Snyk Code --------------------------------------------------------------------
     if snyk_bin:
         ctx.log("Snyk Code: scanning our code")
-        argv = [*snyk_bin, "code", "test", "--json"]
+        argv = [*snyk_bin, "code", "test", "--json", *snyk.org_args()]
         p = await run_cmd(argv, root, timeout=900)
         res.commands.append(p.record("snyk-code", argv, ctx.raw_dir))
         err, code, code_secrets = snyk.parse_code(p.stdout, root)
         if err or p.exit_code not in (0, 1):
-            not_run["snyk-code"] = (err or p.stderr.strip() or f"exit code {p.exit_code}")[:400]
+            msg = (err or p.stderr.strip() or f"exit code {p.exit_code}")[:400]
+            not_run["snyk-code"] = msg + snyk.org_hint(msg)
         else:
             code_findings += code
             secrets += code_secrets
@@ -103,12 +113,12 @@ async def run(ctx: CheckContext) -> CheckResult:
     if semgrep_bin:
         ctx.log("Semgrep: OWASP rules + AI-mistake rules")
         argv = semgrep.code_argv(semgrep_bin, ctx.info.svd_rules_dir)
-        p = await run_cmd(argv, root, timeout=900)
+        p, argv = await run_semgrep(argv, root, 900)
         res.commands.append(p.record("semgrep", argv, None))
         (ctx.raw_dir / "semgrep.masked.json").write_text(semgrep.scrub_raw(p.stdout))
         err, sg, warnings = semgrep.parse_code(p.stdout)
         if err:
-            not_run["semgrep"] = err
+            not_run["semgrep"] = err + semgrep.token_hint(err)
         else:
             code_findings += sg
             scanners["semgrep"] = f"{len(sg)} issues"
@@ -121,7 +131,7 @@ async def run(ctx: CheckContext) -> CheckResult:
     secrets_scanner = None
     if snyk_bin:
         ctx.log("Snyk Secrets: checking for keys and passwords")
-        argv = [*snyk_bin, "secrets", "test", "--json"]
+        argv = [*snyk_bin, "secrets", "test", "--json", *snyk.org_args()]
         p = await run_cmd(argv, root, timeout=600)
         reason = snyk.secrets_unavailable(p.stdout, p.stderr, p.exit_code)
         rec = p.record("snyk-secrets", argv, None)
@@ -135,17 +145,17 @@ async def run(ctx: CheckContext) -> CheckResult:
         if semgrep_bin:
             ctx.log("Secrets fallback: Semgrep p/secrets + svd-secrets rules")
             argv = semgrep.secrets_argv(semgrep_bin, registry=True)
-            p = await run_cmd(argv, root, timeout=600)
+            p, argv = await run_semgrep(argv, root, 600)
             err, sec = semgrep.parse_secrets(p.stdout, root)
             label = "semgrep (p/secrets + svd-secrets)"
             if err:
                 # p/secrets comes from the Semgrep registry: no network, or a change in what it serves
                 # without an account, must not leave the project with no secret scan at all.
-                res.data["semgrep_registry_secrets_error"] = err[:300]
+                res.data["semgrep_registry_secrets_error"] = err[:300] + semgrep.token_hint(err)
                 ctx.log("p/secrets unavailable; retrying with the bundled svd-secrets rules only")
                 res.commands.append(p.record("semgrep-secrets-registry", argv, None))
                 argv = semgrep.secrets_argv(semgrep_bin, registry=False)
-                p = await run_cmd(argv, root, timeout=600)
+                p, argv = await run_semgrep(argv, root, 600)
                 err, sec = semgrep.parse_secrets(p.stdout, root)
                 label = "semgrep (bundled svd-secrets rules only)"
             res.commands.append(p.record("semgrep-secrets", argv, None))
@@ -179,6 +189,7 @@ async def run(ctx: CheckContext) -> CheckResult:
     res.findings = code_findings + sorted(lib_findings, key=lambda f: -_sev(f))
     res.secrets = secrets
     res.data["scanners"] = scanners
+    res.data["snyk_org"] = snyk.org()
     res.data["not_run"] = not_run
 
     code_hi = [f for f in code_findings if f.severity in ("critical", "high")]

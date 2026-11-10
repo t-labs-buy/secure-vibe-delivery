@@ -68,6 +68,11 @@ async def run_cmd(
     start = time.monotonic()
     full_env = {**os.environ, **(env or {})}
     full_env.setdefault("NO_COLOR", "1")
+    # Client configs pass tokens through as "" when the user hasn't set them; an empty value
+    # would override the login saved by `snyk auth` / `semgrep login`, so drop empty ones.
+    for k in ("SNYK_TOKEN", "SVD_SNYK_ORG", "SNYK_CFG_ORG", "SEMGREP_APP_TOKEN"):
+        if k in full_env and not full_env[k].strip():
+            del full_env[k]
     try:
         proc = await asyncio.create_subprocess_exec(
             *argv,

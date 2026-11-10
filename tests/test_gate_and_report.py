@@ -80,3 +80,4 @@ def test_locustgen_from_routes_compiles():
     assert "routes" in how
     assert "self.client.get('/products')" in src and "/calc" in src
     compile(src, "locustfile.py", "exec")
+

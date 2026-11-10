@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 from pathlib import Path
 from typing import Any, Optional
@@ -30,8 +31,30 @@ def _load_json(text: str) -> Any:
             return None
 
 
+def org() -> Optional[str]:
+    """Snyk organisation to scan into, from SVD_SNYK_ORG (or Snyk's own SNYK_CFG_ORG).
+    Use the organisation ID: `snyk secrets test` ignores a slug and falls back to the
+    account's default organisation without saying so."""
+    return (os.environ.get("SVD_SNYK_ORG") or os.environ.get("SNYK_CFG_ORG") or "").strip() or None
+
+
+def org_args() -> list[str]:
+    o = org()
+    return [f"--org={o}"] if o else []
+
+
+def org_hint(error: str) -> str:
+    """Explain the error Snyk gives when the token can't use the configured organisation."""
+    e = error.lower()
+    if org() and ("not found" in e or "permission" in e or "unauthorized" in e or "forbidden" in e
+                  or "not supported for your current organization" in e):
+        return (f" Hint: the Snyk token in use can't access organisation {org()}. Use the organisation's "
+                "shared SNYK_TOKEN, or ask a Snyk admin to add your account to it.")
+    return ""
+
+
 def open_source_argv(snyk: list[str], python_cmd: Optional[list[str]]) -> list[str]:
-    argv = [*snyk, "test", "--all-projects", f"--exclude={EXCLUDES}", "--json"]
+    argv = [*snyk, "test", "--all-projects", f"--exclude={EXCLUDES}", "--json", *org_args()]
     if python_cmd and len(python_cmd) == 1 and Path(python_cmd[0]).exists():
         argv.append(f"--command={python_cmd[0]}")
     return argv

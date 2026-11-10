@@ -107,3 +107,30 @@ def test_semgrep_secrets_logged_out_masks_from_source():
 def test_secrets_argv_bundled_only_needs_no_registry():
     argv = semgrep.secrets_argv(["semgrep"], registry=False)
     assert "p/secrets" not in argv and any(a.endswith("svd-secrets.yml") for a in argv)
+
+
+def test_semgrep_project_root_flags_and_fallback():
+    argv = semgrep.secrets_argv(["semgrep"])
+    assert argv[argv.index("--project-root") + 1] == "."
+    stripped = semgrep.without_project_root(argv)
+    assert "--project-root" not in stripped and "--semgrepignore-v2" not in stripped and "." in stripped
+    assert semgrep.rejected_flag("semgrep scan: unknown option '--project-root'")
+    assert not semgrep.rejected_flag("some other failure")
+
+
+def test_snyk_org_args_and_hint(monkeypatch):
+    monkeypatch.delenv("SNYK_CFG_ORG", raising=False)
+    monkeypatch.setenv("SVD_SNYK_ORG", "00000000-0000-0000-0000-000000000001")
+    assert snyk.org_args() == ["--org=00000000-0000-0000-0000-000000000001"]
+    assert "can't access organisation" in snyk.org_hint("Org x was not found or you may not have the correct permissions")
+    assert snyk.org_hint("Snyk Code is not supported for your current organization: ``.")
+    monkeypatch.setenv("SVD_SNYK_ORG", "  ")
+    assert snyk.org_args() == [] and snyk.org_hint("not found") == ""
+
+
+def test_semgrep_token_hint(monkeypatch):
+    err = "Failed to download configuration from https://semgrep.dev/c/p/secrets HTTP 403."
+    monkeypatch.setenv("SEMGREP_APP_TOKEN", "bad")
+    assert "rejected SEMGREP_APP_TOKEN" in semgrep.token_hint(err)
+    monkeypatch.delenv("SEMGREP_APP_TOKEN")
+    assert semgrep.token_hint(err) == ""

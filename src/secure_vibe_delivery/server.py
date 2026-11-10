@@ -167,7 +167,8 @@ def secure_vibe_delivery_prompt(target_url: str = "", mode: str = "quick", peak_
     return f"""Run the Secure Vibe Delivery pipeline on this project.
 
 1. Call svd_doctor with the absolute path of the current project. If it lists blocking actions
-   (missing Snyk/Semgrep, Snyk not authenticated), tell me and stop.
+   (missing Snyk/Semgrep, Snyk not authenticated), tell me how to fix them and stop. Mention any
+   "Recommended" actions (such as logging in to Semgrep), but carry on.
 2. {"" if target_url else "Ask me for the test environment URL for the load test (or confirm I want to skip performance). "}Call svd_run with project_path,{url} mode="{mode}", peak_users={peak_users}.
 3. Poll svd_status every 30-60 seconds until state is "done". Give me a one-line update each time.
 4. Call svd_report. Tell me the verdict, give me the path to the HTML report, and summarise the

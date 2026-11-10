@@ -83,13 +83,43 @@ second copy of the key.
 
 ## Install
 
-You need [uv](https://docs.astral.sh/uv/) (which supplies `uvx`) and the Snyk CLI. `uvx` downloads a suitable Python (3.11–3.13) for the server by itself. Semgrep and Locust are used from your `PATH` if present, otherwise they run through
-`uvx` automatically.
+You need [uv](https://docs.astral.sh/uv/) (which supplies `uvx`) and the Snyk CLI. `uvx` downloads
+a suitable Python (3.11–3.13) for the server by itself. Semgrep and Locust are used from your `PATH`
+if present, otherwise they run through `uvx` automatically.
 
 ```bash
-brew tap snyk/tap && brew install snyk && snyk auth   # once per laptop
-brew install semgrep                                  # optional: otherwise uvx runs it
+brew install uv
+brew tap snyk/tap && brew install snyk   # once per laptop
+brew install semgrep                     # optional: otherwise uvx runs it
 ```
+
+### Accounts: Snyk and Semgrep
+
+Each developer uses their own free accounts, set up once per laptop.
+
+**Snyk (required).** Sign up at [app.snyk.io/signup](https://app.snyk.io/signup), then connect the
+CLI to your account. A browser window opens; log in there.
+
+```bash
+snyk auth
+```
+
+Without this, the three Snyk scans (libraries, code, secrets) can't run, and a scan that didn't
+run counts as a failure, so every report would say NO-GO.
+
+**Semgrep (recommended).** Sign up at [semgrep.dev/login](https://semgrep.dev/login), then:
+
+```bash
+semgrep login
+```
+
+Semgrep works without an account, so this one is optional. Logged in, Semgrep's output keeps the
+matched source lines instead of replacing them with `requires login`, and rules that need a login
+become available. Scans still run on your laptop with `semgrep scan`: nothing is uploaded to
+Semgrep's dashboard.
+
+`svd_doctor` checks both and tells you what's missing. Snyk Secrets isn't included in every Snyk
+plan; where it's missing, the server uses Semgrep's secret rules instead (see above).
 
 The server is installed straight from the public repository
 [github.com/t-labs-buy/secure-vibe-delivery](https://github.com/t-labs-buy/secure-vibe-delivery),
@@ -102,7 +132,7 @@ For all your projects:
 
 ```bash
 claude mcp add --scope user secure-vibe-delivery -- \
-  uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.0 secure-vibe-delivery
+  uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.1 secure-vibe-delivery
 ```
 
 For one project, shared with the team: copy [`examples/claude-code/.mcp.json`](examples/claude-code/.mcp.json)
@@ -115,18 +145,6 @@ Copy [`examples/vscode/mcp.json`](examples/vscode/mcp.json) to `.vscode/mcp.json
 and commit it. Start the server from the **Start** link VS Code shows above the entry (or run
 *MCP: List Servers* from the command palette), then use it from Copilot Chat in Agent mode.
 
-```json
-{
-  "servers": {
-    "secure-vibe-delivery": {
-      "type": "stdio",
-      "command": "uvx",
-      "args": ["--from", "git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.0", "secure-vibe-delivery"]
-    }
-  }
-}
-```
-
 ### Other clients
 
 **Codex** (`~/.codex/config.toml`). The first `uvx` launch downloads dependencies, so give it time to start:
@@ -134,7 +152,7 @@ and commit it. Start the server from the **Start** link VS Code shows above the 
 ```toml
 [mcp_servers.secure-vibe-delivery]
 command = "uvx"
-args = ["--from", "git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.0", "secure-vibe-delivery"]
+args = ["--from", "git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.1", "secure-vibe-delivery"]
 startup_timeout_sec = 60
 ```
 
@@ -143,12 +161,15 @@ View raw config, which opens `~/.gemini/config/mcp_config.json`; some older guid
 `~/.gemini/antigravity/mcp_config.json`, so check which file your install reads): use the
 `mcpServers` block from `examples/claude-code/.mcp.json`, without the `"type"` line.
 
-If Snyk isn't logged in on a machine, add `"env": {"SNYK_TOKEN": "..."}` to the entry (in Codex,
-`env = { SNYK_TOKEN = "..." }`).
+Optional settings, for any client's `env`: `SVD_SNYK_ORG` sends Snyk scans to a particular Snyk
+organisation (use its **ID**: `snyk secrets test` ignores a slug), and `SNYK_TOKEN` /
+`SEMGREP_APP_TOKEN` replace `snyk auth` / `semgrep login` on machines where you can't log in
+interactively. Put tokens only in personal config files, never in one you commit: this repository
+is public.
 
 ### Upgrading
 
-Releases are git tags. To move to a new one, change `@v0.1.0` to the new tag in the command or
+Releases are git tags. To move to a new one, change the `@v0.1.x` tag in the command or
 config file.
 
 ## Using it

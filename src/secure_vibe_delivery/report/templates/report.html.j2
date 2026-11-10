@@ -17,6 +17,7 @@
   --good:#0ca30c;--good-ink:#006300;--warning:#fab219;--serious:#ec835a;--critical:#d03b3b;
   --good-bg:#e8f3ea;--warn-bg:#faf3e0;--bad-bg:#fbeaea;--notrun-bg:#fcefe8;
   --series-1:#2a78d6;--series-2:#eb6834;
+  --tab-bg:#e9e7f7;--tab-ink:#4f46b8;--tab-border:#c9c4ec;--shell:#fbfbfa;
 }
 @media (prefers-color-scheme:dark){
   :root:where(:not([data-theme="light"])){
@@ -26,6 +27,7 @@
     --grid:#4a4f63;--axis:#626880;--good-ink:#a6d189;
     --good-bg:#3b4a45;--warn-bg:#4a4536;--bad-bg:#4d3a42;--notrun-bg:#4d4038;
     --series-1:#3987e5;--series-2:#d95926;
+    --tab-bg:#454063;--tab-ink:#babbf1;--tab-border:#6c6896;--shell:#3a3e52;
   }
 }
 :root[data-theme="dark"]{
@@ -35,6 +37,7 @@
   --grid:#4a4f63;--axis:#626880;--good-ink:#a6d189;
   --good-bg:#3b4a45;--warn-bg:#4a4536;--bad-bg:#4d3a42;--notrun-bg:#4d4038;
   --series-1:#3987e5;--series-2:#d95926;
+  --tab-bg:#454063;--tab-ink:#babbf1;--tab-border:#6c6896;--shell:#3a3e52;
 }
 html{scroll-behavior:smooth;scroll-padding-top:4rem}
 body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 "JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
@@ -50,15 +53,29 @@ h1{font-size:clamp(1.4rem,3vw,2rem);margin:.3rem 0 .4rem;line-height:1.25}
 h2{font-size:1.2rem;margin:0 0 .25rem}
 h3{font-size:1rem;margin:1.5rem 0 .5rem}
 .meta{color:var(--muted);font-size:12.5px;display:flex;flex-wrap:wrap;gap:.25rem 1.25rem}
-nav.toc{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--border)}
-nav.toc .wrap{display:flex;gap:.25rem;overflow-x:auto;padding-top:.5rem;padding-bottom:.5rem;align-items:center}
-nav.toc a{white-space:nowrap;text-decoration:none;color:var(--muted);padding:.3rem .6rem;border-radius:6px;font-size:13px}
-nav.toc a:hover{background:var(--accent-soft);color:var(--ink)}
-nav.toc .sp{flex:1}
+header.mast .top{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem}
+.tabshell{background:var(--shell);border:1px solid var(--border);border-radius:18px;padding:1rem 1.25rem 1.5rem;margin:1.5rem 0}
+.tabbar{display:flex;gap:.25rem;overflow-x:auto;border-bottom:2px solid var(--border);margin:0 0 1.5rem;scrollbar-width:thin}
+.tabbar [role=tab]{font:inherit;font-size:13.5px;color:var(--muted);background:none;border:1px solid transparent;border-bottom:0;
+  border-radius:10px 10px 0 0;padding:.6rem 1rem;margin-bottom:-2px;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:.4rem}
+.tabbar [role=tab]:hover{color:var(--ink);background:var(--accent-soft)}
+.tabbar [role=tab][aria-selected=true]{background:var(--tab-bg);color:var(--tab-ink);border-color:var(--tab-border);font-weight:700;
+  border-bottom:2px solid var(--tab-bg)}
+.tabbar [role=tab]:focus-visible{outline:2px solid var(--tab-ink);outline-offset:-2px}
+.tabbar .dot{font-size:11px;font-weight:700}
+.tabbar .dot.PASS{color:var(--good)}.tabbar .dot.FAIL{color:var(--critical)}.tabbar .dot.NOT_RUN{color:var(--serious)}.tabbar .dot.WARN{color:#9a6a00}
+.js-tabs section.panel{display:none}
+.js-tabs section.panel.active{display:block}
+section.panel:focus{outline:none}
+.tabshell section.card{background:none;border:0;border-radius:0;padding:0;margin:0}
+.pager{display:flex;justify-content:space-between;gap:1rem;border-top:1px solid var(--border);margin-top:2rem;padding-top:1.25rem}
+.pager a{color:var(--tab-ink);font-weight:700;text-decoration:none;font-size:14px}
+.pager a:hover{text-decoration:underline}
+.pager .next{margin-left:auto;text-align:right}
+@media (max-width:640px){.tabshell{padding:.75rem .75rem 1.25rem;border-radius:14px}}
 button.theme{font:inherit;font-size:13px;background:var(--card);color:var(--ink);border:1px solid var(--border);border-radius:6px;padding:.3rem .7rem;cursor:pointer;white-space:nowrap}
 main{padding:1.5rem 0 4rem}
 section.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.5rem;margin:0 0 1.25rem}
-@media (max-width:640px){section.card{padding:1rem}}
 .lede{color:var(--muted);margin:.2rem 0 1rem;max-width:62rem}
 .verdict{display:flex;gap:1.25rem;align-items:center;flex-wrap:wrap;padding:1.25rem;border-radius:10px;border:2px solid}
 .verdict.NO-GO{background:var(--bad-bg);border-color:var(--critical)}
@@ -96,7 +113,11 @@ th{background:var(--bg);font-weight:700;color:var(--muted);font-size:11.5px;text
 tr:last-child td{border-bottom:0}
 td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 td .sub{color:var(--muted);font-size:12px;display:block;margin-top:.15rem}
-.where{color:var(--accent);word-break:break-all}
+.where{color:var(--accent);overflow-wrap:anywhere}
+td.where{min-width:13ch}
+.tablewrap table{min-width:40rem}
+td.issuecol{min-width:30ch}
+td.fixcol{min-width:26ch}
 .filters{display:flex;gap:.5rem;flex-wrap:wrap;margin:.5rem 0 .75rem}
 .filters input,.filters select{font:inherit;font-size:13px;padding:.35rem .6rem;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--ink);min-width:0}
 .filters input{flex:1 1 14rem}
@@ -135,12 +156,13 @@ details summary{cursor:pointer;font-weight:600}
 .muted{color:var(--muted)}
 .empty{color:var(--muted);font-style:italic;padding:.5rem 0}
 .masked{font-weight:700;letter-spacing:.03em}
-@media print{nav.toc,.filters,button.theme{display:none}section.card{break-inside:avoid-page}body{background:#fff}}
+@media print{.tabbar,.pager,.filters,button.theme{display:none}.js-tabs section.panel{display:block}section.card{break-inside:avoid-page;margin-bottom:2rem!important}body{background:#fff}.tabshell{border:0;padding:0}}
 </style>
 </head>
 <body>
 <header class="mast"><div class="wrap">
-  <div class="eyebrow">Secure Vibe Delivery · go-live analysis</div>
+  <div class="top"><div class="eyebrow">Secure Vibe Delivery · go-live analysis</div>
+  <button class="theme" id="themeBtn" type="button">◐ Theme</button></div>
   <h1>{{ project_name }}: {{ verdict }}</h1>
   <div class="meta">
     <span>Project <code>{{ opts.project_path }}</code></span>
@@ -150,13 +172,6 @@ details summary{cursor:pointer;font-weight:600}
     <span>Took {{ duration }}</span>
   </div>
 </div></header>
-<nav class="toc"><div class="wrap">
-  <a href="#verdict">Verdict</a><a href="#mustfix">Must fix ({{ must_fix|length }})</a>
-  <a href="#secrets">Secrets ({{ sec.secrets|length }})</a><a href="#security">Security</a>
-  <a href="#functional">Functional</a><a href="#performance">Performance</a>
-  <a href="#checklist">Go-live checklist</a><a href="#appendix">Appendix</a>
-  <span class="sp"></span><button class="theme" id="themeBtn" type="button">◐ Theme</button>
-</div></nav>
 
 {% macro status_badge(s) -%}
 {%- set v = s.value if s.value is defined else s -%}
@@ -164,9 +179,23 @@ details summary{cursor:pointer;font-weight:600}
 {%- endmacro %}
 {% macro sev(s) %}<span class="sev sev-{{ s }}">{{ s }}</span>{% endmacro %}
 
-<main><div class="wrap">
+{% macro tab(id, label, status=None) -%}
+<button type="button" role="tab" id="tab-{{ id }}" aria-controls="{{ id }}" aria-selected="false" tabindex="-1" data-label="{{ label|striptags }}">
+{%- if status %}<span class="dot {{ status }}" aria-hidden="true">{{ {"PASS":"✓","FAIL":"✕","WARN":"!","NOT_RUN":"⊘"}[status] }}</span>{% endif %}{{ label }}</button>
+{%- endmacro %}
+<main><div class="wrap"><div class="tabshell">
+<div class="tabbar" role="tablist" aria-label="Report sections">
+  {{ tab("verdict", "Overview") }}
+  {{ tab("mustfix", "Must fix (" ~ must_fix|length ~ ")") }}
+  {{ tab("secrets", "Secrets (" ~ sec.secrets|length ~ ")") }}
+  {{ tab("security", "Security", results.security.status.value) }}
+  {{ tab("functional", "Functional", results.functional.status.value) }}
+  {{ tab("performance", "Performance", results.performance.status.value) }}
+  {{ tab("checklist", "Go-live checklist") }}
+  {{ tab("appendix", "Appendix") }}
+</div>
 
-<section class="card" id="verdict">
+<section class="card panel" id="verdict" role="tabpanel" aria-labelledby="tab-verdict">
   <div class="verdict {{ verdict }}">
     <div class="ico" aria-hidden="true">{{ {"NO-GO":"✕","PROVISIONAL":"!","GO":"✓"}[verdict] }}</div>
     <div><div class="big">{{ verdict }}</div><p>{{ verdict_text }}</p></div>
@@ -185,7 +214,7 @@ details summary{cursor:pointer;font-weight:600}
   A security failure is never traded off against functional or performance results.</p>
 </section>
 
-<section class="card" id="mustfix">
+<section class="card panel" id="mustfix" role="tabpanel" aria-labelledby="tab-mustfix">
   <h2>What needs fixing, in order</h2>
   <p class="lede">The roadmap's order: leaked keys first, then critical and high issues in our own code, then critical issues in
   libraries, then suspicious packages, failing tests, coverage and performance. After fixing, run everything again.</p>
@@ -196,17 +225,17 @@ details summary{cursor:pointer;font-weight:600}
     {% for i in must_fix %}
     <tr>
       <td class="num">{{ loop.index }}</td><td>{{ sev(i.severity) }}</td><td>{{ i.kind }}</td>
-      <td><b>{{ i.title }}</b>{% if i.where %}<span class="sub where">{{ i.where }}</span>{% endif %}
+      <td class="issuecol"><b>{{ i.title }}</b>{% if i.where %}<span class="sub where">{{ i.where }}</span>{% endif %}
         {% if i.detail %}<span class="sub">{{ i.detail|truncate(260) }}</span>{% endif %}
         {% if i.sources %}<span class="sub">Reported by {{ i.sources|join(", ") }}</span>{% endif %}</td>
-      <td>{{ i.fix or "-" }}</td>
+      <td class="fixcol">{{ i.fix or "-" }}</td>
     </tr>
     {% endfor %}
     </tbody></table></div>
   {% else %}<p class="empty">Nothing to fix. Every automated check passed.</p>{% endif %}
 </section>
 
-<section class="card" id="secrets">
+<section class="card panel" id="secrets" role="tabpanel" aria-labelledby="tab-secrets">
   <h2>Exposed secrets</h2>
   <p class="lede">Scanned by <b>{{ sec.data.secrets_scanner or "no scanner (didn't run)" }}</b>{% if sec.data.snyk_secrets_unavailable %}.
   Snyk Secrets wasn't available ({{ sec.data.snyk_secrets_unavailable|truncate(160) }}), so the Semgrep fallback ran{% endif %}.
@@ -225,7 +254,7 @@ details summary{cursor:pointer;font-weight:600}
   {% else %}<div class="callout bad">The secret scan didn't run, so this check fails.</div>{% endif %}
 </section>
 
-<section class="card" id="security">
+<section class="card panel" id="security" role="tabpanel" aria-labelledby="tab-security">
   <h2>Security: is it safe?</h2>
   <p class="lede">Two scanners look at the code from different angles (Snyk Code and Semgrep with the bundled AI-mistake rules);
   Snyk Open Source checks libraries; a provenance check confirms every dependency is real and not brand-new.</p>
@@ -277,7 +306,7 @@ details summary{cursor:pointer;font-weight:600}
   {% else %}<p class="empty">Every direct dependency exists on its public registry and is over 30 days old.</p>{% endif %}
 </section>
 
-<section class="card" id="functional">
+<section class="card panel" id="functional" role="tabpanel" aria-labelledby="tab-functional">
   <h2>Functional: does it work?</h2>
   {% set c = fun.data.get("counts", {}) %}
   {% if fun.status.value == "NOT_RUN" and not c.get("total") %}
@@ -324,7 +353,7 @@ details summary{cursor:pointer;font-weight:600}
   {% endif %}
 </section>
 
-<section class="card" id="performance">
+<section class="card panel" id="performance" role="tabpanel" aria-labelledby="tab-performance">
   <h2>Performance: can it cope?</h2>
   {% set a = perf.data.get("aggregate") %}
   {% if not a %}
@@ -382,7 +411,7 @@ details summary{cursor:pointer;font-weight:600}
   <p class="muted">If the app calls an AI model, a load test is also a cost test: check usage limits and spend for this run.</p>
 </section>
 
-<section class="card" id="checklist">
+<section class="card panel" id="checklist" role="tabpanel" aria-labelledby="tab-checklist">
   <h2>The go-live checklist</h2>
   <p class="lede">Signed by the Delivery Lead before every release. Every box must be ticked, or covered by an approved exception
   (a written reason, a named owner, an end date at most 90 days away, and the Delivery Lead's approval).</p>
@@ -398,7 +427,7 @@ details summary{cursor:pointer;font-weight:600}
   <div class="signoff"><div>Delivery Lead</div><div>Date</div><div>Exceptions approved (IDs)</div></div>
 </section>
 
-<section class="card" id="appendix">
+<section class="card panel" id="appendix" role="tabpanel" aria-labelledby="tab-appendix">
   <h2>Appendix: what ran</h2>
   <h3>Commands</h3>
   <div class="tablewrap"><table><thead><tr><th>Check</th><th>Command</th><th class="num">Exit</th><th class="num">Time</th></tr></thead><tbody>
@@ -415,7 +444,7 @@ details summary{cursor:pointer;font-weight:600}
   Generated by secure-vibe-delivery, following the Secure Vibe Delivery roadmap (T-Labs Buy, Oct 2026).</p>
 </section>
 
-</div></main>
+</div></div></main>
 
 <script type="application/json" id="perfData">{{ perf_json }}</script>
 <script>
@@ -428,6 +457,35 @@ details summary{cursor:pointer;font-weight:600}
     var next=cur==="dark"?"light":"dark"; root.setAttribute("data-theme",next);
     try{localStorage.setItem(KEY,next);}catch(e){}
   });
+
+  // Tabs: one section at a time, synced with the URL hash, with Previous/Next links.
+  var tabs=[].slice.call(document.querySelectorAll('[role=tab]'));
+  var panels=tabs.map(function(t){return document.getElementById(t.getAttribute("aria-controls"));});
+  var redraws=[]; window.__svdRedraw=function(f){redraws.push(f);};
+  root.classList.add("js-tabs");
+  panels.forEach(function(p,i){
+    var nav=document.createElement("nav"); nav.className="pager"; nav.setAttribute("aria-label","Section navigation");
+    function link(j,cls,text){var a=document.createElement("a"); a.href="#"+panels[j].id; a.className=cls; a.textContent=text;
+      a.addEventListener("click",function(e){e.preventDefault(); show(j,true); window.scrollTo({top:document.querySelector(".tabshell").offsetTop-8,behavior:"smooth"});}); nav.appendChild(a);}
+    if(i>0) link(i-1,"prev","← Previous: "+tabs[i-1].dataset.label);
+    if(i<panels.length-1) link(i+1,"next","Next: "+tabs[i+1].dataset.label+" →");
+    p.appendChild(nav);
+  });
+  function show(i,push){
+    tabs.forEach(function(t,j){var on=j===i; t.setAttribute("aria-selected",on); t.tabIndex=on?0:-1; panels[j].classList.toggle("active",on);});
+    tabs[i].scrollIntoView({block:"nearest",inline:"nearest"});
+    if(push) history.replaceState(null,"","#"+panels[i].id);
+    redraws.forEach(function(f){f();});
+  }
+  tabs.forEach(function(t,i){
+    t.addEventListener("click",function(){show(i,true);});
+    t.addEventListener("keydown",function(e){var k=e.key,n=null;
+      if(k==="ArrowRight")n=(i+1)%tabs.length; else if(k==="ArrowLeft")n=(i-1+tabs.length)%tabs.length;
+      else if(k==="Home")n=0; else if(k==="End")n=tabs.length-1;
+      if(n!==null){e.preventDefault(); show(n,true); tabs[n].focus();}});
+  });
+  function fromHash(){var id=location.hash.slice(1),i=panels.findIndex(function(p){return p.id===id;}); show(i<0?0:i,false);}
+  window.addEventListener("hashchange",fromHash); fromHash();
 
   // Table filters
   document.querySelectorAll(".filters").forEach(function(f){
@@ -507,6 +565,7 @@ details summary{cursor:pointer;font-weight:600}
       hit.addEventListener("keydown",function(e){if(e.key==="ArrowLeft"){cur=Math.max(0,cur-1);show(cur);e.preventDefault();}if(e.key==="ArrowRight"){cur=Math.min(series.length-1,cur+1);show(cur);e.preventDefault();}});
     }
     draw(); var rt; window.addEventListener("resize",function(){clearTimeout(rt); rt=setTimeout(draw,120);});
+    if(window.__svdRedraw) window.__svdRedraw(function(){ if(host.clientWidth) draw(); });
   }
   lineChart(document.getElementById("chartLatency"),{label:"Response time over the run",unit:"ms",ref:data.target,
     lines:[{key:"p50",label:"p50 (median)",short:"p50",color:"var(--series-1)"},{key:"p95",label:"p95",short:"p95",color:"var(--series-2)"}]});

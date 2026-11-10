@@ -11,6 +11,31 @@ from .secrets_util import extract_secret, mask, read_span
 
 EXCLUDES = [".venv", "venv", "env", "node_modules", ".svd", "dist", "build", "coverage"]
 
+# Treat the folder being scanned as the project root. Otherwise, inside a larger git repository,
+# Semgrep resolves its default ignore list (which skips tests/ folders) from the repository root,
+# and a project that lives under some tests/ folder gets 0 files scanned. Older Semgrep versions
+# lack --project-root, and --semgrepignore-v2 is deprecated, so callers retry without these.
+PROJECT_ROOT_ARGS = ["--project-root", ".", "--semgrepignore-v2"]
+
+
+def without_project_root(argv: list[str]) -> list[str]:
+    out, skip = [], 0
+    for a in argv:
+        if skip:
+            skip -= 1
+            continue
+        if a == "--project-root":
+            skip = 1
+            continue
+        if a == "--semgrepignore-v2":
+            continue
+        out.append(a)
+    return out
+
+
+def rejected_flag(stderr: str) -> bool:
+    return "unknown option" in stderr and ("--project-root" in stderr or "--semgrepignore-v2" in stderr)
+
 
 def rules_path(name: str) -> str:
     return str(resources.files("secure_vibe_delivery").joinpath("rules", name))
@@ -27,15 +52,26 @@ def code_argv(semgrep: list[str], project_rules: Optional[Path]) -> list[str]:
     argv = [*semgrep, "scan", "--config", "auto", "--config", rules_path("ai-mistakes.yml")]
     if project_rules:
         argv += ["--config", str(project_rules)]
-    return argv + _excl() + ["--json", "--quiet", "--metrics", "auto", "."]
+    return argv + PROJECT_ROOT_ARGS + _excl() + ["--json", "--quiet", "--metrics", "auto", "."]
 
 
 def secrets_argv(semgrep: list[str], registry: bool = True) -> list[str]:
     """registry=True adds Semgrep's p/secrets (downloaded from the Semgrep registry). The bundled
     svd-secrets rules are local files and need no account, network or paid plan."""
     configs = ["--config", "p/secrets"] if registry else []
-    return [*semgrep, "scan", *configs, "--config", rules_path("svd-secrets.yml"), *_excl(), "--json", "--quiet",
+    return [*semgrep, "scan", *configs, "--config", rules_path("svd-secrets.yml"), *PROJECT_ROOT_ARGS, *_excl(),
+            "--json", "--quiet",
             "--metrics", "off", "."]
+
+
+def token_hint(error: str) -> str:
+    """Semgrep answers HTTP 403 for registry rules (--config auto, p/secrets) when SEMGREP_APP_TOKEN
+    is wrong or revoked; local rule files still run, which makes the cause easy to miss."""
+    import os
+    if os.environ.get("SEMGREP_APP_TOKEN", "").strip() and ("403" in error or "401" in error):
+        return (" Hint: Semgrep rejected SEMGREP_APP_TOKEN (invalid or revoked), so registry rules couldn't be "
+                "downloaded. Get the current company token, or unset it to scan without a login.")
+    return ""
 
 
 def _short_id(check_id: str) -> str:
