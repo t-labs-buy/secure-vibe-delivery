@@ -62,6 +62,8 @@ class SecretFinding(BaseModel):
 class CommandRecord(BaseModel):
     name: str
     argv: list[str]
+    cwd: str = ""
+    started_at: float = 0.0
     exit_code: Optional[int]
     duration_s: float
     stdout_path: str = ""
@@ -105,6 +107,7 @@ class RunOptions(BaseModel):
     stop_on_security_fail: bool = False
     spawn_rate: int = 10
     duration: Optional[str] = None  # override, e.g. "5m"
+    open_report: bool = True  # open the finished report in the default browser
 
 
 class RunState(BaseModel):
@@ -117,6 +120,9 @@ class RunState(BaseModel):
     results: dict[str, CheckResult] = Field(default_factory=dict)
     verdict: Optional[str] = None
     report_path: Optional[str] = None
+    report_opened: Optional[bool] = None  # None = not attempted
+    journal: list[dict] = Field(default_factory=list)  # every step and command, in order
+    ai_summary: Optional[dict] = None
     summary_path: Optional[str] = None
     error: Optional[str] = None
     created_at: float = 0.0

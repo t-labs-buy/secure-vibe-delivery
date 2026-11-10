@@ -81,3 +81,36 @@ def test_locustgen_from_routes_compiles():
     assert "self.client.get('/products')" in src and "/calc" in src
     compile(src, "locustfile.py", "exec")
 
+
+
+async def test_report_opens_in_browser_and_can_be_disabled(monkeypatch, tmp_path):
+    from secure_vibe_delivery import jobs
+    opened = []
+    monkeypatch.setattr(jobs.webbrowser, "open", lambda url: opened.append(url) or True)
+    report = tmp_path / "r.html"
+    report.write_text("<html></html>")
+    assert await jobs.open_in_browser(str(report)) is True
+    assert opened == [report.as_uri()]
+    monkeypatch.setenv("SVD_OPEN_REPORT", "0")
+    assert not jobs.auto_open_enabled()
+    monkeypatch.setenv("SVD_OPEN_REPORT", "1")
+    assert jobs.auto_open_enabled()
+
+
+async def test_open_in_browser_never_raises(monkeypatch, tmp_path):
+    from secure_vibe_delivery import jobs
+    def boom(url):
+        raise RuntimeError("no display")
+    monkeypatch.setattr(jobs.webbrowser, "open", boom)
+    assert await jobs.open_in_browser(str(tmp_path / "x.html")) is False
+
+
+async def test_finished_run_reports_opened(monkeypatch):
+    from secure_vibe_delivery import jobs
+    from secure_vibe_delivery.models import RunOptions, RunState
+    st = RunState(run_id="t", options=RunOptions(project_path=str(APP)), state="done", created_at=0,
+                  report_path="/x/r.html", report_opened=True)
+    v = jobs.status_view(st)
+    assert v["report_opened"] is True and "already open" in v["next"]
+    st.report_opened = False
+    assert "report_path" in jobs.status_view(st)["next"]

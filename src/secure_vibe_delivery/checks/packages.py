@@ -134,4 +134,8 @@ async def check(root: Path) -> tuple[list[Finding], dict]:
                 message=f"'{name}' first appeared on {registry} {age} day(s) ago (under {NEW_PACKAGE_DAYS}).",
                 fix_hint="Check the maintainer and source repository before trusting it."))
     meta["checked"] = len([r for r in results if r])
+    from ..proc import journal_step
+    journal_step("network", f"Looked up {len(py)} Python package name(s) on pypi.org and {len(js)} on "
+                            f"registry.npmjs.org (names only); {meta['checked']} answered, "
+                            f"{len(meta['lookup_errors'])} lookup error(s)")
     return findings, meta

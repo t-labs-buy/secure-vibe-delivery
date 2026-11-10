@@ -217,6 +217,30 @@ async def snyk_signed_in() -> Optional[bool]:
     return p.exit_code == 0 and bool(p.stdout.strip())
 
 
+SNYK_CODE_OFF = re.compile(r"not (?:been )?enabled|enable (?:it|snyk code)|not supported for (?:your|this) "
+                           r"(?:current )?org|snyk code is disabled", re.I)
+SNYK_CODE_HOWTO = ("In your browser, go to app.snyk.io, open Settings, choose Snyk Code, switch on the "
+                   "\"Enable Snyk Code\" toggle, and click Save changes.")
+
+
+async def snyk_code_enabled() -> Optional[bool]:
+    """Run Snyk Code on a two-line throwaway file. True if it scans, False if Snyk says Snyk Code is
+    switched off for the organisation, None if it can't tell (for example, no network)."""
+    import tempfile
+    from .proc import run_cmd
+    cmd = _snyk_cmd()
+    if not cmd:
+        return None
+    with tempfile.TemporaryDirectory(prefix="svd-snyk-code-") as d:
+        Path(d, "probe.py").write_text("def add(a, b):\n    return a + b\n")
+        p = await run_cmd([*cmd, "code", "test", "--json"], d, timeout=180)
+    if p.exit_code in (0, 1) and "runs" in p.stdout:
+        return True
+    if SNYK_CODE_OFF.search(p.stdout + p.stderr):
+        return False
+    return None
+
+
 async def semgrep_signed_in() -> Optional[bool]:
     from .proc import run_cmd
     cmd = _semgrep_cmd()

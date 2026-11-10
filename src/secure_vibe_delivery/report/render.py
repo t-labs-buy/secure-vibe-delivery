@@ -10,7 +10,8 @@ from pathlib import Path
 from jinja2 import Environment, PackageLoader, select_autoescape
 from markupsafe import Markup
 
-from .. import gate
+from .. import gate, scoring
+from .. import summary as summaries
 from ..models import SEVERITY_ORDER, CheckResult, RunState, Status
 
 _env = Environment(loader=PackageLoader("secure_vibe_delivery", "report/templates"),
@@ -34,22 +35,65 @@ _env.filters["dur"] = _fmt_dur
 _env.filters["sevrank"] = lambda s: SEVERITY_ORDER.get(s, 0)
 
 
+def server_version() -> str:
+    try:
+        from importlib.metadata import version
+        return version("secure-vibe-delivery")
+    except Exception:
+        return "unknown"
+
+
+def _hms(t: float) -> str:
+    return datetime.fromtimestamp(t).strftime("%H:%M:%S")
+
+
+def journal_lines(st: RunState) -> list[str]:
+    out = []
+    for i, e in enumerate(sorted(st.journal, key=lambda e: e["t"]), 1):
+        line = f"{i:>3}. {_hms(e['t'])} [{e['kind']}] {e['text']}"
+        if e["kind"] == "command":
+            line += (f"\n       in: {e.get('cwd', '')}\n       exit: {e.get('exit_code')}  "
+                     f"time: {e.get('duration_s')}s" + ("  TIMED OUT" if e.get("timed_out") else "")
+                     + (f"  error: {e['error']}" if e.get("error") else ""))
+        out.append(line)
+    return out
+
+
+def write_run_log(st: RunState, run_dir: Path, reports_dir: Path) -> Path:
+    """The full step-by-step log as plain text, next to the report and in the run folder."""
+    head = [f"secure-vibe-delivery run log", f"run {st.run_id}  verdict {st.verdict}",
+            f"project {st.options.project_path}", ""]
+    text = "\n".join(head + journal_lines(st)) + "\n"
+    (run_dir / "run-log.txt").write_text(text)
+    if st.report_path:
+        p = Path(st.report_path).with_name(Path(st.report_path).stem + "-runlog.txt")
+        p.write_text(text)
+        return p
+    return run_dir / "run-log.txt"
+
+
 def build_summary(st: RunState, results: dict[str, CheckResult]) -> dict:
     v = st.verdict or gate.verdict(results)
+    score = scoring.compute(results, st.options.mode != "gate")
+    must = gate.must_fix(results)
+    auto = summaries.automatic(results, v, score, must)
     return {
+        "score": score, "overview_summary": st.ai_summary or auto, "automatic_summary": auto,
         "tool": "secure-vibe-delivery", "run_id": st.run_id, "project": st.options.project_path,
         "generated_at": datetime.now().isoformat(timespec="seconds"), "mode": st.options.mode,
         "verdict": v, "verdict_text": gate.VERDICT_TEXT[v],
         "checks": {k: {"status": r.status.value, "summary": r.summary,
                        "subchecks": [s.model_dump(mode="json") for s in r.subchecks]} for k, r in results.items()},
         "secrets": [s.model_dump(mode="json") for s in results["security"].secrets],
-        "must_fix": gate.must_fix(results),
+        "must_fix": must,
         "tool_versions": st.tool_versions,
     }
 
 
-def render_report(st: RunState, results: dict[str, CheckResult], run_dir: Path, reports_dir: Path) -> tuple[Path, Path]:
-    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+def render_report(st: RunState, results: dict[str, CheckResult], run_dir: Path, reports_dir: Path,
+                  html_path: Path | None = None) -> tuple[Path, Path]:
+    """Writes the report. Pass html_path to rebuild an existing report in place (same file name)."""
+    stamp = (html_path.stem.replace("svd-report-", "") if html_path else datetime.now().strftime("%Y%m%d-%H%M%S"))
     summary = build_summary(st, results)
     sec, fun, perf = results["security"], results["functional"], results["performance"]
 
@@ -90,6 +134,9 @@ def render_report(st: RunState, results: dict[str, CheckResult], run_dir: Path, 
         Status=Status, generated=datetime.now().strftime("%d %b %Y, %H:%M"),
         duration=_fmt_dur((st.finished_at or time.time()) - st.created_at),
         project_name=Path(st.options.project_path).name,
+        score=summary["score"], overview=summary["overview_summary"],
+        journal=sorted(st.journal, key=lambda e: e["t"]), hms=_hms, runlog_rel=f"svd-report-{stamp}-runlog.txt",
+        server_version=server_version(),
     )
     html_path = reports_dir / f"svd-report-{stamp}.html"
     html_path.write_text(html)

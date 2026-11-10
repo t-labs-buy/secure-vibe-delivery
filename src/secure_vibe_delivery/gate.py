@@ -52,7 +52,7 @@ def must_fix(results: dict[str, CheckResult], limit: int | None = None) -> list[
             if f.category == "code" and f.severity in ("critical", "high"):
                 items.append({"priority": 2, "severity": f.severity, "check": "security", "kind": "Code issue",
                               "title": f.title or f.rule_id, "where": f"{f.file}:{f.line}",
-                              "detail": f.message, "fix": f.fix_hint, "sources": f.sources})
+                              "detail": f.message, "fix": f.fix_hint, "sources": f.sources, "cwe": f.cwe})
         for f in sec.findings:
             if f.category == "library" and f.severity == "critical":
                 items.append({"priority": 3, "severity": "critical", "check": "security", "kind": "Library",
@@ -90,5 +90,10 @@ def must_fix(results: dict[str, CheckResult], limit: int | None = None) -> list[
                 items.append({"priority": 8, "severity": "high", "check": r.name, "kind": "Didn't run",
                               "title": s.label, "where": "", "detail": s.detail,
                               "fix": "A scan that didn't run counts as a failure. Fix the cause and re-run."})
+    from .skills import guide_for
+    for i in items:
+        g = guide_for(i["kind"], i.get("cwe"))
+        if g:
+            i["guide"] = g
     items.sort(key=lambda i: (i["priority"], -SEVERITY_ORDER.get(i["severity"], 0)))
     return items[:limit] if limit else items

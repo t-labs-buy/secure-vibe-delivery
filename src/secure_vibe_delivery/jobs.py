@@ -5,9 +5,12 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
+import platform
 import secrets
 import time
 import traceback
+import webbrowser
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -18,9 +21,24 @@ from .checks.context import CheckContext
 from .detect import detect
 from .doctor import tool_versions
 from .models import RunOptions, RunState, Status
-from .report.render import render_report
+from .proc import JOURNAL, journal_step
+from .report.render import render_report, server_version, write_run_log
 
 RUNNERS = {"security": security.run, "functional": functional.run, "performance": performance.run}
+
+
+def auto_open_enabled() -> bool:
+    """SVD_OPEN_REPORT=0 (or false/no/off) turns automatic opening off on a machine."""
+    return os.environ.get("SVD_OPEN_REPORT", "1").strip().lower() not in ("0", "false", "no", "off")
+
+
+async def open_in_browser(path: str) -> bool:
+    """Open a report in the default browser. Returns False where there's no browser to open
+    (a headless server, a remote container) instead of raising."""
+    try:
+        return bool(await asyncio.to_thread(webbrowser.open, Path(path).as_uri()))
+    except Exception:
+        return False
 
 
 def svd_dir(project: Path) -> Path:
@@ -81,13 +99,27 @@ class RunManager:
     async def _run(self, st: RunState, root: Path, d: Path) -> None:
         st.state = "running"
 
+        JOURNAL.set(st.journal)
+
         def log(msg: str) -> None:
             st.messages.append(f"{time.strftime('%H:%M:%S')} {msg}")
             st.messages[:] = st.messages[-200:]
+            journal_step("step", msg)
             self._save(st)
 
         try:
+            o = st.options
+            journal_step("setup", f"Run {st.run_id} started on {platform.system()} {platform.release()} "
+                                  f"({platform.machine()}), Python {platform.python_version()}, "
+                                  f"secure-vibe-delivery {server_version()}")
+            journal_step("setup", f"Project folder: {root}")
+            journal_step("setup", f"Options: checks={','.join(o.checks)} mode={o.mode} peak_users={o.peak_users} "
+                                  f"p95_target={o.response_time_p95_ms}ms coverage_target={o.coverage_threshold:.0f}% "
+                                  f"target_url={o.target_url or '(none)'} duration={o.duration or 'default'} "
+                                  f"open_report={o.open_report}")
+            journal_step("setup", f"Output folder: {d}")
             st.tool_versions = await tool_versions(root)
+            journal_step("setup", "Tool versions: " + ", ".join(f"{k} {v}" for k, v in st.tool_versions.items()))
             info = detect(root)
             log(f"Project: {'Python ' if info.is_python else ''}{'JavaScript ' if info.is_js else ''}"
                 f"tests={info.test_runner or 'none'}")
@@ -110,10 +142,20 @@ class RunManager:
             st.verdict = gate.verdict(results)
             reports = svd_dir(root) / "reports"
             reports.mkdir(exist_ok=True)
+            st.finished_at = time.time()
+            journal_step("step", f"Verdict {st.verdict}; writing the report")
             html_path, summary_path = render_report(st, results, d, reports)
             st.report_path, st.summary_path = str(html_path), str(summary_path)
+            journal_step("output", f"Report written: {html_path}")
+            journal_step("output", f"Summary data written: {summary_path}")
+            if st.options.open_report and auto_open_enabled():
+                st.report_opened = await open_in_browser(st.report_path)
+                journal_step("output", "Report opened in the browser" if st.report_opened
+                             else "Couldn't open a browser on this machine; report path returned instead")
             st.state = "done"
-            log(f"Verdict {st.verdict}. Report: {html_path}")
+            write_run_log(st, d, reports)
+            log(f"Verdict {st.verdict}. Report: {html_path}"
+                + (" (opened in the browser)" if st.report_opened else ""))
         except Exception as e:  # keep the server alive; surface the error to the client
             st.state, st.error = "error", f"{type(e).__name__}: {e}"
             (d / "error.txt").write_text(traceback.format_exc())
@@ -143,7 +185,10 @@ def status_view(st: RunState) -> dict:
         view["hint"] = f"Load test in progress ({dur}). Poll again in about 30-60 seconds."
     if st.state == "done":
         view.update(verdict=st.verdict, report_path=st.report_path, summary_path=st.summary_path,
-                    next="Call svd_report for the must-fix list.")
+                    report_opened=bool(st.report_opened),
+                    next="Call svd_report for the must-fix list. "
+                         + ("The report is already open in the person's browser."
+                            if st.report_opened else "Give the person report_path so they can open it."))
     if st.error:
         view["error"] = st.error
     return view
@@ -156,9 +201,20 @@ def report_view(st: RunState, top: int = 10) -> dict:
     summary = json.loads(Path(st.summary_path).read_text())
     return {
         "run_id": st.run_id, "verdict": summary["verdict"], "verdict_text": summary["verdict_text"],
+        "score": {k: summary["score"][k] for k in ("score", "grade", "grade_word", "caps")},
+        "score_by_check": {k: v["score"] for k, v in summary["score"]["checks"].items()},
+        "summary_source": summary["overview_summary"]["source"],
+        "automatic_summary": summary["automatic_summary"],
         "report_path": st.report_path, "report_url": Path(st.report_path).as_uri(),
         "summary_path": st.summary_path, "checks": summary["checks"],
         "must_fix_total": len(summary["must_fix"]), "must_fix_top": summary["must_fix"][:top],
-        "instructions": "Open report_path in a browser. Fix items in priority order, then run svd_run again: "
-                        "every fix is followed by a full re-scan.",
+        "report_opened": bool(st.report_opened),
+        "instructions": ("The report is open in the person's browser. " if st.report_opened else
+                         "Give the person report_path to open in a browser (or call svd_report with open=true). ")
+                        + ("" if summary["overview_summary"]["source"] == "ai" else
+                           "Now write the report's Overview summary: read summary_path for the full results, then "
+                           "call svd_write_summary with an overall paragraph and short lists of what went well, where "
+                           "the issues are and what needs immediate attention, in plain language. Never include "
+                           "secret values. ")
+                        + "Fix items in priority order, then run svd_run again: every fix is followed by a full re-scan.",
     }

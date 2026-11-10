@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextvars
 import os
 import re
 import shutil
@@ -11,6 +12,17 @@ from pathlib import Path
 from typing import Optional
 
 from .models import CommandRecord
+
+# The run log: when a pipeline run sets this list, every command any check runs is appended to it,
+# so the report can show exactly what was executed, in order.
+JOURNAL: contextvars.ContextVar[Optional[list]] = contextvars.ContextVar("svd_journal", default=None)
+
+
+def journal_step(kind: str, text: str, **extra) -> None:
+    j = JOURNAL.get()
+    if j is not None:
+        j.append({"t": time.time(), "kind": kind, "text": text, **extra})
+
 
 # Tools that can be run through `uvx` when they aren't on PATH.
 UVX_FALLBACK = {"semgrep": "semgrep", "locust": "locust"}
@@ -52,6 +64,7 @@ class ProcResult:
         return CommandRecord(
             name=name,
             argv=[redact_arg(a) for a in argv],
+            started_at=time.time() - self.duration_s,
             exit_code=self.exit_code,
             duration_s=round(self.duration_s, 2),
             stdout_path=out_p,
@@ -66,6 +79,22 @@ def redact_arg(a: str) -> str:
 
 
 async def run_cmd(
+    argv: list[str],
+    cwd: str | Path,
+    timeout: float = 900,
+    env: Optional[dict[str, str]] = None,
+) -> ProcResult:
+    started_wall = time.time()
+    res = await _run_cmd(argv, cwd, timeout, env)
+    j = JOURNAL.get()
+    if j is not None:
+        j.append({"t": started_wall, "kind": "command", "text": " ".join(redact_arg(a) for a in argv),
+                  "cwd": str(cwd), "exit_code": res.exit_code, "duration_s": round(res.duration_s, 2),
+                  "timed_out": res.timed_out, "error": res.error})
+    return res
+
+
+async def _run_cmd(
     argv: list[str],
     cwd: str | Path,
     timeout: float = 900,

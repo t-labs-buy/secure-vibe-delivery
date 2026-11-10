@@ -147,6 +147,8 @@ async def run(ctx: CheckContext) -> CheckResult:
         lf = ctx.run_dir / "locustfile.generated.py"
         lf.write_text(src)
         res.data["locustfile_source"] = f"generated ({how})"
+        from ..proc import journal_step
+        journal_step("decision", f"No locustfile in the project; generated one from {how}: {lf}")
     res.data["locustfile"] = str(lf)
 
     prefix = ctx.run_dir / "locust"

@@ -4,7 +4,7 @@ from __future__ import annotations
 import time
 
 from ..models import SEVERITY_ORDER, CheckResult, Finding, SecretFinding, Status, SubCheck
-from ..proc import resolve_tool, run_cmd
+from ..proc import journal_step, resolve_tool, run_cmd
 from . import packages, semgrep, snyk
 from .context import CheckContext
 
@@ -53,6 +53,8 @@ async def run_semgrep(argv: list[str], root, timeout: float):
     """Run Semgrep; if this version rejects the project-root flags, run again without them."""
     p = await run_cmd(argv, root, timeout=timeout)
     if p.exit_code not in (0, 1) and semgrep.rejected_flag(p.stderr):
+        journal_step("decision", "This Semgrep version doesn't accept --project-root/--semgrepignore-v2; "
+                                 "retrying without them")
         argv = semgrep.without_project_root(argv)
         p = await run_cmd(argv, root, timeout=timeout)
     return p, argv
@@ -101,7 +103,10 @@ async def run(ctx: CheckContext) -> CheckResult:
         err, code, code_secrets = snyk.parse_code(p.stdout, root)
         if err or p.exit_code not in (0, 1):
             msg = (err or p.stderr.strip() or f"exit code {p.exit_code}")[:400]
-            not_run["snyk-code"] = msg + snyk.org_hint(msg)
+            from ..installer import SNYK_CODE_HOWTO, SNYK_CODE_OFF
+            hint = snyk.org_hint(msg) or (" Snyk Code is switched off for your Snyk organisation. " + SNYK_CODE_HOWTO
+                                          if SNYK_CODE_OFF.search(msg) else "")
+            not_run["snyk-code"] = msg + hint
         else:
             code_findings += code
             secrets += code_secrets
@@ -141,6 +146,7 @@ async def run(ctx: CheckContext) -> CheckResult:
             secrets_scanner = "snyk-secrets"
         else:
             res.data["snyk_secrets_unavailable"] = reason
+            journal_step("decision", f"Snyk Secrets unavailable ({reason[:160]}); using Semgrep's secret rules instead")
     if secrets_scanner is None:
         if semgrep_bin:
             ctx.log("Secrets fallback: Semgrep p/secrets + svd-secrets rules")

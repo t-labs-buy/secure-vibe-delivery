@@ -147,6 +147,34 @@ td.fixcol{min-width:26ch}
 .chart .row-hit:hover~.bar,.chart g.r:hover .bar{opacity:.85}
 .legend i.sw{display:inline-block;width:.7rem;height:.7rem;border-radius:2px}
 .tablelink{font-size:12.5px}
+.ov-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:1.1rem;margin-top:1.25rem}
+@media (min-width:1100px){.ov-grid{grid-template-columns:minmax(18rem,26rem) minmax(0,1fr)}}
+.scorecard,.sumcard{border:1px solid var(--border);border-radius:12px;padding:1.2rem 1.3rem;background:var(--card)}
+.scorecard h4,.sumcard h4{margin:0 0 .2rem;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.score-hero{display:flex;align-items:baseline;gap:.6rem;margin:.3rem 0 .2rem}
+.score-hero .num{font-size:3.4rem;font-weight:800;line-height:1}
+.score-hero .of{color:var(--muted);font-size:1rem}
+.grade{display:inline-flex;align-items:center;gap:.4rem;font-weight:700;font-size:13px;padding:.15rem .6rem;border-radius:999px;border:1px solid var(--border);margin-left:auto}
+.grade i{font-style:normal;width:.6rem;height:.6rem;border-radius:2px;display:inline-block}
+.meter{height:.6rem;border-radius:999px;background:var(--code-bg);overflow:hidden;margin:.55rem 0 .2rem}
+.meter b{display:block;height:100%;border-radius:999px}
+.band-good{background:var(--good)}.band-warn{background:var(--warning)}.band-bad{background:var(--critical)}
+.sc-rows{margin-top:1rem;display:grid;gap:.65rem}
+.sc-row .top{display:flex;justify-content:space-between;font-size:13.5px}
+.sc-row .top span{color:var(--muted)}
+.sc-row .meter{height:.45rem;margin:.3rem 0 0}
+.caps{font-size:12.5px;color:var(--muted);margin:.8rem 0 0}
+.sumcard .src{font-size:12px;color:var(--muted);margin:0 0 .6rem}
+.sumcard .overall{font-size:15px;margin:.2rem 0 1rem}
+.sumcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));gap:1rem}
+.sumcols h5{margin:0 0 .4rem;font-size:13px;display:flex;align-items:center;gap:.4rem}
+.sumcols ul{margin:0;padding-left:1.1rem;font-size:13.5px}
+.sumcols li{margin:.25rem 0}
+.sumcols .ok h5 i{color:var(--good)}.sumcols .bad h5 i{color:var(--critical)}.sumcols .first h5 i{color:var(--serious)}
+.sumcols h5 i{font-style:normal}
+.jt td.k{white-space:nowrap}
+.jt .kind{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.jt code{white-space:pre-wrap;word-break:break-all}
 .callout{background:var(--accent-soft);padding:.85rem 1.15rem;border-radius:10px;margin:1rem 0;font-size:14px}
 .callout.warn{background:var(--warn-bg)}
 .callout.bad{background:var(--bad-bg)}
@@ -229,6 +257,47 @@ details summary{cursor:pointer;font-weight:600}
     <div class="ico" aria-hidden="true">{{ {"NO-GO":"✕","PROVISIONAL":"!","GO":"✓"}[verdict] }}</div>
     <div><div class="big">{{ verdict }}</div><p>{{ verdict_text }}</p></div>
   </div>
+  {% macro band(v) -%}{{ "band-good" if v >= 80 else "band-warn" if v >= 60 else "band-bad" }}{%- endmacro %}
+  <div class="ov-grid">
+    <div class="scorecard card-lift">
+      <h4>Secure-health score</h4>
+      <div class="score-hero"><span class="num">{{ score.score }}</span><span class="of">/ 100</span>
+        <span class="grade"><i class="{{ band(score.score) }}"></i>Grade {{ score.grade }} · {{ score.grade_word }}</span></div>
+      <div class="meter" role="img" aria-label="Score {{ score.score }} out of 100"><b class="{{ band(score.score) }}" style="width:{{ score.score }}%"></b></div>
+      <div class="sc-rows">
+        {% for name, label in [("security","Security"),("functional","Functional"),("performance","Performance")] %}
+        {% set c = score.checks[name] %}
+        <div class="sc-row"><div class="top">{{ label }}<span>{{ c.points }} / {{ c.weight }} points</span></div>
+          <div class="meter" role="img" aria-label="{{ label }} {{ c.score }} percent"><b class="{{ band(c.score) }}" style="width:{{ c.score }}%"></b></div></div>
+        {% endfor %}
+      </div>
+      {% for cap in score.caps %}<p class="caps">Capped: {{ cap }}.</p>{% endfor %}
+      {% if score.note %}<p class="caps">{{ score.note }}</p>{% endif %}
+      <details><summary>How the score is worked out</summary>
+        <p class="muted" style="font-size:13px">{{ score.method }} An exposed secret or a critical issue holds the score at 59 or below; a check
+        that didn't run holds it at 79 or below. Grades: A 90+, B 80+, C 70+, D 60+, F below 60.</p>
+        <div class="tablewrap"><table><thead><tr><th>Part</th><th class="num">Points</th><th>Why</th></tr></thead><tbody>
+          {% for name in ["security","functional","performance"] %}{% for comp in score.checks[name].components %}
+          <tr><td>{{ name|title }} · {{ comp.label }}</td><td class="num">{{ comp.points }} / {{ comp.max_points }}</td><td>{{ comp.detail }}</td></tr>
+          {% endfor %}{% endfor %}
+          <tr><td><b>Total before caps</b></td><td class="num"><b>{{ score.raw_score }} / 100</b></td><td></td></tr>
+        </tbody></table></div>
+      </details>
+    </div>
+    <div class="sumcard card-lift">
+      <h4>Summary</h4>
+      <p class="src">{% if overview.source == "ai" %}Written by your AI assistant from this run's results.{% else %}Automatic summary from the results. For a written one, ask your assistant to "write the summary for this report".{% endif %}</p>
+      <p class="overall">{{ overview.overall }}</p>
+      <div class="sumcols">
+        <div class="ok"><h5><i aria-hidden="true">✓</i>What went well</h5>
+          {% if overview.went_well %}<ul>{% for x in overview.went_well %}<li>{{ x }}</li>{% endfor %}</ul>{% else %}<p class="empty">Nothing passed yet.</p>{% endif %}</div>
+        <div class="bad"><h5><i aria-hidden="true">✕</i>Where the issues are</h5>
+          {% if overview.needs_attention %}<ul>{% for x in overview.needs_attention %}<li>{{ x }}</li>{% endfor %}</ul>{% else %}<p class="empty">No issues found.</p>{% endif %}</div>
+        <div class="first"><h5><i aria-hidden="true">→</i>Needs immediate attention</h5>
+          {% if overview.fix_first %}<ol>{% for x in overview.fix_first %}<li>{{ x }}</li>{% endfor %}</ol>{% else %}<p class="empty">Nothing urgent.</p>{% endif %}</div>
+      </div>
+    </div>
+  </div>
   <div class="grid3">
     {% for name, label, question in [("security","Security","Is it safe?"),("functional","Functional","Does it work?"),("performance","Performance","Can it cope?")] %}
     {% set r = results[name] %}
@@ -280,7 +349,7 @@ details summary{cursor:pointer;font-weight:600}
       <td class="issuecol"><b>{{ i.title }}</b>{% if i.where %}<span class="sub where">{{ i.where }}</span>{% endif %}
         {% if i.detail %}<span class="sub">{{ i.detail|truncate(260) }}</span>{% endif %}
         {% if i.sources %}<span class="sub">Reported by {{ i.sources|join(", ") }}</span>{% endif %}</td>
-      <td class="fixcol">{{ i.fix or "-" }}</td>
+      <td class="fixcol">{{ i.fix or "-" }}{% if i.guide %}<span class="sub">Fixing guide for your assistant: <code>{{ i.guide }}</code></span>{% endif %}</td>
     </tr>
     {% endfor %}
     </tbody></table></div>
@@ -492,17 +561,22 @@ details summary{cursor:pointer;font-weight:600}
 
 <section class="card panel" id="appendix" role="tabpanel" aria-labelledby="tab-appendix">
   <h2>Appendix: what ran</h2>
-  <h3>Commands</h3>
-  <div class="tablewrap"><table><thead><tr><th>Check</th><th>Command</th><th class="num">Exit</th><th class="num">Time</th></tr></thead><tbody>
-    {% for name, c in commands %}<tr><td>{{ name }}</td><td><code>{{ c.argv|join(" ")|truncate(400) }}</code>{% if c.error %}<span class="sub">{{ c.error }}</span>{% endif %}</td>
-      <td class="num">{{ c.exit_code if c.exit_code is not none else "-" }}</td><td class="num">{{ c.duration_s }}s</td></tr>{% endfor %}
+  <p class="lede">Every step and every exact command, in the order they happened, so you can trace what was done and repeat
+  any command yourself. Download the same log as a <a href="{{ runlog_rel }}">text file</a>.</p>
+  <h3>Run log ({{ journal|length }} entries)</h3>
+  <div class="filters" data-for="journalTable"><input type="search" placeholder="Search the log: a command, a tool, a file" aria-label="Search the run log"></div>
+  <div class="tablewrap"><table class="jt" id="journalTable"><thead><tr><th class="num">#</th><th>Time</th><th>Type</th><th>What happened</th><th class="num">Exit</th><th class="num">Took</th></tr></thead><tbody>
+    {% for e in journal %}<tr>
+      <td class="num">{{ loop.index }}</td><td class="k">{{ hms(e.t) }}</td><td class="k"><span class="kind">{{ e.kind }}</span></td>
+      <td>{% if e.kind == "command" %}<code>{{ e.text }}</code><span class="sub">in {{ e.cwd }}{% if e.timed_out %} · timed out{% endif %}{% if e.error %} · {{ e.error }}{% endif %}</span>{% else %}{{ e.text }}{% endif %}</td>
+      <td class="num">{{ e.exit_code if e.kind == "command" and e.exit_code is not none else ("-" if e.kind == "command" else "") }}</td>
+      <td class="num">{{ (e.duration_s ~ "s") if e.kind == "command" else "" }}</td></tr>{% endfor %}
   </tbody></table></div>
   <h3>Tool versions</h3>
-  <p>{% for k, v in st.tool_versions.items() %}<code>{{ k }} {{ v }}</code> {% endfor %}</p>
+  <p>{% for k, v in st.tool_versions.items() %}<code>{{ k }} {{ v }}</code> {% endfor %}<code>secure-vibe-delivery {{ server_version }}</code></p>
   <h3>Settings</h3>
   <p class="muted">peak users {{ opts.peak_users }} · p95 target {{ opts.response_time_p95_ms }} ms · coverage target {{ opts.coverage_threshold|int }}% ·
-  checks {{ opts.checks|join(", ") }}</p>
-  <details><summary>Run log</summary><pre>{{ st.messages|join("\n") }}</pre></details>
+  checks {{ opts.checks|join(", ") }} · mode {{ opts.mode }}</p>
   <p class="muted">Raw tool output: <code>{{ opts.project_path }}/.svd/runs/{{ st.run_id }}/raw/</code>. Secret-scanner output is stored masked.
   Generated by secure-vibe-delivery, following the Secure Vibe Delivery roadmap (T-Labs Buy, Oct 2026).</p>
 </section>

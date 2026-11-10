@@ -23,15 +23,19 @@ troubleshooting. Tip: Ctrl-click (⌘-click on a Mac) a link to open it in a new
 
 ## First run
 
-Ask your assistant **"Set up secure-vibe-delivery for me"**. It downloads Snyk if needed and opens a
-free Snyk sign-up (and optionally Semgrep's) in your browser; you sign in there, never in the chat.
+Ask your assistant **"Set up secure-vibe-delivery for me"**. It walks you through a short checklist one
+step at a time, asking before each step: get the Snyk scanner (it can download it), create a free Snyk
+account or sign in in your browser, turn on **Enable Snyk Code** in your Snyk settings (Settings →
+Snyk Code → toggle on → **Save changes**), and an optional Semgrep sign-in. You never type a password
+into the chat.
 Then:
 
 > Run secure vibe delivery on this project against http://127.0.0.1:8000 with 100 peak users
 
 Use a test environment, never production. Without an address, performance shows as "didn't run".
 By default the load test is a 2-minute quick run; say "use gate mode" for the 15-minute go-live
-run. The report lands in the project's `.svd/reports/` folder; open the `.html` file in a browser.
+run. When the check finishes, the HTML report opens in your browser automatically (set
+`SVD_OPEN_REPORT=0` to turn that off); it's also saved in the project's `.svd/reports/` folder.
 Secret values in it are always masked.
 
 **What the project needs:** for Python, a virtual environment with the project's packages, `pytest`,
@@ -42,12 +46,26 @@ alongside the bundled ones.
 
 | Tool | Does |
 |---|---|
-| `svd_setup` | One-time setup: fetch Snyk, start the browser sign-ins |
+| `svd_setup` | Guided one-time setup, one step at a time |
 | `svd_doctor` | Check that everything is installed and signed in |
 | `svd_run` | Start a check in the background; returns a `run_id` |
 | `svd_status` | Progress of a run |
 | `svd_report` | Verdict, report path and top must-fix items |
 | `svd_generate_locustfile` | Starter load-test script from the project's API |
+| `svd_write_summary` | The assistant adds its written summary to the report's Overview |
+| `svd_skills` / `svd_skill` | List and read the fixing skills (below) |
+
+## Skills: the know-how for fixing
+
+Besides tools, the server serves five [Agent Skills](https://senthilcaesar.github.io/blogs/#/posts/skills-over-mcp)
+as MCP resources at `skill://<skill>/<file>`, following the Skills over MCP convention (SEP-2640):
+`fix-security-findings`, `rotate-exposed-secrets`, `write-wrong-case-tests`, `write-locustfiles` and
+`write-svd-rules`. Each must-fix item in a report links to the one guide that explains how to fix it,
+so the assistant reads only what the fix needs. They're instructions only (no scripts), and every
+file is listed with its SHA-256 digest. Updating the server updates the skills for everyone.
+
+The report's Overview also shows a secure-health score (0–100, graded A–F) and a summary your
+assistant writes; the Appendix holds a full run log of every step and command.
 
 Useful `svd_run` options: `target_url`, `mode` (`quick`/`gate`), `peak_users` (default 100),
 `response_time_p95_ms` (default 1000), `checks`, `coverage_threshold` (default 70). Optional
@@ -57,7 +75,7 @@ committed files: this repository is public.
 
 ## Update or remove
 
-Releases are git tags; change `@v0.1.3` to a newer tag to update. To remove the server from Claude
+Releases are git tags; change `@v0.1.4` to a newer tag to update. To remove the server from Claude
 Code: `claude mcp remove secure-vibe-delivery -s user`. For Copilot, delete its `mcp.json` entry.
 
 ## Development

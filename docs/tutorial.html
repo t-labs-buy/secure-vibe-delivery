@@ -1745,7 +1745,7 @@
         </p>
         <div class="meta-strip">
           <span><strong>Audience</strong> — everyone: developers, testers, delivery leads, managers</span>
-          <span><strong>Version</strong> — v0.1.3</span>
+          <span><strong>Version</strong> — v0.1.4</span>
           <span><strong>Install steps only</strong> — <a href="install.html">install guide</a></span>
           <span><strong>Repo</strong> — <a href="https://github.com/t-labs-buy/secure-vibe-delivery">t-labs-buy/secure-vibe-delivery</a></span>
         </div>
@@ -2065,17 +2065,27 @@ npm install -g @anthropic-ai/claude-code</pre>
             <div class="step-h"><span class="n">2</span>Add the server to Claude Code</div>
             <pre class="language-bash">
 claude mcp add --scope user secure-vibe-delivery -- \
-  uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.3 secure-vibe-delivery</pre>
+  uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.4 secure-vibe-delivery</pre>
             <p>Check it worked. You should see <code>Status: ✔ Connected</code>; the first check takes a few seconds while it downloads.</p>
             <pre class="language-bash">claude mcp get secure-vibe-delivery</pre>
             <div class="step-h"><span class="n">3</span>Do the one-time sign-up, with your assistant</div>
             <p>Open Claude Code (start a new conversation) and type:</p>
             <pre>Set up secure-vibe-delivery for me</pre>
             <p>
-              Your assistant downloads Snyk if you don't have it, then opens a browser window for a
-              free Snyk account (and, if you like, a free Semgrep account). Sign up or log in there;
-              your assistant tells you when you're ready. You never type a password into the chat.
+              Your assistant walks you through four short steps, one at a time, and asks before each
+              one: getting the Snyk scanner (it can download it for you), creating your free Snyk
+              account or signing in (it opens the page only when you say you're ready, and tells you
+              what to do there), turning on Snyk Code, and an optional Semgrep sign-in. You sign in
+              only on those websites; you never type a password into the chat.
             </p>
+            <div class="warn">
+              <span class="label">Don't skip: turn on Snyk Code</span>
+              <p>
+                New Snyk accounts have Snyk Code switched off, and without it the check of your own
+                code can't run, so every report says NO-GO. After signing in, go to <a href="https://app.snyk.io">app.snyk.io</a>, open <strong>Settings</strong> (bottom of the left-hand menu), choose <strong>Snyk Code</strong>, switch on the <strong>Enable Snyk Code</strong> toggle, and click <strong>Save changes</strong>.
+                Your assistant reminds you and checks it worked.
+              </p>
+            </div>
             <div class="win">
               <span class="label">What you have now</span>
               <p>The server installed for all your projects, in Claude Code's terminal and its VS Code extension, and signed in.</p>
@@ -2103,16 +2113,17 @@ winget install --id Git.Git -e</pre>
             <pre class="language-bash">npm install -g @anthropic-ai/claude-code</pre>
             <div class="step-h"><span class="n">2</span>Add the server to Claude Code</div>
             <p>Paste this as one line:</p>
-            <pre class="language-bash">claude mcp add --scope user secure-vibe-delivery -- uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.3 secure-vibe-delivery</pre>
+            <pre class="language-bash">claude mcp add --scope user secure-vibe-delivery -- uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.4 secure-vibe-delivery</pre>
             <p>Check it worked:</p>
             <pre class="language-bash">claude mcp get secure-vibe-delivery</pre>
             <div class="step-h"><span class="n">3</span>Do the one-time sign-up, with your assistant</div>
             <p>Open Claude Code (start a new conversation) and type:</p>
             <pre>Set up secure-vibe-delivery for me</pre>
             <p>
-              As on a Mac, your assistant downloads Snyk if needed and opens the Snyk sign-up in your
-              browser. For Semgrep, Windows needs a terminal window, so your assistant will ask you
-              to run <code>uvx semgrep login</code> in PowerShell yourself (optional).
+              As on a Mac, your assistant walks you through the steps one at a time and asks before
+              each one, including turning on <strong>Enable Snyk Code</strong> in your Snyk settings
+              and clicking <strong>Save changes</strong>. For the optional Semgrep step, Windows needs a terminal window, so your
+              assistant will ask you to run <code>uvx semgrep login</code> in PowerShell yourself.
             </p>
             <div class="warn">
               <span class="label">If PowerShell says scripts are disabled</span>
@@ -2163,7 +2174,7 @@ winget install --id Git.Git -e</pre>
     "secure-vibe-delivery": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.3", "secure-vibe-delivery"]
+      "args": ["--from", "git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.4", "secure-vibe-delivery"]
     }
   }
 }</pre>
@@ -2207,7 +2218,7 @@ winget install --id Git.Git -e</pre>
               <li><strong>Doctor check</strong>: it confirms Snyk, Semgrep and your test tools are ready. If you haven't done the one-time sign-up, it offers it first instead of running a check that can only fail.</li>
               <li><strong>The run starts in the background</strong>, in order: security, then functional, then performance.</li>
               <li><strong>Progress updates</strong> appear in the chat while it works. A quick run takes a few minutes; a gate run adds the 15-minute load test.</li>
-              <li><strong>The result</strong>: the verdict, the top items to fix, and the path to the HTML report.</li>
+              <li><strong>The result</strong>: the verdict and the top items to fix in the chat, and the full report opens in your browser automatically.</li>
             </ol>
             <h3>Quick or gate?</h3>
             <div class="choice">
@@ -2224,7 +2235,7 @@ winget install --id Git.Git -e</pre>
             </div>
             <div class="win">
               <span class="label">What you have now</span>
-              <p>A report in the project's <code>.svd/reports/</code> folder. Open the <code>.html</code> file in any browser.</p>
+              <p>The report open in your browser. It's also saved in the project's <code>.svd/reports/</code> folder; ask "open the report again" to reopen it.</p>
             </div>
           </section>
 
@@ -2240,17 +2251,42 @@ winget install --id Git.Git -e</pre>
               <table>
                 <thead><tr><th>Tab</th><th>What you'll find</th></tr></thead>
                 <tbody>
-                  <tr><td>Overview</td><td>The verdict, a card per check (click one to jump to it), and a chart of security findings by severity.</td></tr>
+                  <tr><td>Overview</td><td>The verdict; a <strong>secure-health score</strong> out of 100 with a grade (A to F); a <strong>summary</strong> written by your AI assistant of what went well, where the issues are and what needs immediate attention; a card per check (click one to jump to it); and a chart of security findings by severity.</td></tr>
                   <tr><td>Must fix</td><td>Everything to fix, in the order to fix it, with how to fix each one. Filter by type or search.</td></tr>
                   <tr><td>Secrets</td><td>Any passwords or keys found, with their values masked (for example <code>AKIA********MPLE</code>).</td></tr>
                   <tr><td>Security</td><td>Which scanners ran, every code issue, every vulnerable library and its fix.</td></tr>
                   <tr><td>Functional</td><td>Test results, coverage against the 70% line, failing tests, wrong-case tests.</td></tr>
                   <tr><td>Performance</td><td>Speed and error charts over the run, results per page or API, and Locust's own report.</td></tr>
                   <tr><td>Go-live checklist</td><td>Every pass mark ticked or crossed, plus the manual items for the Delivery Lead.</td></tr>
-                  <tr><td>Appendix</td><td>The exact commands that ran, tool versions and settings, for anyone who wants to check.</td></tr>
+                  <tr><td>Appendix</td><td>The full <strong>run log</strong>: every step and every exact command, in order, with where it ran, how long it took and whether it succeeded. You can search it, or download it as a text file to trace what was done.</td></tr>
                 </tbody>
               </table>
             </div>
+            <h3>The secure-health score</h3>
+            <p>
+              One number for how the project did across everything that ran. Security counts for 50 points,
+              functional for 25 and performance for 25. Each part earns points in proportion to how well it did:
+              one medium issue costs far less than a critical one. A check that didn't run earns nothing. Two
+              caps keep it honest: an exposed secret or a critical issue holds the score at 59 or below (grade F),
+              and a check that didn't run holds it at 79 or below. Open "How the score is worked out" on the
+              Overview tab to see every point gained and lost.
+            </p>
+            <div class="tablewrap">
+              <table>
+                <thead><tr><th>Grade</th><th>Score</th><th>In plain words</th></tr></thead>
+                <tbody>
+                  <tr><td>A</td><td>90–100</td><td>Excellent: healthy across the board.</td></tr>
+                  <tr><td>B</td><td>80–89</td><td>Good: a few things to tidy up.</td></tr>
+                  <tr><td>C</td><td>70–79</td><td>Fair: real issues to fix before go-live.</td></tr>
+                  <tr><td>D</td><td>60–69</td><td>Poor: significant problems.</td></tr>
+                  <tr><td>F</td><td>Below 60</td><td>Failing: serious or urgent problems, such as a leaked key.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              The score shows overall health; the <strong>verdict</strong> decides go-live. A project can score well
+              and still be NO-GO if a single must-pass check fails.
+            </p>
             <div class="why">
               <span class="label">Getting around</span>
               <p>
@@ -2275,8 +2311,28 @@ winget install --id Git.Git -e</pre>
             </ol>
             <p>
               Your AI assistant can help: ask it to "fix the top items in the secure vibe
-              delivery report". Then <strong>run the check again</strong>. Every fix is followed
+              delivery report". It doesn't have to guess how: the server comes with five
+              built-in <strong>fixing guides</strong> (called skills), and every item in the
+              Must fix list points to the one that explains how to fix it. Then
+              <strong>run the check again</strong>. Every fix is followed
               by a full re-scan, because a fix can break something else.
+            </p>
+            <h3>The built-in fixing guides</h3>
+            <div class="tablewrap">
+              <table>
+                <thead><tr><th>Guide</th><th>Helps your assistant</th></tr></thead>
+                <tbody>
+                  <tr><td>Fix security findings</td><td>Fix each kind of issue the right way (SQL injection, running text as code, switched-off HTTPS checks, unsafe web requests, risky libraries), and draft an exception when a fix has to wait.</td></tr>
+                  <tr><td>Rotate exposed secrets</td><td>Walk you through replacing and cancelling each leaked key at its provider (AWS, GitHub, Slack, Stripe, Google, AI services), then load secrets safely.</td></tr>
+                  <tr><td>Write wrong-case tests</td><td>Write tests proving logged-out visitors, other users and lower roles are refused, and raise coverage where it matters.</td></tr>
+                  <tr><td>Write load tests</td><td>Write a realistic Locust script, estimate the expected peak, and work out why the app is slow.</td></tr>
+                  <tr><td>Write team rules</td><td>Add and test the team's own Semgrep rules for mistakes AI tools keep making.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              The guides come from the server itself, so when the team improves one, everyone
+              gets the new version. They contain instructions only, never programs to run.
             </p>
             <h3>When something can't be fixed yet</h3>
             <p>
@@ -2338,7 +2394,7 @@ winget install --id Git.Git -e</pre>
             </div>
             <div class="qa">
               <p class="q">Do I have to install Snyk and Semgrep myself?</p>
-              <p>No. Install <code>uv</code>, add the server, and ask your assistant to "set up secure-vibe-delivery". It downloads Snyk if needed (into its own folder, nothing system-wide), runs Semgrep through <code>uv</code>, and walks you through the free sign-ups in your browser.</p>
+              <p>No. Install <code>uv</code>, add the server, and ask your assistant to "set up secure-vibe-delivery". It walks you through a short checklist one step at a time, asking before each step: it can download Snyk for you (into its own folder, nothing system-wide), runs Semgrep through <code>uv</code>, and guides you through the free sign-ups in your browser.</p>
             </div>
             <div class="qa">
               <p class="q">Do I need to be a security expert?</p>
@@ -2346,7 +2402,7 @@ winget install --id Git.Git -e</pre>
             </div>
             <div class="qa">
               <p class="q">Why does my report say NO-GO when nothing seems wrong?</p>
-              <p>Usually a check didn't run: Snyk not logged in, no test address, or no tests. Open the Go-live checklist tab and look for "Didn't run" with its reason.</p>
+              <p>Usually a check didn't run: Snyk not logged in, Snyk Code not switched on in your Snyk settings, no test address, or no tests. Open the Go-live checklist tab and look for "Didn't run" with its reason.</p>
             </div>
             <div class="qa">
               <p class="q">Which languages does it support?</p>

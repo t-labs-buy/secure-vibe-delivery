@@ -122,6 +122,8 @@ def generate(root: Path, target_url: Optional[str], openapi_file: Optional[Path]
                 if r.status_code == 200 and "paths" in r.text[:200000]:
                     spec = r.json()
                     source = f"OpenAPI spec at {candidate}"
+                    from ..proc import journal_step
+                    journal_step("network", f"Fetched the OpenAPI spec from {target_url.rstrip('/')}{candidate}")
                     break
             except (httpx.HTTPError, ValueError):
                 continue
