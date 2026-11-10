@@ -35,8 +35,9 @@ Then:
 Use a test environment, never production. Without an address, performance shows as "didn't run".
 By default the load test is a 2-minute quick run; say "use gate mode" for the 15-minute go-live
 run. When the check finishes, the HTML report opens in your browser automatically (set
-`SVD_OPEN_REPORT=0` to turn that off); it's also saved in the project's `.svd/reports/` folder.
-Secret values in it are always masked.
+`SVD_OPEN_REPORT=0` to turn that off); it's also saved in the project's `.svd/reports/` folder,
+with a PDF copy beside it when Chrome or Edge is installed (the report's **Download PDF** button), or
+**Print / Save as PDF** from the report in any browser. Secret values in both are always masked.
 
 **What the project needs:** for Python, a virtual environment with the project's packages, `pytest`,
 `pytest-cov` and `pip`; for JavaScript, `jest` installed. Custom Semgrep rules in `svd-rules/` run
@@ -72,12 +73,13 @@ command in order, with a Copy button and a hover note on what each one checks.
 Useful `svd_run` options: `target_url`, `mode` (`quick`/`gate`), `peak_users` (default 100),
 `response_time_p95_ms` (default 1000), `checks`, `coverage_threshold` (default 70). Optional
 environment settings: `SVD_SNYK_ORG` (a Snyk organisation ID), `SNYK_TOKEN` / `SEMGREP_APP_TOKEN`
-(instead of browser sign-in), `SVD_CACHE_DIR` (where the downloaded Snyk lives). Keep tokens out of
+(instead of browser sign-in), `SVD_CACHE_DIR` (where the downloaded Snyk lives), `SVD_PDF=0` (no PDF copy) or `SVD_PDF_BROWSER`
+(which browser prints it). Keep tokens out of
 committed files: this repository is public.
 
 ## Update or remove
 
-Releases are git tags; change `@v0.1.9` to a newer tag to update. To remove the server from Claude
+Releases are git tags; change `@v0.1.10` to a newer tag to update. To remove the server from Claude
 Code: `claude mcp remove secure-vibe-delivery -s user`. For Copilot, delete its `mcp.json` entry.
 
 ## Development

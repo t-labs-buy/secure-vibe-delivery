@@ -95,7 +95,7 @@ def build_summary(st: RunState, results: dict[str, CheckResult]) -> dict:
 
 
 def render_report(st: RunState, results: dict[str, CheckResult], run_dir: Path, reports_dir: Path,
-                  html_path: Path | None = None) -> tuple[Path, Path]:
+                  html_path: Path | None = None, pdf: bool = False) -> tuple[Path, Path]:
     """Writes the report. Pass html_path to rebuild an existing report in place (same file name)."""
     stamp = (html_path.stem.replace("svd-report-", "") if html_path else datetime.now().strftime("%Y%m%d-%H%M%S"))
     summary = build_summary(st, results)
@@ -117,14 +117,32 @@ def render_report(st: RunState, results: dict[str, CheckResult], run_dir: Path, 
     lib_counts = {s: sum(1 for f in libs if f.severity == s) for s in ("critical", "high", "medium", "low")}
 
     not_run = sec.data.get("not_run", {})
+
+    def where_list(findings, kind):
+        """Per severity: the exact places a chart segment stands for (capped so the tooltip stays readable)."""
+        out = {}
+        for sev in ("critical", "high", "medium", "low"):
+            fs = [f for f in findings if f.severity == sev]
+            items = []
+            for f in fs[:12]:
+                if kind == "library":
+                    where = f"{f.package}@{f.version}" if f.version else f.package
+                else:
+                    where = f"{f.file}:{f.line}" if f.line else f.file
+                items.append({"where": where, "title": (f.title or f.rule_id or "")[:120]})
+            out[sev] = {"items": items, "more": max(0, len(fs) - len(items))}
+        return out
+
     report_data = {
         "series": perf.data.get("series", []),
         "target": perf.data.get("p95_target_ms"),
         "severity": [
-            {"label": "Our code", "counts": sev_counts,
+            {"label": "Our code", "counts": sev_counts, "where": where_list(code, "code"),
              "notRun": "snyk-code" in not_run and "semgrep" in not_run},
-            {"label": "Libraries", "counts": lib_counts, "notRun": "snyk-open-source" in not_run},
-        ] + ([{"label": "Infrastructure", "counts": iac_counts, "notRun": "snyk-iac" in not_run}]
+            {"label": "Libraries", "counts": lib_counts, "where": where_list(libs, "library"),
+             "notRun": "snyk-open-source" in not_run},
+        ] + ([{"label": "Infrastructure", "counts": iac_counts, "where": where_list(iac_issues, "iac"),
+               "notRun": "snyk-iac" in not_run}]
              if sec.data.get("iac", {}).get("files") else []),
         "coverage": [{"label": f["file"], "value": f["pct"]} for f in fun.data.get("coverage_files", [])[:10]],
         "coverageTarget": fun.data.get("coverage_threshold"),
@@ -143,7 +161,7 @@ def render_report(st: RunState, results: dict[str, CheckResult], run_dir: Path, 
         project_name=Path(st.options.project_path).name,
         score=summary["score"], overview=summary["overview_summary"],
         journal=sorted(st.journal, key=lambda e: e["t"]), hms=_hms, runlog_rel=f"svd-report-{stamp}-runlog.txt",
-        server_version=server_version(), history=command_history(st.journal), timeline=command_timeline(st, results),
+        server_version=server_version(), pdf_rel=(f"svd-report-{stamp}.pdf" if pdf else ""), history=command_history(st.journal), timeline=command_timeline(st, results),
         hero=overview_hero(st, results, summary["verdict"], summary["score"], summary["must_fix"]),
     )
     html_path = reports_dir / f"svd-report-{stamp}.html"

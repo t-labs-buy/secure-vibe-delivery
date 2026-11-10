@@ -54,14 +54,12 @@ a{color:var(--accent)}
 code,pre{font-family:inherit;background:var(--code-bg);color:var(--code-ink);border-radius:4px}
 code{padding:.05em .35em;font-size:.92em}
 pre{padding:.85rem 1.1rem;overflow:auto;font-size:13px;white-space:pre-wrap;word-break:break-word;max-height:22rem}
-header.mast{background:var(--head-bg);border-bottom:1px solid var(--border);padding:2rem 0 1.5rem}
 .wrap{margin:0;padding:0 clamp(16px,2.5vw,44px)}
 .eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:700}
 h1{font-size:clamp(1.4rem,3vw,2rem);margin:.3rem 0 .4rem;line-height:1.25}
 h2{font-size:1.3rem;margin:0 0 .35rem}
 h3{font-size:1.05rem;margin:2rem 0 .65rem}
 .meta{color:var(--muted);font-size:12.5px;display:flex;flex-wrap:wrap;gap:.25rem 1.25rem}
-header.mast .top{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem}
 .tabshell{background:var(--shell);border:1px solid var(--border);border-radius:18px;padding:.5rem clamp(1rem,2vw,2rem) 2rem;margin:1.5rem 0}
 .tabbar{display:flex;gap:.25rem;overflow-x:auto;border-bottom:2px solid var(--border);margin:0 0 1.75rem;scrollbar-width:thin;
   position:sticky;top:0;z-index:5;background:var(--shell);padding-top:.6rem}
@@ -276,6 +274,11 @@ details.cv-files pre{margin:.5rem 0 0;max-height:14rem}
 .hero-meta{display:flex;flex-wrap:wrap;gap:.35rem 1.4rem;font-size:13px;color:var(--muted)}
 .hero-meta b{color:var(--ink)}.hero-meta code{background:none;padding:0}
 .hero-meta .br{flex-basis:100%}
+.hero-meta .hm-path{color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+.tb-actions{margin:0 0 .35rem auto;flex:none;align-self:center;display:flex;gap:.4rem;padding-left:.75rem}
+.tb-btn{font:inherit;font-size:13px;background:var(--card);color:var(--ink);border:1px solid var(--border);border-radius:6px;padding:.3rem .7rem;
+  cursor:pointer;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;transition:border-color .15s ease,background-color .15s ease}
+.tb-btn:hover{border-color:var(--axis);background:var(--row-hover)}
 .path{border:1px solid var(--border);border-radius:14px;background:var(--card);padding:1rem 1.2rem 1.1rem;margin-top:1.4rem}
 .path-head{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:.9rem}
 .path-head h4{margin:0;font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
@@ -321,6 +324,47 @@ details.cv-files pre{margin:.5rem 0 0;max-height:14rem}
 .sd-link{display:inline-block;margin-top:1.1rem;color:#9fc0ff;font-size:13px;text-decoration:none}
 .sd-link:hover{text-decoration:underline}
 .ov-summary{margin-top:1.1rem}
+.sm-lede{color:var(--muted);font-size:13.5px;margin:.6rem 0 1.2rem;max-width:80ch}
+.sm-scale{margin:0 0 1.6rem}
+.sm-scale-top{display:flex;justify-content:space-between;gap:1rem;font-size:14px;margin-bottom:.5rem;flex-wrap:wrap}
+.sm-scale-top b{font-size:1.25rem}
+.sm-bands{position:relative;height:1.7rem}
+.sm-band{position:absolute;top:0;bottom:0;background:var(--code-bg);border-right:2px solid var(--card);display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:var(--faint)}
+.sm-band:first-child{border-radius:7px 0 0 7px}.sm-band-A{border-right:0;border-radius:0 7px 7px 0}
+.sm-band.on{color:var(--ink);background:var(--row-hover);box-shadow:inset 0 -3px 0 var(--ink)}
+.sm-mark{position:absolute;top:-.35rem;bottom:-.35rem;width:3px;border-radius:2px;transform:translateX(-50%);background:var(--ink)}
+.sm-mark::after{content:attr(data-label);position:absolute;bottom:calc(100% + .2rem);left:50%;transform:translateX(-50%);
+  font-size:11.5px;font-weight:700;white-space:nowrap;color:var(--ink)}
+.sm-raw{background:none;border-left:2px dashed var(--muted);width:0}
+.sm-raw::after{color:var(--muted);font-weight:500;bottom:auto;top:calc(100% + .15rem)}
+.sm-ticks{position:relative;height:1.1rem;font-size:11px;color:var(--faint);margin-top:.3rem}
+.sm-ticks span{position:absolute;transform:translateX(-50%)}.sm-ticks span:first-child{transform:none}.sm-ticks span:last-child{transform:translateX(-100%)}
+.sm-cap{margin:.4rem 0 0;font-size:12.5px;color:var(--muted)}
+.sm-group{border-top:1px solid var(--border);padding:.9rem 0 .4rem}
+.sm-ghead{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;margin-bottom:.55rem}
+.sm-gname{display:inline-flex;align-items:center;gap:.5rem;font-weight:700;font-size:14.5px}
+.sm-gname .sw{width:.7rem;height:.7rem;border-radius:3px;display:inline-block}
+.sm-gpts{font-size:13px;color:var(--muted)}.sm-gpts b{color:var(--ink);font-size:15px}
+.sm-row{display:grid;grid-template-columns:minmax(12rem,1fr) minmax(0,1.4fr);gap:.4rem 1.4rem;align-items:center;padding:.45rem 0}
+.sm-label b{display:block;font-size:13.5px;font-weight:600}
+.sm-label small{display:block;color:var(--muted);font-size:12px;line-height:1.45}
+.sm-barcell{display:grid;grid-template-columns:minmax(0,1fr) 9.5rem;align-items:center;gap:.8rem;min-width:0}
+.sm-plot{min-width:0}
+.sm-track{height:.85rem;background:var(--code-bg);border-radius:5px;overflow:hidden;cursor:help;outline:none;
+  box-shadow:inset 0 0 0 1px var(--border)}
+.sm-track:hover,.sm-track:focus-visible{box-shadow:inset 0 0 0 1px var(--axis),0 0 0 3px var(--accent-soft)}
+.sm-fill{display:block;height:100%;border-radius:5px 0 0 5px}
+.sm-notrun .sm-track{background:repeating-linear-gradient(45deg,var(--code-bg) 0 4px,var(--border) 4px 6px)}
+.sm-val{font-size:12.5px;white-space:nowrap;color:var(--muted);font-variant-numeric:tabular-nums}
+.sm-val b{color:var(--ink)}
+.sm-lost{color:var(--muted);margin-left:.15rem}
+.sm-foot{font-size:12.5px;color:var(--muted);margin:1rem 0 .4rem}
+details.sm-table{margin-top:.6rem}
+@media (max-width:760px){.sm-row{grid-template-columns:minmax(0,1fr)}.sm-barcell{grid-template-columns:minmax(0,1fr) 8rem}}
+.viztip{position:fixed;z-index:30;background:var(--card);color:var(--ink);border:1px solid var(--border);border-radius:8px;box-shadow:var(--lift);
+  padding:.5rem .7rem;font-size:12.5px;pointer-events:none;max-width:22rem}
+.viztip b{display:block;margin-bottom:.15rem}.viztip span{display:block;color:var(--muted)}
 details{border:1px solid var(--border);border-radius:10px;padding:.6rem .9rem;margin:.6rem 0;background:var(--card);transition:border-color .15s ease}
 details:hover{border-color:var(--axis)}
 details summary{cursor:pointer;font-weight:600}
@@ -338,11 +382,18 @@ details summary{cursor:pointer;font-weight:600}
 .legend b.dash{background:none!important;border-top:2px dashed var(--muted);height:0}
 .chart svg{display:block;width:100%;height:auto;overflow:visible}
 .chart text{fill:var(--faint);font-size:11px;font-family:inherit;font-variant-numeric:tabular-nums}
-.tip{position:absolute;pointer-events:none;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:.4rem .6rem;font-size:12px;box-shadow:0 4px 14px rgba(0,0,0,.12);display:none;z-index:3;min-width:9rem}
+.tip{position:absolute;pointer-events:none;max-width:min(32rem,92vw);background:var(--card);border:1px solid var(--border);border-radius:6px;padding:.4rem .6rem;font-size:12px;box-shadow:0 4px 14px rgba(0,0,0,.12);display:none;z-index:3;min-width:9rem}
 .tip .row{display:flex;align-items:center;gap:.4rem}
 .tip .row b{font-weight:700;color:var(--ink)}
 .tip .row span{color:var(--muted)}
 .tip .key{width:12px;height:2px;border-radius:1px;display:inline-block}
+.tip .where{margin-top:.45rem;padding-top:.45rem;border-top:1px solid var(--border);max-width:30rem}
+.tip .wh{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.25rem}
+.tip .wi{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.15rem .6rem;padding:.12rem 0;align-items:baseline}
+.tip .wi code{font-size:11.5px;color:var(--ink);background:var(--code-bg);white-space:nowrap}
+.tip .wi span{color:var(--muted);font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tip .wm{color:var(--muted);font-size:11.5px;margin-top:.2rem}
+.tip .wf{color:var(--accent);font-size:11px;margin-top:.35rem}
 .tip .t{color:var(--muted);margin-bottom:.15rem}
 .check-list{list-style:none;padding:0;margin:0}
 .check-list li{display:flex;gap:.75rem;align-items:flex-start;padding:.55rem 0;border-bottom:1px solid var(--border)}
@@ -356,13 +407,38 @@ details summary{cursor:pointer;font-weight:600}
 .empty{color:var(--muted);font-style:italic;padding:.5rem 0}
 .masked{font-weight:700;letter-spacing:.03em}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.tile:hover,.kpi:hover,.chartcard:hover,.chipbar button:hover{transform:none}}
-@media print{.tabbar,.pager,.filters,button.theme{display:none}.js-tabs section.panel{display:block}section.card{break-inside:avoid-page;margin-bottom:2rem!important}body{background:#fff}.tabshell{border:0;padding:0}.tabbar{position:static}.tile:hover,.kpi:hover,.chartcard:hover{transform:none;box-shadow:none}}
+@media print{
+  @page{size:A4;margin:12mm}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{background:#fff;font-size:12px}
+  main{padding:0}
+  .tabbar,.pager,.filters,.chipbar,button.copy,button.theme,.tb-actions,.viztip,.cmdtip,.tip,.vtip-pop,.sd-link,.tl-detail,.hint,.sm-table{display:none!important}
+  .js-tabs section.panel{display:block!important;animation:none!important}
+  .tabshell{border:0;padding:0;margin:0;background:none}
+  .tabshell section.panel+section.panel{break-before:page}
+  .chartcard,.kpi,.tile,.codever,.sumcard,.scoredark,.path,.sm-row,.sm-scale,.tl-row,tr,li{break-inside:avoid}
+  .tablewrap{overflow:visible}th{position:static}
+  html{zoom:.82}
+  table,.tablewrap table{width:100%!important;min-width:0!important}
+  td.where,td.issuecol,td.fixcol{min-width:0!important}
+  th,td{overflow-wrap:anywhere;padding:.4rem .5rem!important}
+  th{overflow-wrap:normal;word-break:normal;white-space:nowrap}
+  h2,h3,h4,.sm-ghead,.tl-head{break-after:avoid}
+  p.empty,.lede{orphans:2;widows:2}
+  .callout,.sm-group,.hero-main,.sd-top{break-inside:avoid}
+  table.hist td.cmdcell{min-width:0!important}.jt code,table.hist code.cmd{word-break:break-all}
+  .tl-bar[aria-pressed=true]{box-shadow:none!important}
+  .tile .go{display:none}
+  pre{max-height:none;overflow:visible}
+  a{color:inherit;text-decoration:none}
+  .tile:hover,.kpi:hover,.chartcard:hover,.card-lift:hover{transform:none!important;box-shadow:none!important}
+}
 </style>
 </head>
 <body>
 {% set cv = st.code_version or {} %}
-{% macro code_version_card() -%}
-<div class="codever card-lift" id="code-version">
+{% macro code_version_card(anchor=false) -%}
+<div class="codever card-lift"{% if anchor %} id="code-version"{% endif %}>
   <h4>Code checked</h4>
   {% if not cv %}
   <p class="muted">Not recorded: this run was made by a version of secure-vibe-delivery that didn't record the code version.</p>
@@ -397,17 +473,6 @@ details summary{cursor:pointer;font-weight:600}
 {% macro vword(v) -%}
 <span class="vtip" tabindex="0">{{ v }}<span class="vtip-pop" role="tooltip"><b>{{ v }}</b> {{ VERDICT_TIPS[v] }}<span class="vtip-all">{% for k in ["GO","PROVISIONAL","NO-GO"] if k != v %}<span><b>{{ k }}</b>: {{ VERDICT_TIPS[k].split(".")[0] }}.</span>{% endfor %}</span></span></span>
 {%- endmacro %}
-<header class="mast"><div class="wrap">
-  <div class="top"><div class="eyebrow">Secure Vibe Delivery · go-live analysis</div>
-  <button class="theme" id="themeBtn" type="button">◐ Theme</button></div>
-  <h1>{{ project_name }}: {{ vword(verdict) }}</h1>
-  <div class="meta">
-    <span>Project <code>{{ opts.project_path }}</code></span>
-    {% if cv.is_git and cv.commit %}<span>Code <a href="#code-version"><code>{{ cv.short }}</code></a>{% if cv.branch %} on <b>{{ cv.branch }}</b>{% endif %}{% if cv.changed_during_run %} · <b>changed during run</b>{% elif cv.dirty %} · <b>+{{ cv.changed_count }} uncommitted</b>{% endif %}</span>
-    {% elif cv and not cv.is_git %}<span>Code version <b>not recorded</b> (not a git repository)</span>{% endif %}
-  </div>
-</div></header>
-
 {% macro status_badge(s) -%}
 {%- set v = s.value if s.value is defined else s -%}
 <span class="badge st-{{ v }}"><i>{{ {"PASS":"✓","FAIL":"✕","WARN":"!","NOT_RUN":"⊘"}[v] }}</i>{{ {"PASS":"Pass","FAIL":"Fail","WARN":"Warning","NOT_RUN":"Didn't run"}[v] }}</span>
@@ -429,6 +494,11 @@ details summary{cursor:pointer;font-weight:600}
   {{ tab("checklist", "Go-live checklist") }}
   {{ tab("logs", "Logs") }}
   {{ tab("history", "History (" ~ history|length ~ ")") }}
+  <div class="tb-actions">
+    {% if pdf_rel %}<a class="tb-btn" href="{{ pdf_rel }}" download="{{ pdf_rel }}" title="The same report as a PDF file, saved beside this page">⤓ Download PDF</a>{% endif %}
+    <button class="tb-btn" id="printBtn" type="button" title="Print, or choose “Save as PDF” in the print dialog">{{ "Print" if pdf_rel else "⤓ Print / Save as PDF" }}</button>
+    <button class="theme" id="themeBtn" type="button" aria-label="Switch between light and dark">◐ Theme</button>
+  </div>
 </div>
 
 <section class="card panel" id="verdict" role="tabpanel" aria-labelledby="tab-verdict">
@@ -437,9 +507,10 @@ details summary{cursor:pointer;font-weight:600}
   <div class="hero">
     <div class="hero-main">
       <span class="vpill v-{{ verdict }}"><i aria-hidden="true"></i>{{ vword(verdict) }}</span>
-      <h2 class="hero-h">{{ H.head[0] }}<span class="acc acc-{{ H.head[3] }}">{{ H.head[1] }}</span>{{ H.head[2] }}</h2>
+      <h1 class="hero-h">{{ H.head[0] }}<span class="acc acc-{{ H.head[3] }}">{{ H.head[1] }}</span>{{ H.head[2] }}</h1>
       <p class="hero-p">{{ H.text }}</p>
       <div class="hero-meta">
+        <span class="br">Project <b>{{ project_name }}</b> <code class="hm-path" title="{{ opts.project_path }}">{{ opts.project_path }}</code></span>
         <span>Run <b><code>{{ st.run_id }}</code></b></span>
         <span>Generated <b>{{ generated }}</b></span>
         <span>Took <b>{{ duration }}</b></span>
@@ -483,7 +554,7 @@ details summary{cursor:pointer;font-weight:600}
       <a class="sd-link" href="#scoremath">How the score is worked out <span aria-hidden="true">↓</span></a>
     </div>
   </div>
-  {{ code_version_card() }}
+  {{ code_version_card(true) }}
   <div class="ov-summary">
     <div class="sumcard card-lift">
       <h4>Summary</h4>
@@ -499,16 +570,56 @@ details summary{cursor:pointer;font-weight:600}
       </div>
     </div>
   </div>
+  {% set all_comps = [] %}{% for name in ["security","functional","performance"] %}{% for comp in score.checks[name].components %}{% set _ = all_comps.append(comp.max_points) %}{% endfor %}{% endfor %}
+  {% set scale_max = (all_comps|max) if all_comps else 1 %}
+  {% set capped = score.score < score.raw_score %}
   <details class="scoremath" id="scoremath"><summary>How the score is worked out <span class="muted hint">(click to expand the full breakdown)</span></summary>
-    <p class="muted" style="font-size:13px">{{ score.method }} An exposed secret or a critical issue holds the score at 59 or below; a check
-    that didn't run holds it at 79 or below. Grades: A 90+, B 80+, C 70+, D 60+, F below 60.</p>
-    <div class="tablewrap"><table><thead><tr><th>Part</th><th class="num">Points</th><th>Why</th></tr></thead><tbody>
-      {% for name in ["security","functional","performance"] %}{% for comp in score.checks[name].components %}
-      <tr><td>{{ name|title }} · {{ comp.label }}</td><td class="num">{{ comp.points }} / {{ comp.max_points }}</td><td>{{ comp.detail }}</td></tr>
-      {% endfor %}{% endfor %}
-      <tr><td><b>Total before caps</b></td><td class="num"><b>{{ score.raw_score }} / 100</b></td><td></td></tr>
-    </tbody></table></div>
+    <p class="sm-lede">{{ score.method }} Each bar below is one part of the score: its full length is what the part is worth, the coloured
+    stretch is what this run earned, and the empty stretch is what it lost.</p>
+
+    <div class="sm-scale" role="img" aria-label="Final score {{ score.score }} of 100, grade {{ score.grade }}{% if capped %}; held down from {{ score.raw_score }} by a cap{% endif %}">
+      <div class="sm-scale-top"><span><b>{{ score.score }}</b> / 100 · Grade {{ score.grade }}</span>{% if capped %}<span class="muted">held down from {{ score.raw_score }} by a cap</span>{% endif %}</div>
+      <div class="sm-bands">
+        {% for g, lo, hi in [("F",0,60),("D",60,70),("C",70,80),("B",80,90),("A",90,100)] %}
+        <div class="sm-band sm-band-{{ g }}{{ ' on' if score.grade == g else '' }}" style="left:{{ lo }}%;width:{{ hi - lo }}%"><span>{{ g }}</span></div>
+        {% endfor %}
+        {% if capped %}<i class="sm-mark sm-raw" style="left:{{ score.raw_score }}%" data-label="{{ score.raw_score }} before cap"></i>{% endif %}
+        <i class="sm-mark sm-final" style="left:{{ score.score }}%" data-label="{{ score.score }}"></i>
+      </div>
+      <div class="sm-ticks">{% for t in [0,60,70,80,90,100] %}<span style="left:{{ t }}%">{{ t }}</span>{% endfor %}</div>
+      {% for cap in score.caps %}<p class="sm-cap">Capped: {{ cap }}.</p>{% endfor %}
+    </div>
+
+    {% for name, label in [("security","Security"),("functional","Functional"),("performance","Performance")] %}{% set chk = score.checks[name] %}
+    <div class="sm-group">
+      <div class="sm-ghead"><span class="sm-gname"><i class="sw tl-{{ name }}"></i>{{ label }}</span>
+        <span class="sm-gpts"><b>{{ "%.1f"|format(chk.points) }}</b> of {{ chk.weight }} points</span></div>
+      {% for comp in chk.components %}{% set lost = (comp.max_points - comp.points)|round(1) %}
+      <div class="sm-row{{ ' sm-notrun' if comp.not_run else '' }}">
+        <div class="sm-label"><b>{{ comp.label }}</b><small>{{ comp.detail }}</small></div>
+        <div class="sm-barcell">
+          <div class="sm-plot"><div class="sm-track" style="width:{{ (comp.max_points / scale_max * 100)|round(2) }}%"
+               data-viz-tip="{{ label }} · {{ comp.label }}" data-viz-lines="Earned {{ '%g'|format(comp.points) }} of {{ '%g'|format(comp.max_points) }} points|{{ ('Lost ' ~ '%g'|format(lost)) if lost > 0 else 'Nothing lost' }}{% if comp.not_run %}|Didn't run, so it scores 0{% endif %}" tabindex="0">
+            <b class="sm-fill tl-{{ name }}" style="width:{{ (comp.points / comp.max_points * 100)|round(2) if comp.max_points else 0 }}%"></b>
+          </div></div>
+          <span class="sm-val"><b>{{ '%g'|format(comp.points) }}</b> / {{ '%g'|format(comp.max_points) }}{% if comp.not_run %} <span class="sm-lost">didn't run</span>{% elif lost > 0 %} <span class="sm-lost">−{{ '%g'|format(lost) }}</span>{% endif %}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+    <p class="sm-foot">Caps: an exposed secret or a critical issue holds the score at 59 or below; a check that didn't run holds it at 79 or below.
+    Grades: A 90+, B 80+, C 70+, D 60+, F below 60.</p>
+    <details class="sm-table"><summary>Show as a table</summary>
+      <div class="tablewrap"><table><thead><tr><th>Part</th><th class="num">Points</th><th>Why</th></tr></thead><tbody>
+        {% for name in ["security","functional","performance"] %}{% for comp in score.checks[name].components %}
+        <tr><td>{{ name|title }} · {{ comp.label }}</td><td class="num">{{ comp.points }} / {{ comp.max_points }}</td><td>{{ comp.detail }}</td></tr>
+        {% endfor %}{% endfor %}
+        <tr><td><b>Total before caps</b></td><td class="num"><b>{{ score.raw_score }} / 100</b></td><td></td></tr>
+      </tbody></table></div>
+    </details>
   </details>
+  <div class="viztip" id="vizTip" role="tooltip" hidden></div>
   <div class="grid3">
     {% for name, label, question in [("security","Security","Is it safe?"),("functional","Functional","Does it work?"),("performance","Performance","Can it cope?")] %}
     {% set r = results[name] %}
@@ -522,7 +633,7 @@ details summary{cursor:pointer;font-weight:600}
   </div>
   <div class="chartcard" style="margin-top:1.25rem">
     <h4>Security findings by severity</h4>
-    <div class="cap">Issues found in our own code and in the libraries we depend on. Hover a segment for its count.</div>
+    <div class="cap">Issues found in our own code and in the libraries we depend on. Hover a segment to see exactly where each issue is; click it to open the Security tab.</div>
     <div class="legend">
       <span><i class="sw" style="background:var(--critical)"></i>critical</span>
       <span><i class="sw" style="background:var(--serious)"></i>high</span>
@@ -534,6 +645,7 @@ details summary{cursor:pointer;font-weight:600}
       <div class="tablewrap"><table><thead><tr><th>Area</th><th class="num">critical</th><th class="num">high</th><th class="num">medium</th><th class="num">low</th></tr></thead><tbody>
         <tr><td>Our code</td>{% for k in ["critical","high","medium","low"] %}<td class="num">{{ sev_counts[k] }}</td>{% endfor %}</tr>
         <tr><td>Libraries</td>{% for k in ["critical","high","medium","low"] %}<td class="num">{{ lib_counts[k] }}</td>{% endfor %}</tr>
+        {% if sec.data.get("iac", {}).get("files") %}<tr><td>Infrastructure</td>{% for k in ["critical","high","medium","low"] %}<td class="num">{{ iac_counts[k] }}</td>{% endfor %}</tr>{% endif %}
       </tbody></table></div></details>
   </div>
   <p class="callout">The rule that matters most: <b>a scan that didn't run counts as a failure, never as a pass.</b>
@@ -943,6 +1055,49 @@ details summary{cursor:pointer;font-weight:600}
     });
   });
 
+
+  // Score breakdown bars: hover or focus shows the exact points.
+  var vtipEl=document.getElementById("vizTip");
+  if(vtipEl){
+    document.body.appendChild(vtipEl);
+    function vShow(t){
+      vtipEl.innerHTML=""; var b=document.createElement("b"); b.textContent=t.getAttribute("data-viz-tip"); vtipEl.appendChild(b);
+      (t.getAttribute("data-viz-lines")||"").split("|").forEach(function(l){if(!l)return; var s=document.createElement("span"); s.textContent=l; vtipEl.appendChild(s);});
+      vtipEl.hidden=false; var r=t.getBoundingClientRect();
+      var left=Math.min(Math.max(8,r.left),window.innerWidth-vtipEl.offsetWidth-8), top=r.bottom+8;
+      if(top+vtipEl.offsetHeight>window.innerHeight-8) top=r.top-vtipEl.offsetHeight-8;
+      vtipEl.style.left=left+"px"; vtipEl.style.top=top+"px";
+    }
+    function vHide(){vtipEl.hidden=true;}
+    [].forEach.call(document.querySelectorAll("[data-viz-tip]"),function(t){
+      t.addEventListener("mouseenter",function(){vShow(t);}); t.addEventListener("mouseleave",vHide);
+      t.addEventListener("focus",function(){vShow(t);}); t.addEventListener("blur",vHide);});
+    window.addEventListener("scroll",vHide,true);
+  }
+
+
+  // PDF / printing: every tab one after another, light colours, every section unfolded.
+  var printState=null;
+  function preparePrint(){
+    if(printState) return;
+    printState={theme:root.getAttribute("data-theme"),title:document.title,closed:[]};
+    root.setAttribute("data-theme","light");
+    [].forEach.call(document.querySelectorAll("details:not([open])"),function(d){if(!d.classList.contains("sm-table")){printState.closed.push(d);d.open=true;}});
+    document.title={{ ("svd-report-" ~ project_name ~ "-" ~ st.run_id)|tojson }};
+    if(typeof redraws!=="undefined") redraws.forEach(function(f){f();});
+  }
+  function restorePrint(){
+    if(!printState) return;
+    if(printState.theme) root.setAttribute("data-theme",printState.theme); else root.removeAttribute("data-theme");
+    printState.closed.forEach(function(d){d.open=false;});
+    document.title=printState.title; printState=null;
+  }
+  window.addEventListener("beforeprint",preparePrint);
+  window.addEventListener("afterprint",restorePrint);
+  var printBtn=document.getElementById("printBtn");
+  if(printBtn) printBtn.addEventListener("click",function(){preparePrint(); setTimeout(function(){window.print();},50);});
+  if(/[?&]print=1/.test(location.search)){preparePrint(); root.classList.add("printing");}
+
   // Tabs: one section at a time, synced with the URL hash, with Previous/Next links.
   var tabs=[].slice.call(document.querySelectorAll('[role=tab]'));
   var panels=tabs.map(function(t){return document.getElementById(t.getAttribute("aria-controls"));});
@@ -972,8 +1127,12 @@ details summary{cursor:pointer;font-weight:600}
       else if(k==="Home")n=0; else if(k==="End")n=tabs.length-1;
       if(n!==null){e.preventDefault(); show(n,true); tabs[n].focus();}});
   });
-  function fromHash(){var id=location.hash.slice(1),i=panels.findIndex(function(p){return p.id===id;}); show(i<0?0:i,false);}
-  window.addEventListener("hashchange",function(){fromHash(); window.scrollTo({top:document.querySelector(".tabshell").offsetTop-8,behavior:"smooth"});}); fromHash();
+  function fromHash(){var id=location.hash.slice(1),i=panels.findIndex(function(p){return p.id===id;});
+    if(i<0&&id){var target=document.getElementById(id), pi=target?panels.findIndex(function(p){return p.contains(target);}):-1;
+      if(pi>=0){show(pi,false); if(target.tagName==="DETAILS") target.open=true;
+        setTimeout(function(){target.scrollIntoView({behavior:"smooth",block:"start"});},60); return true;}}
+    show(i<0?0:i,false); return false;}
+  window.addEventListener("hashchange",function(){if(!fromHash()) window.scrollTo({top:document.querySelector(".tabshell").offsetTop-8,behavior:"smooth"});}); fromHash();
 
   // Table filters: free-text search, severity select and type chips combine per table.
   var tableState={};
@@ -1075,6 +1234,17 @@ details summary{cursor:pointer;font-weight:600}
       row.appendChild(b); row.appendChild(s); tip.appendChild(row);});
     tip.style.display="block";
   }
+  // Exact locations behind a chart segment: file:line (or package@version) and the issue title.
+  function whereList(tip,w,isLib){
+    var box=document.createElement("div"); box.className="where";
+    var h=document.createElement("div"); h.className="wh"; h.textContent=isLib?"Which libraries":"Where"; box.appendChild(h);
+    w.items.forEach(function(it){var d=document.createElement("div"); d.className="wi";
+      var c=document.createElement("code"); c.textContent=it.where; var t=document.createElement("span"); t.textContent=it.title;
+      d.appendChild(c); d.appendChild(t); box.appendChild(d);});
+    if(w.more){var m=document.createElement("div"); m.className="wm"; m.textContent="+ "+w.more+" more in the Security tab"; box.appendChild(m);}
+    var f=document.createElement("div"); f.className="wf"; f.textContent="Click to open the Security tab"; box.appendChild(f);
+    tip.appendChild(box);
+  }
   function placeTip(tip,card,e){var r=card.getBoundingClientRect(), x=e.clientX-r.left+14, y=e.clientY-r.top+14;
     if(x+tip.offsetWidth>card.clientWidth-8) x=e.clientX-r.left-tip.offsetWidth-14;
     tip.style.left=Math.max(4,x)+"px"; tip.style.top=y+"px";}
@@ -1139,8 +1309,14 @@ details summary{cursor:pointer;font-weight:600}
           var g=el("g",{"class":"r"},svg);
           el(last?"path":"rect",last?{"class":"bar",d:barPath(x,y,Math.max(1,w),bh,4),fill:k.color}:{"class":"bar",x:x,y:y,width:Math.max(1,w-gap),height:bh,fill:k.color},g);
           var hit=el("rect",{x:x,y:y-6,width:Math.max(6,w),height:bh+12,fill:"transparent",tabindex:0},g);
-          function show(e){fillTip(tip,r.label,[{color:k.color,value:r.counts[k.key].toLocaleString(),label:k.label},{value:totals[i].toLocaleString(),label:"total"}]);
-            if(e&&e.clientX!=null) placeTip(tip,card,e); else {tip.style.left="8px"; tip.style.top=(host.offsetTop+y)+"px";}}
+          var w8=(r.where||{})[k.key];
+          function show(e){fillTip(tip,r.label,[{color:k.color,value:r.counts[k.key].toLocaleString(),label:k.label+(r.counts[k.key]===1?" issue":" issues")}]);
+            if(w8) whereList(tip,w8,r.label==="Libraries");
+            if(e&&e.clientX!=null) placeTip(tip,card,e); else {tip.style.left="8px"; tip.style.top=(host.offsetTop+y+bh+8)+"px";}}
+          hit.style.cursor="pointer";
+          hit.setAttribute("aria-label",r.label+": "+r.counts[k.key]+" "+k.label+". Opens the Security tab.");
+          hit.addEventListener("click",function(){location.hash="security";});
+          hit.addEventListener("keydown",function(ev){if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();location.hash="security";}});
           hit.addEventListener("pointermove",show); hit.addEventListener("pointerleave",function(){tip.style.display="none"});
           hit.addEventListener("focus",function(){show(null)}); hit.addEventListener("blur",function(){tip.style.display="none"});
           x+=w;

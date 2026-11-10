@@ -154,8 +154,10 @@ class RunManager:
             reports.mkdir(exist_ok=True)
             st.finished_at = time.time()
             journal_step("step", f"Verdict {st.verdict}; writing the report")
-            html_path, summary_path = render_report(st, results, d, reports)
+            from .report.pdf import render_with_pdf
+            html_path, summary_path, pdf_path, pdf_reason = await render_with_pdf(st, results, d, reports)
             st.report_path, st.summary_path = str(html_path), str(summary_path)
+            st.pdf_path = str(pdf_path) if pdf_path else None
             journal_step("output", f"Report written: {html_path}")
             journal_step("output", f"Summary data written: {summary_path}")
             if st.options.open_report and auto_open_enabled():
@@ -216,6 +218,7 @@ def report_view(st: RunState, top: int = 10) -> dict:
         "summary_source": summary["overview_summary"]["source"],
         "automatic_summary": summary["automatic_summary"],
         "report_path": st.report_path, "report_url": Path(st.report_path).as_uri(),
+        "pdf_path": st.pdf_path,
         "summary_path": st.summary_path, "checks": summary["checks"],
         "must_fix_total": len(summary["must_fix"]), "must_fix_top": summary["must_fix"][:top],
         "report_opened": bool(st.report_opened),

@@ -120,6 +120,7 @@ class RunState(BaseModel):
     results: dict[str, CheckResult] = Field(default_factory=dict)
     verdict: Optional[str] = None
     report_path: Optional[str] = None
+    pdf_path: Optional[str] = None  # PDF copy beside the report, when a Chromium browser was found
     report_opened: Optional[bool] = None  # None = not attempted
     journal: list[dict] = Field(default_factory=list)  # every step and command, in order
     ai_summary: Optional[dict] = None

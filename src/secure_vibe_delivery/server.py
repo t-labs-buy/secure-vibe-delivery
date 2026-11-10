@@ -234,19 +234,20 @@ async def svd_write_summary(
     if st is None or st.state != "done" or not st.report_path:
         return {"error": "No finished run found to add a summary to."}
     from .gate import ensure_all
-    from .report.render import render_report
+    from .report.pdf import render_with_pdf
     from .summary import ai as ai_summary
     try:
         st.ai_summary = ai_summary(overall, went_well, needs_attention, fix_first)
     except ValueError as e:
         return {"error": str(e)}
     run_dir = Path(st.options.project_path) / ".svd" / "runs" / st.run_id
-    html, summary_path = render_report(st, ensure_all(st), run_dir, Path(st.report_path).parent,
-                                       html_path=Path(st.report_path))
+    html, summary_path, pdf_path, _ = await render_with_pdf(st, ensure_all(st), run_dir, Path(st.report_path).parent,
+                                                            html_path=Path(st.report_path))
     st.summary_path = str(summary_path)
+    st.pdf_path = str(pdf_path) if pdf_path else None
     (run_dir / "state.json").write_text(st.model_dump_json(indent=1))
     opened = await open_in_browser(str(html)) if reopen else False
-    return {"report_path": str(html), "summary_added": True, "reopened": opened,
+    return {"report_path": str(html), "pdf_path": st.pdf_path, "summary_added": True, "reopened": opened,
             "tell_the_user": "The summary is in the report's Overview tab"
                              + (" (the updated report just opened in your browser)." if opened else ".")}
 
