@@ -139,11 +139,17 @@ For one project, shared with the team: copy [`examples/claude-code/.mcp.json`](e
 to the project root and commit it. Claude Code asks each person to approve the server the first time
 they open the project. Type `/mcp` in a session to confirm `secure-vibe-delivery` is connected.
 
-### VS Code
+### VS Code (GitHub Copilot Chat)
 
 Copy [`examples/vscode/mcp.json`](examples/vscode/mcp.json) to `.vscode/mcp.json` in the project
-and commit it. Start the server from the **Start** link VS Code shows above the entry (or run
-*MCP: List Servers* from the command palette), then use it from Copilot Chat in Agent mode.
+and commit it, or add the same entry to your own configuration with *MCP: Open User
+Configuration*. Start the server from the **Start** link VS Code shows above the entry (or run
+*MCP: List Servers* from the command palette), then use it from Copilot Chat in **Agent** mode.
+If you added it while a chat was open, run *Developer: Reload Window* and start a new chat.
+
+> **Using the Claude Code extension inside VS Code?** It doesn't read VS Code's `mcp.json`.
+> Claude Code keeps its own list of servers, so set it up with the [Claude Code](#claude-code)
+> steps above, even though you're working in VS Code.
 
 ### Other clients
 
