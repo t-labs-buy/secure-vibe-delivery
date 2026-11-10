@@ -51,7 +51,7 @@ def argv(browser: str, html: Path, pdf: Path) -> list[str]:
     # ?print=1 tells the report's script to show every tab and unfold every section before printing
     url = html.resolve().as_uri() + "?print=1"
     return [browser, "--headless=new", "--disable-gpu", "--no-first-run", "--no-default-browser-check",
-            "--no-pdf-header-footer", "--hide-scrollbars", "--window-size=820,1160",
+            "--no-pdf-header-footer", "--hide-scrollbars", "--window-size=1300,900",
             "--virtual-time-budget=8000", "--run-all-compositor-stages-before-draw",
             f"--print-to-pdf={pdf}", url]
 

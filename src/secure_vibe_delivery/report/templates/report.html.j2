@@ -54,13 +54,13 @@ a{color:var(--accent)}
 code,pre{font-family:inherit;background:var(--code-bg);color:var(--code-ink);border-radius:4px}
 code{padding:.05em .35em;font-size:.92em}
 pre{padding:.85rem 1.1rem;overflow:auto;font-size:13px;white-space:pre-wrap;word-break:break-word;max-height:22rem}
-.wrap{margin:0;padding:0 clamp(16px,2.5vw,44px)}
+.wrap{margin:0;padding:0 clamp(8px,1vw,18px)}
 .eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:700}
 h1{font-size:clamp(1.4rem,3vw,2rem);margin:.3rem 0 .4rem;line-height:1.25}
 h2{font-size:1.3rem;margin:0 0 .35rem}
 h3{font-size:1.05rem;margin:2rem 0 .65rem}
 .meta{color:var(--muted);font-size:12.5px;display:flex;flex-wrap:wrap;gap:.25rem 1.25rem}
-.tabshell{background:var(--shell);border:1px solid var(--border);border-radius:18px;padding:.5rem clamp(1rem,2vw,2rem) 2rem;margin:1.5rem 0}
+.tabshell{background:var(--shell);border:1px solid var(--border);border-radius:14px;padding:.25rem clamp(.9rem,1.6vw,2rem) 1.5rem;margin:.5rem 0}
 .tabbar{display:flex;gap:.25rem;overflow-x:auto;border-bottom:2px solid var(--border);margin:0 0 1.75rem;scrollbar-width:thin;
   position:sticky;top:0;z-index:5;background:var(--shell);padding-top:.6rem}
 .tabbar [role=tab]{font:inherit;font-size:13.5px;color:var(--muted);background:none;border:1px solid transparent;border-bottom:0;
@@ -85,7 +85,7 @@ section.panel:focus{outline:none}
 .pager .next{margin-left:auto;text-align:right}
 @media (max-width:640px){.tabshell{padding:.75rem .75rem 1.25rem;border-radius:14px}}
 button.theme{font:inherit;font-size:13px;background:var(--card);color:var(--ink);border:1px solid var(--border);border-radius:6px;padding:.3rem .7rem;cursor:pointer;white-space:nowrap}
-main{padding:1.5rem 0 4rem}
+main{padding:.25rem 0 1.5rem}
 section.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.5rem;margin:0 0 1.25rem}
 .lede{color:var(--muted);margin:.2rem 0 1.25rem;max-width:95ch}
 .verdict{display:flex;gap:1.25rem;align-items:center;flex-wrap:wrap;padding:1.5rem 1.75rem;border-radius:14px}
@@ -349,7 +349,7 @@ details.cv-files pre{margin:.5rem 0 0;max-height:14rem}
 .sm-row{display:grid;grid-template-columns:minmax(12rem,1fr) minmax(0,1.4fr);gap:.4rem 1.4rem;align-items:center;padding:.45rem 0}
 .sm-label b{display:block;font-size:13.5px;font-weight:600}
 .sm-label small{display:block;color:var(--muted);font-size:12px;line-height:1.45}
-.sm-barcell{display:grid;grid-template-columns:minmax(0,1fr) 9.5rem;align-items:center;gap:.8rem;min-width:0}
+.sm-barcell{display:grid;grid-template-columns:minmax(0,1fr) 11rem;align-items:center;gap:.8rem;min-width:0}
 .sm-plot{min-width:0}
 .sm-track{height:.85rem;background:var(--code-bg);border-radius:5px;overflow:hidden;cursor:help;outline:none;
   box-shadow:inset 0 0 0 1px var(--border)}
@@ -365,6 +365,48 @@ details.sm-table{margin-top:.6rem}
 .viztip{position:fixed;z-index:30;background:var(--card);color:var(--ink);border:1px solid var(--border);border-radius:8px;box-shadow:var(--lift);
   padding:.5rem .7rem;font-size:12.5px;pointer-events:none;max-width:22rem}
 .viztip b{display:block;margin-bottom:.15rem}.viztip span{display:block;color:var(--muted)}
+.sum2{border:1px solid var(--border);border-radius:14px;background:var(--card);padding:1.3rem 1.4rem 1.4rem;margin-top:1.1rem}
+.sum2-top{display:grid;grid-template-columns:minmax(0,1fr);gap:1.2rem 2.5rem;align-items:start}
+@media (min-width:1000px){.sum2-top{grid-template-columns:minmax(0,1.6fr) minmax(16rem,1fr)}}
+.sum2-lead h3{margin:0;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.sum2-src{margin:.3rem 0 .7rem;font-size:12px;color:var(--muted)}
+.ai-chip{display:inline-block;font-weight:700;color:var(--tab-ink);background:var(--tab-bg);border-radius:999px;padding:.05rem .5rem;margin-right:.2rem}
+.sum2-overall{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Inter,Roboto,sans-serif;font-size:clamp(1rem,1.35vw,1.2rem);line-height:1.55}
+.su-head{font-size:13px;color:var(--muted);margin-bottom:.55rem}.su-head b{color:var(--ink);font-size:1.15rem}
+.su-strip{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:5px}
+.su{display:inline-block;width:1.15rem;height:1.15rem;border-radius:4px;flex:none}
+.su-strip .su{width:1.5rem;height:1.5rem;cursor:help;outline:none;transition:transform .12s ease}
+.su-strip .su:hover,.su-strip .su:focus-visible{transform:scale(1.18);box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--ink)}
+.su-PASS{background:var(--good)}.su-FAIL{background:var(--critical)}
+.su-NOT_RUN{background:repeating-linear-gradient(45deg,var(--code-bg) 0 3px,var(--faint) 3px 5px)}
+.su-WARN{background:var(--warning)}
+.su-strip .su-gap{margin-left:.7rem}
+.su-groups{display:flex;gap:.7rem;font-size:11px;color:var(--faint);margin-top:.3rem}
+.su-key{list-style:none;margin:.65rem 0 0;padding:0;display:flex;flex-wrap:wrap;gap:.35rem 1rem;font-size:12.5px;color:var(--muted)}
+.su-key li{display:flex;align-items:center;gap:.4rem}.su-key b{color:var(--ink)}
+.su-key .su{width:.8rem;height:.8rem;border-radius:3px}
+.sum2-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(17rem,1fr));gap:1rem;margin-top:1.3rem}
+.sp{border-radius:12px;padding:1rem 1.1rem 1.05rem}
+.sp-ok{background:var(--good-bg)}.sp-bad{background:var(--bad-bg)}.sp-first{background:var(--warn-bg)}
+.sp-head{display:flex;align-items:center;gap:.55rem;margin-bottom:.6rem}
+.sp-head h4{margin:0;font-size:14px;flex:1}
+.sp-head i{font-style:normal;width:1.6rem;height:1.6rem;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;color:#fff;flex:none}
+.sp-ok .sp-head i{background:#1d8a4e}.sp-bad .sp-head i{background:var(--critical)}.sp-first .sp-head i{background:#c27a00}
+.sp-n{font-size:12.5px;font-weight:700;min-width:1.6rem;text-align:center;padding:.1rem .45rem;border-radius:999px;background:var(--card);color:var(--ink)}
+.sp ul{margin:0;padding:0;list-style:none}
+.sp ul li{position:relative;padding:.38rem 0 .38rem 1.1rem;font-size:13.5px;line-height:1.45;border-top:1px solid rgba(0,0,0,.06)}
+.sp ul li:first-child{border-top:0}
+.sp ul li::before{content:"";position:absolute;left:.15rem;top:.85rem;width:.4rem;height:.4rem;border-radius:50%;background:currentColor;opacity:.35}
+.sp-rank{margin:0;padding:0;list-style:none;counter-reset:none}
+.sp-rank li{display:grid;grid-template-columns:1.7rem minmax(0,1fr);gap:.6rem;align-items:start;padding:.42rem 0;font-size:13.5px;line-height:1.45;border-top:1px solid rgba(0,0,0,.06)}
+.sp-rank li:first-child{border-top:0}
+.rk{width:1.55rem;height:1.55rem;border-radius:7px;display:grid;place-items:center;font-weight:800;font-size:12.5px;background:var(--card);color:var(--ink)}
+.sp-rank li:first-child .rk{background:#c27a00;color:#fff}
+.sp-link{display:inline-block;margin-top:.7rem;font-size:13px;font-weight:700;color:var(--ink);text-decoration:none}
+.sp-link:hover{text-decoration:underline}
+.sp-empty{margin:0;color:var(--muted);font-size:13.5px}
+:root[data-theme="dark"] .sp ul li,:root[data-theme="dark"] .sp-rank li{border-color:rgba(255,255,255,.08)}
+@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])) .sp ul li,:root:where(:not([data-theme="light"])) .sp-rank li{border-color:rgba(255,255,255,.08)}}
 details{border:1px solid var(--border);border-radius:10px;padding:.6rem .9rem;margin:.6rem 0;background:var(--card);transition:border-color .15s ease}
 details:hover{border-color:var(--axis)}
 details summary{cursor:pointer;font-weight:600}
@@ -408,7 +450,7 @@ details summary{cursor:pointer;font-weight:600}
 .masked{font-weight:700;letter-spacing:.03em}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.tile:hover,.kpi:hover,.chartcard:hover,.chipbar button:hover{transform:none}}
 @media print{
-  @page{size:A4;margin:12mm}
+  @page{size:A4 landscape;margin:10mm}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   body{background:#fff;font-size:12px}
   main{padding:0}
@@ -423,12 +465,24 @@ details summary{cursor:pointer;font-weight:600}
   td.where,td.issuecol,td.fixcol{min-width:0!important}
   th,td{overflow-wrap:anywhere;padding:.4rem .5rem!important}
   th{overflow-wrap:normal;word-break:normal;white-space:nowrap}
+  td.num,td.k{overflow-wrap:normal;white-space:nowrap}
   h2,h3,h4,.sm-ghead,.tl-head{break-after:avoid}
   p.empty,.lede{orphans:2;widows:2}
-  .callout,.sm-group,.hero-main,.sd-top{break-inside:avoid}
+  .callout,.sm-group,.hero-main,.sd-top,.sp,.sum2-top{break-inside:avoid}
+  /* landscape page: use the wide, side-by-side layouts whatever width the print engine reports */
+  .hero{grid-template-columns:minmax(0,1.45fr) minmax(0,1fr)!important}
+  .sum2-top{grid-template-columns:minmax(0,1.6fr) minmax(15rem,1fr)!important}
+  .sum2-cols{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .sm-row{grid-template-columns:minmax(12rem,1fr) minmax(0,1.6fr)!important}
+  .split{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}
+  .grid3{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .kpis{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  .gates li small{display:block!important}
   table.hist td.cmdcell{min-width:0!important}.jt code,table.hist code.cmd{word-break:break-all}
   .tl-bar[aria-pressed=true]{box-shadow:none!important}
-  .tile .go{display:none}
+  .tile .go,.sp-link{display:none!important}
+  .sum2{break-inside:avoid}
+  .sm-val{white-space:normal}
   pre{max-height:none;overflow:visible}
   a{color:inherit;text-decoration:none}
   .tile:hover,.kpi:hover,.chartcard:hover,.card-lift:hover{transform:none!important;box-shadow:none!important}
@@ -555,21 +609,40 @@ details summary{cursor:pointer;font-weight:600}
     </div>
   </div>
   {{ code_version_card(true) }}
-  <div class="ov-summary">
-    <div class="sumcard card-lift">
-      <h4>Summary</h4>
-      <p class="src">{% if overview.source == "ai" %}Written by your AI assistant from this run's results.{% else %}Automatic summary from the results. For a written one, ask your assistant to "write the summary for this report".{% endif %}</p>
-      <p class="overall">{{ overview.overall }}</p>
-      <div class="sumcols">
-        <div class="ok"><h5><i aria-hidden="true">✓</i>What went well</h5>
-          {% if overview.went_well %}<ul>{% for x in overview.went_well %}<li>{{ x }}</li>{% endfor %}</ul>{% else %}<p class="empty">Nothing passed yet.</p>{% endif %}</div>
-        <div class="bad"><h5><i aria-hidden="true">✕</i>Where the issues are</h5>
-          {% if overview.needs_attention %}<ul>{% for x in overview.needs_attention %}<li>{{ x }}</li>{% endfor %}</ul>{% else %}<p class="empty">No issues found.</p>{% endif %}</div>
-        <div class="first"><h5><i aria-hidden="true">→</i>Needs immediate attention</h5>
-          {% if overview.fix_first %}<ol>{% for x in overview.fix_first %}<li>{{ x }}</li>{% endfor %}</ol>{% else %}<p class="empty">Nothing urgent.</p>{% endif %}</div>
+  {% set U = hero.units %}{% set TL = hero.tally %}
+  <section class="sum2" aria-labelledby="sum2-h">
+    <div class="sum2-top">
+      <div class="sum2-lead">
+        <h3 id="sum2-h">Summary</h3>
+        <p class="sum2-src">{% if overview.source == "ai" %}<span class="ai-chip">✦ AI-written</span> by your assistant from this run's results.{% else %}Automatic summary. For a written one, ask your assistant to “write the summary for this report”.{% endif %}</p>
+        <p class="sum2-overall">{{ overview.overall }}</p>
+      </div>
+      {% if U %}<div class="sum2-units">
+        <div class="su-head"><b>{{ TL.PASS }}</b> of {{ U|length }} automated checks passed</div>
+        <ol class="su-strip" aria-label="{{ TL.PASS }} passed, {{ TL.FAIL }} failed, {{ TL.NOT_RUN }} didn't run, {{ TL.WARN }} warnings">
+          {% for u in U %}<li class="su su-{{ u.status }}{% if not loop.first and U[loop.index0 - 1].check != u.check %} su-gap{% endif %}" tabindex="0" data-viz-tip="{{ u.label }}" data-viz-lines="{{ {'PASS':'Passed','FAIL':'Failed','NOT_RUN':'Didn\'t run (counts as a failure)','WARN':'Warning'}[u.status] }}{% if u.detail %}|{{ u.detail|truncate(140) }}{% endif %}"><span class="sr">{{ u.label }}: {{ u.status }}</span></li>{% endfor %}
+        </ol>
+        <ul class="su-key">
+          {% for k, lab in [("PASS","passed"),("FAIL","failed"),("NOT_RUN","didn't run"),("WARN","warning")] if TL[k] %}<li><i class="su su-{{ k }}"></i><b>{{ TL[k] }}</b> {{ lab }}</li>{% endfor %}
+        </ul>
+      </div>{% endif %}
+    </div>
+    <div class="sum2-cols">
+      <div class="sp sp-ok">
+        <div class="sp-head"><i aria-hidden="true">✓</i><h4>What went well</h4><span class="sp-n">{{ overview.went_well|length }}</span></div>
+        {% if overview.went_well %}<ul>{% for x in overview.went_well %}<li>{{ x }}</li>{% endfor %}</ul>{% else %}<p class="sp-empty">Nothing passed yet.</p>{% endif %}
+      </div>
+      <div class="sp sp-bad">
+        <div class="sp-head"><i aria-hidden="true">✕</i><h4>Where the issues are</h4><span class="sp-n">{{ overview.needs_attention|length }}</span></div>
+        {% if overview.needs_attention %}<ul>{% for x in overview.needs_attention %}<li>{{ x }}</li>{% endfor %}</ul>{% else %}<p class="sp-empty">No issues found.</p>{% endif %}
+      </div>
+      <div class="sp sp-first">
+        <div class="sp-head"><i aria-hidden="true">!</i><h4>Needs immediate attention</h4><span class="sp-n">{{ overview.fix_first|length }}</span></div>
+        {% if overview.fix_first %}<ol class="sp-rank">{% for x in overview.fix_first %}<li><span class="rk">{{ loop.index }}</span><span>{{ x }}</span></li>{% endfor %}</ol>
+        <a class="sp-link" href="#mustfix">Open the must-fix list <span aria-hidden="true">→</span></a>{% else %}<p class="sp-empty">Nothing urgent.</p>{% endif %}
       </div>
     </div>
-  </div>
+  </section>
   {% set all_comps = [] %}{% for name in ["security","functional","performance"] %}{% for comp in score.checks[name].components %}{% set _ = all_comps.append(comp.max_points) %}{% endfor %}{% endfor %}
   {% set scale_max = (all_comps|max) if all_comps else 1 %}
   {% set capped = score.score < score.raw_score %}

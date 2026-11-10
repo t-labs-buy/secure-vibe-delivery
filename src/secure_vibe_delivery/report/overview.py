@@ -120,8 +120,16 @@ def hero(st: RunState, results: dict[str, CheckResult], verdict: str, score: dic
     else:
         note = f"{_fmt(lost)} points lost."
 
+    # every automated check as one unit, for the summary's dot strip
+    names = {"security": "Security", "functional": "Functional", "performance": "Performance"}
+    units = [{"check": k, "label": f"{names.get(k, k.title())}: {sc.label}", "detail": sc.detail,
+              "status": sc.status.value}
+             for k in ("security", "functional", "performance") if results.get(k)
+             for sc in results[k].subchecks if sc.id not in ("own-data", "review")]
+    tally = {k: sum(1 for u in units if u["status"] == k) for k in ("PASS", "FAIL", "NOT_RUN", "WARN")}
+
     peak = st.options.peak_users
-    return {"head": head, "text": text, "gates": g, "cleared": cleared, "total": len(g),
+    return {"units": units, "tally": tally, "head": head, "text": text, "gates": g, "cleared": cleared, "total": len(g),
             "score_note": note, "peak": peak, "tested_users": users if perf and perf.status != Status.NOT_RUN else None}
 
 

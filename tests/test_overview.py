@@ -68,3 +68,11 @@ def test_score_note_adds_up():
         {"label": "Tests passing", "points": 97.5, "max_points": 97.5}]}}}
     h = hero(st, {}, "PROVISIONAL", score, [])
     assert h["score_note"] == "2.5 points lost, all of them in “Wrong-case tests present”."
+
+
+def test_summary_units_cover_every_automated_check():
+    h, _ = _run()
+    labels = [u["label"] for u in h["units"]]
+    assert all(not l.endswith(("own-data", "review")) for l in labels)
+    assert h["tally"]["PASS"] + h["tally"]["FAIL"] + h["tally"]["NOT_RUN"] + h["tally"]["WARN"] == len(h["units"])
+    assert labels[0].startswith("Security:")

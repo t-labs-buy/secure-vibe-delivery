@@ -69,7 +69,7 @@ def test_ai_summary_is_escaped_in_report(tmp_path):
     html, _ = render_report(st, gate.ensure_all(st), tmp_path, tmp_path)
     text = html.read_text()
     assert "<script>alert(1)</script>" not in text and "&lt;script&gt;alert(1)&lt;/script&gt;" in text
-    assert "Written by your AI assistant" in text
+    assert "AI-written" in text
 
 
 async def test_journal_records_every_command(tmp_path):
