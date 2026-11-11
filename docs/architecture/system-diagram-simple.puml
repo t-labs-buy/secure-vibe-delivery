@@ -51,7 +51,8 @@ GR .up.> User : report
 note bottom of TEST
   Simplified: setup, doctor, locustfile
   generator and skills are inside
-  MCP Server; the three checks are one box.
+  MCP Server; the three checks are one box,
+  and so are their three local tools.
   Full view: system-diagram.png
 end note
 

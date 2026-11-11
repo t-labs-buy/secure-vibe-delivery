@@ -16,11 +16,13 @@ participant "AI Assistant" as AST #E3F2FD
 participant "MCP Server" as MCP #E8F5E9
 participant "Doctor" as DOC #FFF3E0
 participant "Run Pipeline" as PIPE #FFF3E0
+participant "Snyk CLI ·\nSemgrep" as SCAN #E3F2FD
 participant "Security\nCheck" as SEC #F3E5F5
-participant "Functional\nCheck" as FUN #F3E5F5
-participant "Performance\nCheck" as PERF #F3E5F5
-participant "Local\nToolchain" as TOOLS #E3F2FD
 boundary "Snyk · Semgrep\n· PyPI/npm" as CLOUD #ECEFF1
+participant "Functional\nCheck" as FUN #F3E5F5
+participant "pytest /\nJest" as PYT #E3F2FD
+participant "Performance\nCheck" as PERF #F3E5F5
+participant "Locust" as LOC #E3F2FD
 boundary "Test\nenvironment" as TEST #ECEFF1
 participant "Go-Live\nGate" as GATE #E8F5E9
 participant "Report\nRenderer" as REND #E8F5E9
@@ -31,8 +33,8 @@ User -> AST : "check this project before go-live"
 == Step 1 — Ask, check readiness, start the run ==
 AST -> MCP : svd_doctor
 MCP -> DOC : check tools
-DOC -> TOOLS : versions · sign-ins
-TOOLS --> DOC : all signed in
+DOC -> SCAN : versions · sign-ins
+SCAN --> DOC : all signed in
 DOC --> AST : ready
 AST -> MCP : svd_run
 MCP -> PIPE : start background job
@@ -43,24 +45,24 @@ activate PIPE
 PIPE -> PIPE : detect project type
 PIPE -> SEC : run
 activate SEC
-SEC -> TOOLS : snyk test / code / secrets · semgrep
-TOOLS -> CLOUD : HTTPS (Snyk token)
-CLOUD --> TOOLS : findings · rules
-TOOLS --> SEC : JSON results
+SEC -> SCAN : snyk test / code / secrets · semgrep
+SCAN -> CLOUD : HTTPS (Snyk token)
+CLOUD --> SCAN : findings · rules
+SCAN --> SEC : JSON results
 SEC -> CLOUD : package age (provenance)
 SEC --> PIPE : **security result**
 deactivate SEC
 
 == Step 3 — Prove it works and copes with load ==
 PIPE -> FUN : run
-FUN -> TOOLS : pytest / Jest + coverage
-TOOLS --> FUN : tests · coverage
+FUN -> PYT : run tests with coverage
+PYT --> FUN : 148 passed · 82%
 FUN --> PIPE : **functional result**
 PIPE -> PERF : run
-PERF -> TOOLS : Locust at 1.5× peak
-TOOLS -> TEST : load traffic
-TEST --> TOOLS : responses
-TOOLS --> PERF : p95 · errors
+PERF -> LOC : load profile at 1.5× peak
+LOC -> TEST : load traffic
+TEST --> LOC : responses
+LOC --> PERF : p95 · errors
 PERF --> PIPE : **performance result**
 AST -> MCP : svd_status (polling)
 MCP --> AST : progress

@@ -22,7 +22,7 @@ flowchart TD
 
     subgraph Server["MCP server (uvx child process, stdio)"]
         MCP["MCP Server<br/>FastMCP · 9 svd_* tools"]
-        SK["Fixing Skills<br/>5 skill:// guides"]
+        SK["Skills<br/>5 skill:// fixing guides"]
         SETUP["Guided Setup<br/>svd_setup"]
         DOC["Doctor<br/>svd_doctor"]
         PIPE["Run Pipeline<br/>background job · run_id"]
@@ -36,7 +36,11 @@ flowchart TD
         REND["Report Renderer<br/>Jinja2 · health score"]
     end
 
-    TOOLS["Local Toolchain<br/>Snyk CLI · Semgrep · pytest/Jest · Locust"]
+    subgraph Tools["Local tools (subprocesses)"]
+        SCAN["Snyk CLI · Semgrep<br/>security scanners"]
+        PYT["pytest / Jest<br/>project test runner"]
+        LOC["Locust<br/>load generator · uvx"]
+    end
     RUNS[("Run Records<br/>.svd/runs · .svd/reports")]
     CHROME["Chrome / Edge<br/>headless PDF (optional)"]
 
@@ -56,16 +60,17 @@ flowchart TD
     PIPE -->|"runs in order"| SEC
     PIPE --> FUN
     PIPE --> PERF
-    SEC -->|subprocess| TOOLS
-    FUN -->|subprocess| TOOLS
-    PERF -->|subprocess| TOOLS
-    SETUP -->|"auth, login"| TOOLS
-    DOC -->|"versions, whoami"| TOOLS
+    SEC -->|subprocess| SCAN
+    FUN -->|"runs tests"| PYT
+    PERF -->|"load profile"| LOC
+    SETUP -->|"auth, login"| SCAN
+    DOC -->|"versions, whoami"| SCAN
     SEC -->|"HTTPS"| REG
-    TOOLS -->|"HTTPS, token"| SNYK
-    TOOLS -->|HTTPS| SGR
-    TOOLS -->|"uvx fetch"| REG
-    TOOLS -->|"load test"| TEST
+    SCAN -->|"HTTPS, token"| SNYK
+    SCAN -->|HTTPS| SGR
+    SCAN -->|"uvx fetch"| REG
+    LOC -->|"uvx fetch"| REG
+    LOC -->|"load test"| TEST
     SETUP -->|"CLI download"| SNYK
     PIPE -->|results| GATE
     PIPE -->|"run state"| REND
@@ -82,4 +87,4 @@ flowchart TD
 
 - Solid arrows = request/command direction; dashed = polling or a reverse-direction hand-back (the assistant polling a run, the report opening for the developer).
 - Dark boxes = external systems Secure Vibe Delivery depends on but doesn't control.
-- Everything inside "MCP server" runs in one local process; the Local Toolchain runs as subprocesses of it.
+- Everything inside "MCP server" runs in one local process; the local tools run as subprocesses of it.

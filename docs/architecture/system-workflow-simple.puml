@@ -42,7 +42,8 @@ AST --> User : 📄 verdict and must-fix list
 
 note across
   Snyk is reached only through the local Snyk CLI, and the assistant polls
-  the background run. Full sequence: system-workflow.png
+  the background run. Checks and their local tools are merged here.
+  Full sequence: system-workflow.png
 end note
 
 @enduml
