@@ -1746,7 +1746,7 @@
         <div class="meta-strip">
           <span><strong>Audience</strong> — developers using Claude Code or GitHub Copilot in VS Code</span>
           <span><strong>Needs first</strong> — Homebrew on a Mac, or winget on Windows 10/11</span>
-          <span><strong>Version</strong> — v0.1.12</span>
+          <span><strong>Version</strong> — v0.1.13</span>
           <span><strong>Repo</strong> — <a href="https://github.com/t-labs-buy/secure-vibe-delivery">t-labs-buy/secure-vibe-delivery</a></span>
         </div>
       </header>
@@ -1909,12 +1909,12 @@ winget install --id Git.Git -e</pre>
             </p>
             <pre class="language-bash">
 claude mcp add --scope user secure-vibe-delivery -- \
-  uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.12 secure-vibe-delivery</pre>
+  uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.13 secure-vibe-delivery</pre>
             <p>
               On Windows, in PowerShell, put it on one line (PowerShell doesn't use
               <code>\</code> to continue a line):
             </p>
-            <pre class="language-bash">claude mcp add --scope user secure-vibe-delivery -- uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.12 secure-vibe-delivery</pre>
+            <pre class="language-bash">claude mcp add --scope user secure-vibe-delivery -- uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.13 secure-vibe-delivery</pre>
             <p>Then check it connected:</p>
             <pre class="language-bash">claude mcp get secure-vibe-delivery</pre>
             <p>The output should include:</p>
@@ -1967,7 +1967,7 @@ claude mcp add --scope user secure-vibe-delivery -- \
     "secure-vibe-delivery": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.12", "secure-vibe-delivery"]
+      "args": ["--from", "git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.13", "secure-vibe-delivery"]
     }
   }
 }</pre>
@@ -2104,6 +2104,29 @@ claude mcp add --scope user secure-vibe-delivery -- \
               </p>
             </div>
             <div class="qa">
+              <p class="q">On Windows, it says Failed to connect (or CONNECTION_CLOSED), but uv is installed.</p>
+              <p>
+                uv was probably installed with <code>pip install --user uv</code>, which
+                leaves <code>uvx.exe</code> in a folder such as
+                <code>%APPDATA%\Python\Python3xx\Scripts</code> that isn't on PATH.
+                Install it with winget instead (<code>winget install --id astral-sh.uv -e</code>),
+                open a new PowerShell window, check <code>where.exe uvx</code> prints a
+                path, and repeat step 2. If the very first start still fails, it's the
+                download timing out: run the <code>uvx --from …</code> command from step 2
+                once by hand, then check again.
+              </p>
+            </div>
+            <div class="qa">
+              <p class="q">The doctor says Semgrep or Locust is missing.</p>
+              <p>
+                The server runs both through <code>uv</code>, so this usually means it's on
+                a version before v0.1.12, which only looked for <code>uvx</code> on PATH.
+                Update to the current version (see <a href="#update">Update to a new version</a>)
+                and restart. If they're still missing, install uv with winget or Homebrew
+                (step 1).
+              </p>
+            </div>
+            <div class="qa">
               <p class="q">It's connected in the terminal, but the Claude Code panel doesn't list it.</p>
               <p>
                 Start a new conversation in the panel. If it's still missing, close VS
@@ -2171,7 +2194,7 @@ claude mcp add --scope user secure-vibe-delivery -- \
             <span class="phase-tag">Later</span>
             <h2>Update to a new version</h2>
             <p>
-              Each release is a version tag such as <code>v0.1.12</code>. Installs stay
+              Each release is a version tag such as <code>v0.1.13</code>. Installs stay
               on the tag they name until you change it, so nobody's setup changes
               without them knowing.
             </p>
@@ -2180,11 +2203,11 @@ claude mcp add --scope user secure-vibe-delivery -- \
             <pre class="language-bash">
 claude mcp remove secure-vibe-delivery -s user
 claude mcp add --scope user secure-vibe-delivery -- \
-  uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.12 secure-vibe-delivery</pre>
+  uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.13 secure-vibe-delivery</pre>
             <p>On Windows, in PowerShell:</p>
             <pre class="language-bash">
 claude mcp remove secure-vibe-delivery -s user
-claude mcp add --scope user secure-vibe-delivery -- uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.12 secure-vibe-delivery</pre>
+claude mcp add --scope user secure-vibe-delivery -- uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.13 secure-vibe-delivery</pre>
             <p>
               Then start a new conversation. Check the version with
               <code>claude mcp get secure-vibe-delivery</code>: the command it shows
@@ -2193,7 +2216,7 @@ claude mcp add --scope user secure-vibe-delivery -- uvx --from git+https://githu
             <h3>In Copilot Chat</h3>
             <p>
               Change the tag in <code>mcp.json</code> (for example
-              <code>@v0.1.11</code> to <code>@v0.1.12</code>), save, then click
+              <code>@v0.1.12</code> to <code>@v0.1.13</code>), save, then click
               <em>Restart</em> above the entry.
             </p>
           </section>

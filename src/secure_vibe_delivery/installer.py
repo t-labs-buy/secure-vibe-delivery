@@ -133,6 +133,21 @@ def _semgrep_cmd() -> Optional[list[str]]:
     return resolve_tool("semgrep")
 
 
+def semgrep_login_command() -> str:
+    """The PowerShell line a person types to sign in to Semgrep, using the same program the server
+    found. A bare name only when PowerShell will find that name on PATH; otherwise the full path,
+    so it still works when uvx.exe isn't on PATH (e.g. after `pip install --user uv`)."""
+    import shutil
+    cmd = _semgrep_cmd()
+    if not cmd:
+        return "uvx semgrep login"
+    exe, rest = cmd[0], cmd[1:]
+    name = Path(exe).stem
+    on_path = shutil.which(name)
+    head = name if on_path and Path(on_path).resolve() == Path(exe).resolve() else f'& "{exe}"'
+    return " ".join([head, *rest, "login"])
+
+
 def start_snyk_auth(si: SignIn) -> None:
     """`snyk auth` works without a terminal: it prints a link, opens the browser and waits."""
     cmd = _snyk_cmd()
@@ -167,7 +182,7 @@ def start_semgrep_login(si: SignIn) -> None:
     if os.name == "nt":
         si.state = "manual"
         si.detail = ("On Windows, Semgrep's sign-in needs a terminal window. Open PowerShell and run: "
-                     "uvx semgrep login")
+                     + semgrep_login_command())
         return
     import pty
     import select

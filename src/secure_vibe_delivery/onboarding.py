@@ -266,5 +266,6 @@ class Onboarding:
         if note:
             out["note"] = note
         if os.name == "nt":
-            out["platform_note"] = "On Windows, Semgrep's sign-in needs the person to run `uvx semgrep login` in PowerShell."
+            out["platform_note"] = ("On Windows, Semgrep's sign-in needs the person to run "
+                                  f"`{installer.semgrep_login_command()}` in PowerShell.")
         return out

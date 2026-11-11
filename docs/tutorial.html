@@ -1745,7 +1745,7 @@
         </p>
         <div class="meta-strip">
           <span><strong>Audience</strong> — everyone: developers, testers, delivery leads, managers</span>
-          <span><strong>Version</strong> — v0.1.12</span>
+          <span><strong>Version</strong> — v0.1.13</span>
           <span><strong>Install steps only</strong> — <a href="install.html">install guide</a></span>
           <span><strong>Repo</strong> — <a href="https://github.com/t-labs-buy/secure-vibe-delivery">t-labs-buy/secure-vibe-delivery</a></span>
         </div>
@@ -2066,7 +2066,7 @@ npm install -g @anthropic-ai/claude-code</pre>
             <div class="step-h"><span class="n">2</span>Add the server to Claude Code</div>
             <pre class="language-bash">
 claude mcp add --scope user secure-vibe-delivery -- \
-  uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.12 secure-vibe-delivery</pre>
+  uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.13 secure-vibe-delivery</pre>
             <p>Check it worked. You should see <code>Status: ✔ Connected</code>; the first check takes a few seconds while it downloads.</p>
             <pre class="language-bash">claude mcp get secure-vibe-delivery</pre>
             <div class="step-h"><span class="n">3</span>Do the one-time sign-up, with your assistant</div>
@@ -2112,11 +2112,29 @@ winget install --id OpenJS.NodeJS.LTS -e
 winget install --id Git.Git -e</pre>
             <p><strong>Close PowerShell and open a new window</strong>, so it finds the new programs. Then:</p>
             <pre class="language-bash">npm install -g @anthropic-ai/claude-code</pre>
+            <p>Check everything is in place. Each name should print a path:</p>
+            <pre class="language-bash">where.exe uvx claude</pre>
+            <div class="why">
+              <span class="label">Use winget for uv, not pip</span>
+              <p>
+                <code>pip install --user uv</code> puts <code>uvx.exe</code> in a folder that
+                usually isn't on PATH, so Claude Code can't start the server. If
+                <code>where.exe uvx</code> prints nothing, run the winget command above and
+                open a new PowerShell window.
+              </p>
+            </div>
             <div class="step-h"><span class="n">2</span>Add the server to Claude Code</div>
             <p>Paste this as one line:</p>
-            <pre class="language-bash">claude mcp add --scope user secure-vibe-delivery -- uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.12 secure-vibe-delivery</pre>
+            <pre class="language-bash">claude mcp add --scope user secure-vibe-delivery -- uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.13 secure-vibe-delivery</pre>
             <p>Check it worked:</p>
             <pre class="language-bash">claude mcp get secure-vibe-delivery</pre>
+            <p>
+              It should say <strong>Connected</strong>. The first start downloads the server, and
+              on a slow connection that can time out and say <em>Failed to connect</em>. If so, run
+              the server once by hand to fill the cache, stop it with <code>Ctrl+C</code> when it
+              goes quiet, and check again:
+            </p>
+            <pre class="language-bash">uvx --from git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.13 secure-vibe-delivery</pre>
             <div class="step-h"><span class="n">3</span>Do the one-time sign-up, with your assistant</div>
             <p>Open Claude Code (start a new conversation) and type:</p>
             <pre>Set up secure-vibe-delivery for me</pre>
@@ -2175,7 +2193,7 @@ winget install --id Git.Git -e</pre>
     "secure-vibe-delivery": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.12", "secure-vibe-delivery"]
+      "args": ["--from", "git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.13", "secure-vibe-delivery"]
     }
   }
 }</pre>
@@ -2419,6 +2437,10 @@ winget install --id Git.Git -e</pre>
             <div class="qa">
               <p class="q">My chat says the server isn't connected.</p>
               <p>Start a new conversation; in Copilot, make sure it's in Agent mode. If you added the server while VS Code was open, reload the window. The <a href="install.html">install guide</a> has more fixes.</p>
+            </div>
+            <div class="qa">
+              <p class="q">On Windows, Claude Code says Failed to connect.</p>
+              <p>Check <code>where.exe uvx</code> prints a path. If it doesn't, uv was probably installed with pip: install it with <code>winget install --id astral-sh.uv -e</code>, open a new PowerShell window and add the server again. If uv is found, the first download probably timed out; run the <code>uvx --from …</code> command from <a href="#windows">Install on Windows</a> once by hand, then check again.</p>
             </div>
             <div class="qa">
               <p class="q">How do I update to a new version?</p>

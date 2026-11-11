@@ -79,7 +79,7 @@ committed files: this repository is public.
 
 ## Update or remove
 
-Releases are git tags; change `@v0.1.12` to a newer tag to update. To remove the server from Claude
+Releases are git tags; change `@v0.1.13` to a newer tag to update. To remove the server from Claude
 Code: `claude mcp remove secure-vibe-delivery -s user`. For Copilot, delete its `mcp.json` entry.
 
 ## Development
