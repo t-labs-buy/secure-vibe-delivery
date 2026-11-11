@@ -1923,7 +1923,7 @@
                   <tr><td>Snyk IaC</td><td>Security</td><td>Only if the project has infrastructure files (Terraform, Kubernetes, CloudFormation, Azure ARM): checks them for risky settings, such as a storage bucket anyone can read or a database open to the whole internet.</td><td>Same Snyk account</td></tr>
                   <tr><td>Semgrep</td><td>Security</td><td>A fast "spell-checker for risky code". Runs standard rules plus our own rules for mistakes AI tools often make, and secret-finding rules.</td><td>Free account recommended, not required</td></tr>
                   <tr><td>Package check</td><td>Security</td><td>Confirms every library really exists on the official registries (PyPI, npm) and isn't brand-new, which catches made-up and look-alike names.</td><td>None</td></tr>
-                  <tr><td>pytest / Jest</td><td>Functional</td><td>Run the project's own automated tests: pytest for Python, Jest for JavaScript.</td><td>None</td></tr>
+                  <tr><td>pytest / Jest</td><td>Functional</td><td>Run the project's own automated tests: pytest for Python, Jest for JavaScript. A project with both (say, a Python backend and a <code>frontend/</code> folder) gets both. Or the project's own test command, set in <code>.svd.toml</code>.</td><td>None</td></tr>
                   <tr><td>Coverage</td><td>Functional</td><td>Measures how much of the code the tests actually exercised.</td><td>None</td></tr>
                   <tr><td>Locust</td><td>Performance</td><td>Pretends to be many users at once and measures how fast and how reliably the app responds.</td><td>None</td></tr>
                   <tr><td>uv</td><td>Setup</td><td>The installer that downloads and starts the server for you, and fetches Semgrep and Locust when needed. (If Snyk isn't installed, the server's setup downloads it.)</td><td>None</td></tr>
@@ -1957,7 +1957,7 @@
               <table>
                 <thead><tr><th>Item</th><th>What it looks for</th><th>Pass mark</th></tr></thead>
                 <tbody>
-                  <tr><td>Leaked keys</td><td>Passwords, API keys and tokens written straight into the code.</td><td>None found</td></tr>
+                  <tr><td>Leaked keys</td><td>Passwords, API keys and tokens written straight into the code. Graded by where they live (see below).</td><td>None in git, or about to be</td></tr>
                   <tr><td>Our code</td><td>Risky patterns: building database queries from user input, running text as code, switching off HTTPS checks.</td><td>No critical or high issues</td></tr>
                   <tr><td>Libraries</td><td>Third-party libraries with publicly known security holes (each has a CVE number).</td><td>No critical issues</td></tr>
                   <tr><td>Packages</td><td>Libraries that don't exist, or were first published under 30 days ago.</td><td>None suspicious</td></tr>
@@ -1975,13 +1975,35 @@
                 the word next to the colour.
               </p>
             </div>
+            <div class="why">
+              <span class="label">Where a secret lives matters</span>
+              <p>
+                A key in a file that git tracks is already on its way to everyone who can read
+                the repository, so it fails the check. So does one in a file git would pick up
+                on the next <code>git add .</code>. A key in a git-ignored file such as
+                <code>.env</code>, a made-up password in a test, or an example in the
+                documentation is listed as lower risk and doesn't fail it. Real provider keys
+                (AWS, GitHub, AI providers and the like) always count, wherever they turn up.
+                Outside a git repository there's no way to tell, so every secret counts.
+              </p>
+            </div>
+            <div class="why">
+              <span class="label">Other people's code isn't scanned</span>
+              <p>
+                Every virtual environment in the project is skipped, whatever its folder is
+                called (the scanner spots one by its <code>pyvenv.cfg</code> file), and so are
+                <code>node_modules</code> and <code>site-packages</code>. Those folders hold
+                thousands of files from libraries you installed, full of sample keys and old
+                code, and they'd bury the handful of findings that are actually yours.
+              </p>
+            </div>
             <h3>Functional: does it work?</h3>
             <div class="tablewrap">
               <table>
                 <thead><tr><th>Item</th><th>What it means</th><th>Pass mark</th></tr></thead>
                 <tbody>
-                  <tr><td>Tests pass</td><td>The project's automated tests all succeed.</td><td>All pass</td></tr>
-                  <tr><td>Coverage</td><td>The share of code lines the tests actually ran. 70% means 7 in every 10 lines were exercised.</td><td>At least 70%</td></tr>
+                  <tr><td>Tests pass</td><td>The project's automated tests all succeed. Each suite (pytest, Jest, or your own command) is listed separately in the report.</td><td>All pass</td></tr>
+                  <tr><td>Coverage</td><td>The share of code lines the tests actually ran. 70% means 7 in every 10 lines were exercised. With two suites, it's combined by line count: 800 of 1,000 backend lines plus 300 of 500 frontend lines makes 1,100 of 1,500, or 73%.</td><td>At least 70%</td></tr>
                   <tr><td>Wrong-case tests</td><td>Tests that check requests are refused when they should be: logged out, another user's data, too low a role.</td><td>Present (warning if missing)</td></tr>
                 </tbody>
               </table>
@@ -1992,6 +2014,19 @@
                 An AI asked to "add tests" often writes tests that check what the code
                 <em>does</em>, not what it was <em>meant</em> to do. A bug then gets locked in by
                 a passing test. Always check AI-written tests against the original request.
+              </p>
+            </div>
+            <div class="warn">
+              <span class="label">Some old-style pytest tests are refused, on purpose</span>
+              <p>
+                Older tests sometimes use a plain <code>setup()</code> or
+                <code>teardown()</code> function at the top of the file (a style borrowed from
+                an older tool called nose) to point themselves at a throwaway database.
+                pytest 8 quietly stopped calling those functions, so the tests would run
+                against the real database instead. When test files use them, the functional
+                check doesn't start pytest. It names the files and says why, and the doctor
+                warns before you run. Give it the command your project really uses in
+                <code>.svd.toml</code> (see <a href="#settings">Project settings</a>).
               </p>
             </div>
             <h3>Performance: can it cope?</h3>
@@ -2029,7 +2064,7 @@
               <li><strong>A Mac or Windows 10/11 PC</strong> with permission to install software.</li>
               <li><strong>An AI assistant that supports MCP:</strong> Claude Code (in a terminal or in VS Code) or GitHub Copilot Chat in VS Code.</li>
               <li><strong>A free Snyk account</strong> (required) and, ideally, a free Semgrep account. You don't need them yet: your assistant guides you through a one-time sign-up after installing.</li>
-              <li><strong>A project with automated tests</strong> (pytest or Jest). Without tests, the functional check can't run, which counts as a failure.</li>
+              <li><strong>A project with automated tests</strong> (pytest, Jest, or both), or a command that runs them. Without tests, the functional check can't run, which counts as a failure.</li>
               <li><strong>A running test copy of the app</strong> and its web address, such as <code>http://127.0.0.1:8000</code>, for the load test. Without it, the performance check shows as "didn't run".</li>
               <li><strong>The expected peak number of users</strong> and the <strong>response-time target</strong> agreed with the client, for the load test.</li>
             </ol>
@@ -2258,6 +2293,65 @@ winget install --id Git.Git -e</pre>
             </div>
           </section>
 
+          <!-- 8b · Project settings -->
+          <section class="phase" id="settings" data-nav-label="Project settings">
+            <span class="phase-tag">Optional</span>
+            <h2>Project settings: <code>.svd.toml</code></h2>
+            <p>
+              Most projects need no settings at all: the server finds pytest, Jest and a
+              locustfile on its own. But some projects only test properly through their own
+              script, one that starts a database in Docker first, say, or loads test
+              accounts. For those, put a file called <code>.svd.toml</code> at the
+              project root. Everything in it is optional and has a default.
+            </p>
+            <pre># Run these instead of the pytest / Jest it finds by itself
+[[functional.suite]]
+name = "backend"
+command = "scripts/run_tests.sh"     # run from the project root
+junit = ".svd/functional/junit.xml"  # optional: per-test results
+coverage = ".svd/functional/coverage.json"
+timeout = 3600                       # seconds (default 1800)
+
+[functional]
+# true only after checking the nose-style files are safe
+allow_unsafe_pytest = false
+
+[performance]
+locustfile = "loadtest/locustfile.py"
+# Variables Locust gets (names logged, values never)
+env_file = ".env"
+env = { LOADTEST_LLM = "0" }         # applied after env_file
+
+[security]
+exclude = ["generated"]              # extra folders to skip</pre>
+            <p>
+              You can add more than one <code>[[functional.suite]]</code> block, one per test
+              command; each gets its own line in the report. A results file that the suite
+              didn't write during this run is ignored, so a leftover file from last week
+              can't pass the check for you.
+            </p>
+            <div class="why">
+              <span class="label">Why the load test needs <code>env</code></span>
+              <p>
+                Locust runs in its own process, so it doesn't see the variables in the
+                terminal you started the app from. If your locustfile logs in with a test
+                account read from <code>TEST_PASSWORD</code>, point <code>env_file</code> at the
+                file that holds it. The run log lists the variable names it passed on, never
+                the values.
+              </p>
+            </div>
+            <div class="why">
+              <span class="label">Tests you ran yourself</span>
+              <p>
+                If the tests could only run somewhere else (in CI, or by hand), you don't have
+                to start over. Ask your assistant to "add these test results to the report",
+                giving it the JUnit XML and coverage JSON. It uses <code>svd_add_results</code>
+                to put them in the finished report and work out the verdict again. Then add the
+                command to <code>.svd.toml</code> so the next run does it by itself.
+              </p>
+            </div>
+          </section>
+
           <!-- 9 · Report -->
           <section class="phase" id="report">
             <span class="phase-tag">Use it</span>
@@ -2428,7 +2522,19 @@ winget install --id Git.Git -e</pre>
             </div>
             <div class="qa">
               <p class="q">Which languages does it support?</p>
-              <p>Security scanning works for most languages. The functional check runs pytest (Python) or Jest (JavaScript/TypeScript). The load test works for any website or API, whatever it's built in.</p>
+              <p>Security scanning works for most languages. The functional check runs pytest (Python) and Jest (JavaScript/TypeScript), both when the project has both. For anything else, give it your own test command in <a href="#settings"><code>.svd.toml</code></a>. The load test works for any website or API, whatever it's built in.</p>
+            </div>
+            <div class="qa">
+              <p class="q">The functional check says it refused to run pytest. Is something broken?</p>
+              <p>No, it's protecting your data. Some test files use nose-style <code>setup()</code> or <code>teardown()</code>, which pytest 8 no longer calls, so they'd run against the real database. The report names the files. Put the command your project really uses in <a href="#settings"><code>.svd.toml</code></a>, or, if you've checked those files are safe, set <code>allow_unsafe_pytest = true</code>.</p>
+            </div>
+            <div class="qa">
+              <p class="q">My tests only run in CI. Can I still get a full report?</p>
+              <p>Yes. Ask your assistant to add the JUnit XML and coverage JSON from that run to the report; it uses <code>svd_add_results</code> and works out the verdict again.</p>
+            </div>
+            <div class="qa">
+              <p class="q">Why is a key in my <code>.env</code> listed but not failing the check?</p>
+              <p>Because git ignores that file, so the key isn't on its way to anyone else. It's still listed as lower risk so you know it's there. A real provider key (AWS, GitHub, an AI provider) fails the check wherever it is.</p>
             </div>
             <div class="qa">
               <p class="q">Does it cost anything?</p>
@@ -2465,6 +2571,9 @@ winget install --id Git.Git -e</pre>
                   <tr><td>Library / dependency</td><td>Ready-made code from someone else that a project uses, instead of writing it from scratch.</td></tr>
                   <tr><td>Vulnerability, CVE</td><td>A known security weakness. Public ones get an ID such as CVE-2023-32681.</td></tr>
                   <tr><td>Secret</td><td>A password, API key or token: anything that grants access and must not be shared.</td></tr>
+                  <tr><td>Test suite</td><td>One set of tests run by one command, such as a project's pytest tests or its Jest tests.</td></tr>
+                  <tr><td><code>.svd.toml</code></td><td>An optional settings file at the project root that tells the server how to run your tests and load test.</td></tr>
+                  <tr><td>JUnit XML</td><td>A common file format for test results: which tests ran, passed and failed.</td></tr>
                   <tr><td>Rotate a key</td><td>Create a replacement key and cancel the old one, so a leaked copy stops working.</td></tr>
                   <tr><td>SQL injection</td><td>An attack where typed-in text tricks the app into running database commands.</td></tr>
                   <tr><td>Automated test</td><td>A small program that checks a piece of the app behaves as expected.</td></tr>

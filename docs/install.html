@@ -2087,6 +2087,17 @@ claude mcp add --scope user secure-vibe-delivery -- \
                 folder; ask "open the report again" any time to reopen it.
               </p>
             </div>
+            <div class="why">
+              <span class="label">If your tests need a script</span>
+              <p>
+                The server finds pytest and Jest by itself, and runs both when the project
+                has both. If the tests only work through your own command (one that starts a
+                database first, say), or the load test needs test-account variables, put them
+                in a <code>.svd.toml</code> file at the project root. The
+                <a href="tutorial.html#settings">tutorial's Project settings section</a>
+                shows every option.
+              </p>
+            </div>
           </section>
 
           <section class="phase" id="trouble">
@@ -2124,6 +2135,41 @@ claude mcp add --scope user secure-vibe-delivery -- \
                 Update to the current version (see <a href="#update">Update to a new version</a>)
                 and restart. If they're still missing, install uv with winget or Homebrew
                 (step 1).
+              </p>
+            </div>
+            <div class="qa">
+              <p class="q">The functional check says it refused to run pytest.</p>
+              <p>
+                Some test files use nose-style <code>setup()</code> or <code>teardown()</code>
+                functions, which pytest 8 no longer calls. Tests that use them to switch to a
+                throwaway database would run against the real one, so the check stops
+                instead and names the files. Put the command your project really uses in
+                <code>.svd.toml</code> (see the <a href="tutorial.html#settings">tutorial</a>).
+                If you've checked the files are safe, set
+                <code>allow_unsafe_pytest = true</code> under <code>[functional]</code>.
+                If you've already run the tests another way, ask your assistant to add the
+                JUnit XML and coverage JSON to the report; it uses
+                <code>svd_add_results</code>.
+              </p>
+            </div>
+            <div class="qa">
+              <p class="q">The load test can't log in, but the app works when I try it.</p>
+              <p>
+                Locust runs in its own process and doesn't see the variables in your
+                terminal, such as a test account's password. Add them under
+                <code>[performance]</code> in <code>.svd.toml</code>, with
+                <code>env_file = ".env"</code> or <code>env = { NAME = "value" }</code>. The
+                log shows the names it passed on, never the values.
+              </p>
+            </div>
+            <div class="qa">
+              <p class="q">The report is full of findings from <code>.venv</code> or <code>node_modules</code>.</p>
+              <p>
+                From v0.1.14 the scanners skip every virtual environment (any folder with a
+                <code>pyvenv.cfg</code>), <code>node_modules</code> and
+                <code>site-packages</code>. Update (see
+                <a href="#update">Update to a new version</a>). To skip another folder, list it
+                in <code>exclude</code> under <code>[security]</code> in <code>.svd.toml</code>.
               </p>
             </div>
             <div class="qa">
