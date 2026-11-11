@@ -31,6 +31,29 @@ def journal_step(kind: str, text: str, **extra) -> None:
 UVX_FALLBACK = {"semgrep": "semgrep", "locust": "locust"}
 
 
+def find_uv_runner() -> Optional[list[str]]:
+    """The argv prefix that runs a tool through uv, or None if uv can't be found.
+
+    PATH comes first. When it misses (common on Windows after `pip install --user uv`, which puts
+    uvx.exe in a Scripts folder that isn't on PATH), fall back to the `UV` variable: uv sets it to
+    its own binary for every process it starts, and this server is normally started by uvx.
+    """
+    found = shutil.which("uvx")
+    if found:
+        return [found]
+    uv = os.environ.get("UV", "")
+    if uv and Path(uv).is_file():
+        uv_path = Path(uv)
+        sibling = uv_path.with_name("uvx" + uv_path.suffix)  # uvx.exe beside uv.exe on Windows
+        if sibling.is_file():
+            return [str(sibling)]
+        return [str(uv_path), "tool", "run"]
+    found = shutil.which("uv")
+    if found:
+        return [found, "tool", "run"]
+    return None
+
+
 def resolve_tool(name: str) -> Optional[list[str]]:
     """Return the argv prefix that runs `name`, or None if it can't be found."""
     path = shutil.which(name)
@@ -42,8 +65,9 @@ def resolve_tool(name: str) -> Optional[list[str]]:
         cached = cached_snyk()
         if cached:
             return [str(cached)]
-    if name in UVX_FALLBACK and shutil.which("uvx"):
-        return [shutil.which("uvx"), "--python", "3.12", UVX_FALLBACK[name]]
+    runner = find_uv_runner() if name in UVX_FALLBACK else None
+    if runner:
+        return [*runner, "--python", "3.12", UVX_FALLBACK[name]]
     return None
 
 

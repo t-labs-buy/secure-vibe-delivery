@@ -4,11 +4,10 @@ from __future__ import annotations
 import json
 import os
 import re
-import shutil
 from pathlib import Path
 
 from .detect import detect
-from .proc import resolve_tool, run_cmd
+from .proc import UVX_FALLBACK, find_uv_runner, resolve_tool, run_cmd
 
 
 def _first_version(text: str) -> str:
@@ -25,7 +24,7 @@ async def tool_versions(root: Path) -> dict[str, str]:
             continue
         p = await run_cmd([*cmd, "--version"], root, timeout=180)
         out[name] = _first_version(p.stdout or p.stderr) if p.exit_code == 0 else "error"
-        if cmd[0].endswith("uvx"):
+        if name in UVX_FALLBACK and cmd[-1] == UVX_FALLBACK[name] and len(cmd) > 1:
             out[name] += " (via uvx)"
     return out
 
@@ -105,7 +104,8 @@ async def doctor(project_path: str) -> dict:
     tools["locust"] = {"version": versions["locust"]}
     if versions["locust"] == "missing":
         report["actions"].append("Install Locust: pip install locust (or install uv so it runs via uvx)")
-    tools["uv"] = {"available": bool(shutil.which("uvx"))}
+    runner = find_uv_runner()
+    tools["uv"] = {"available": bool(runner), **({"path": runner[0]} if runner else {})}
 
     det = report["project_detection"]
     det.update(python=info.is_python, javascript=info.is_js, test_runner=info.test_runner,
