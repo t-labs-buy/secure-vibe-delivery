@@ -62,7 +62,7 @@
       }
       .tab .kind { font-size: 0.68rem; font-weight: 400; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.8; }
       .tab:hover { color: var(--ink); }
-      .tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+      .tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); background: var(--accent-soft); border-radius: 6px 6px 0 0; }
       .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
       main .inner { padding-block: 18px 40px; }
       .panel { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
@@ -95,17 +95,17 @@
         </div>
         <p class="sub">How the MCP server is put together and how one go-live check flows through it. v0.1.13.</p>
         <div class="tabs" role="tablist" aria-label="Architecture views">
-          <button class="tab" role="tab" id="tab-components" aria-controls="components" data-view="components"><span>Component diagram</span><span class="kind">png</span></button>
-          <button class="tab" role="tab" id="tab-workflow" aria-controls="workflow" data-view="workflow"><span>Workflow</span><span class="kind">png</span></button>
-          <button class="tab" role="tab" id="tab-overview" aria-controls="overview" data-view="overview"><span>High-level architecture</span><span class="kind">interactive</span></button>
-          <button class="tab" role="tab" id="tab-demo" aria-controls="demo" data-view="demo"><span>Live demo</span><span class="kind">animated</span></button>
+          <button class="tab" role="tab" id="tab-components" aria-controls="panel-components" data-view="components"><span>Component diagram</span><span class="kind">png</span></button>
+          <button class="tab" role="tab" id="tab-workflow" aria-controls="panel-workflow" data-view="workflow"><span>Workflow</span><span class="kind">png</span></button>
+          <button class="tab" role="tab" id="tab-overview" aria-controls="panel-overview" data-view="overview"><span>High-level architecture</span><span class="kind">interactive</span></button>
+          <button class="tab" role="tab" id="tab-demo" aria-controls="panel-demo" data-view="demo"><span>Live demo</span><span class="kind">animated</span></button>
         </div>
       </div>
     </header>
 
     <main>
       <div class="inner">
-        <section class="panel" role="tabpanel" id="components" aria-labelledby="tab-components">
+        <section class="panel" role="tabpanel" id="panel-components" aria-labelledby="tab-components">
           <div class="panel-head">
             <p>Every component of the server in seven layers, from the developer and their assistant down to the reports, with the external services on the right.</p>
             <a class="open" href="component-architecture.png" target="_blank" rel="noopener">Open full size ↗</a>
@@ -113,7 +113,7 @@
           <div class="frame image"><img src="component-architecture.png" alt="Component architecture of the secure-vibe-delivery MCP server: seven layers from people and assistant to outputs, with external services" width="4260" height="3128" /></div>
         </section>
 
-        <section class="panel" role="tabpanel" id="workflow" aria-labelledby="tab-workflow" hidden>
+        <section class="panel" role="tabpanel" id="panel-workflow" aria-labelledby="tab-workflow" hidden>
           <div class="panel-head">
             <p>One go-live check as a sequence: start the run, run the three checks, then decide and report. The assistant polls the background run.</p>
             <a class="open" href="system-workflow-simple.png" target="_blank" rel="noopener">Open full size ↗</a>
@@ -121,7 +121,7 @@
           <div class="frame image"><img src="system-workflow-simple.png" alt="Simplified workflow sequence diagram of a go-live check" width="1411" height="795" /></div>
         </section>
 
-        <section class="panel" role="tabpanel" id="overview" aria-labelledby="tab-overview" hidden>
+        <section class="panel" role="tabpanel" id="panel-overview" aria-labelledby="tab-overview" hidden>
           <div class="panel-head">
             <p>The primary path across twelve core components, with the local boundary and the outside services. Hover, zoom and switch themes inside the view.</p>
             <a class="open" href="svd-overview.html" target="_blank" rel="noopener">Open on its own ↗</a>
@@ -129,7 +129,7 @@
           <div class="frame"><iframe title="High-level architecture" data-src="svd-overview.html"></iframe></div>
         </section>
 
-        <section class="panel" role="tabpanel" id="demo" aria-labelledby="tab-demo" hidden>
+        <section class="panel" role="tabpanel" id="panel-demo" aria-labelledby="tab-demo" hidden>
           <div class="panel-head">
             <p>Press Play to watch one request travel through every component in 28 steps. Click any card or link to inspect it.</p>
             <a class="open" href="architecture/demo/index.html" target="_blank" rel="noopener">Open on its own ↗</a>
@@ -149,7 +149,7 @@
             var on = t.dataset.view === view;
             t.setAttribute("aria-selected", on ? "true" : "false");
             t.tabIndex = on ? 0 : -1;
-            var panel = document.getElementById(t.dataset.view);
+            var panel = document.getElementById("panel-" + t.dataset.view);
             panel.hidden = !on;
             if (on) {
               var f = panel.querySelector("iframe[data-src]");

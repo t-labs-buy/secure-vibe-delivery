@@ -71,7 +71,7 @@ const NODES = {
     "x": 600,
     "y": 120,
     "icon": "📘",
-    "title": "Fixing Skills",
+    "title": "Skills",
     "sub": "5 skill:// guides",
     "color": "#a855f7",
     "desc": "Five step-by-step fixing guides served as MCP resources. Each must-fix item in the report points at one guide."
@@ -121,18 +121,36 @@ const NODES = {
     "color": "#8b5cf6",
     "desc": "Runs a Locust load test at 1.5× the expected peak against the test environment and checks the p95 response time."
   },
-  "TOOLS": {
+  "SCAN": {
+    "x": 1440,
+    "y": 120,
+    "icon": "🔍",
+    "title": "Snyk CLI · Semgrep",
+    "sub": "security scanners",
+    "color": "#14b8a6",
+    "desc": "The Snyk CLI (Open Source, Code, Secrets, IaC) and Semgrep with AI-mistake rules, run as local subprocesses. Semgrep runs through uvx if not installed."
+  },
+  "PYT": {
     "x": 1440,
     "y": 336,
-    "icon": "🧰",
-    "title": "Local Toolchain",
-    "sub": "Snyk CLI · Semgrep · Locust",
+    "icon": "🧪",
+    "title": "pytest / Jest",
+    "sub": "project test runner",
     "color": "#14b8a6",
-    "desc": "The command-line tools the checks drive: Snyk CLI, Semgrep, pytest/Jest, Locust. The tool resolver finds each one: PATH, then the Snyk cache, then uvx via the UV variable."
+    "desc": "The project's own test runner: pytest for Python, Jest for JavaScript. Run with coverage so the functional check can apply its gate."
+  },
+  "LOC": {
+    "x": 1440,
+    "y": 552,
+    "icon": "🐝",
+    "title": "Locust",
+    "sub": "load generator · uvx",
+    "color": "#14b8a6",
+    "desc": "The load generator. Runs through uvx if not installed, driven by the project's locustfile."
   },
   "REG": {
     "x": 1720,
-    "y": 120,
+    "y": 336,
     "icon": "📦",
     "title": "PyPI · npm",
     "sub": "package registries",
@@ -142,7 +160,7 @@ const NODES = {
   },
   "CLOUD": {
     "x": 1720,
-    "y": 336,
+    "y": 120,
     "icon": "☁️",
     "title": "Snyk · Semgrep",
     "sub": "cloud services",
@@ -329,10 +347,10 @@ const STEPS = [
   },
   {
     "f": "SEC",
-    "t": "TOOLS",
+    "t": "SCAN",
     "ph": 2,
     "k": "call",
-    "route": "Security Check → Local Toolchain",
+    "route": "Security Check → Snyk CLI · Semgrep",
     "m": "The security check runs the Snyk scans and Semgrep as subprocesses.",
     "chat": [
       [
@@ -343,14 +361,14 @@ const STEPS = [
   },
   {
     "f": "CLOUD",
-    "t": "TOOLS",
+    "t": "SCAN",
     "ph": 2,
     "k": "data",
-    "route": "Local Toolchain ⇄ Snyk · Semgrep",
+    "route": "Snyk CLI · Semgrep ⇄ cloud services",
     "m": "The CLIs call Snyk cloud with the signed-in token and fetch Semgrep rules.",
     "chat": [
       [
-        "TOOLS",
+        "SCAN",
         "Here's the dependency list and code, with my token."
       ],
       [
@@ -361,15 +379,15 @@ const STEPS = [
     "roundTrip": true
   },
   {
-    "f": "TOOLS",
+    "f": "SCAN",
     "t": "SEC",
     "ph": 2,
     "k": "data",
-    "route": "Local Toolchain → Security Check",
+    "route": "Snyk CLI · Semgrep → Security Check",
     "m": "The CLIs hand back JSON findings.",
     "chat": [
       [
-        "TOOLS",
+        "SCAN",
         "JSON findings from Snyk and Semgrep."
       ]
     ]
@@ -422,19 +440,19 @@ const STEPS = [
     ]
   },
   {
-    "f": "TOOLS",
+    "f": "PYT",
     "t": "FUN",
     "ph": 3,
     "k": "data",
-    "route": "Functional Check ⇄ Local Toolchain",
+    "route": "Functional Check ⇄ pytest / Jest",
     "m": "pytest runs the project's tests with coverage.",
     "chat": [
       [
         "FUN",
-        "Run pytest with coverage."
+        "pytest, run the test suite with coverage."
       ],
       [
-        "TOOLS",
+        "PYT",
         "148 passed · coverage 82%."
       ]
     ],
@@ -489,10 +507,10 @@ const STEPS = [
   },
   {
     "f": "PERF",
-    "t": "TOOLS",
+    "t": "LOC",
     "ph": 4,
     "k": "call",
-    "route": "Performance Check → Local Toolchain",
+    "route": "Performance Check → Locust",
     "m": "Locust runs through uvx with the load profile.",
     "chat": [
       [
@@ -503,14 +521,14 @@ const STEPS = [
   },
   {
     "f": "TEST",
-    "t": "TOOLS",
+    "t": "LOC",
     "ph": 4,
     "k": "data",
-    "route": "Local Toolchain ⇄ Test Environment",
+    "route": "Locust ⇄ Test Environment",
     "m": "Locust sends load to the test copy of the app.",
     "chat": [
       [
-        "TOOLS",
+        "LOC",
         "Sending load to the test environment."
       ],
       [
@@ -521,15 +539,15 @@ const STEPS = [
     "roundTrip": true
   },
   {
-    "f": "TOOLS",
+    "f": "LOC",
     "t": "PERF",
     "ph": 4,
     "k": "data",
-    "route": "Local Toolchain → Performance Check",
+    "route": "Locust → Performance Check",
     "m": "Locust's CSV stats come back.",
     "chat": [
       [
-        "TOOLS",
+        "LOC",
         "Stats: p95 410 ms · error rate 0.2%."
       ]
     ]
@@ -633,7 +651,7 @@ const STEPS = [
     "t": "MCP",
     "ph": 5,
     "k": "data",
-    "route": "MCP Server ⇄ Fixing Skills",
+    "route": "MCP Server ⇄ Skills",
     "m": "The assistant reads the guide for the first must-fix item.",
     "chat": [
       [
@@ -722,7 +740,7 @@ function linkInfo(key) {
 // Pairs that need arrowheads on BOTH ends because the flow is a
 // request/response round-trip along one edge, not two distinct steps.
 // Must exactly match every pairKey(f, t) used with roundTrip: true above.
-const BIDIRECTIONAL = new Set(["AST|MCP", "CLOUD|TOOLS", "DOC|MCP", "FUN|TOOLS", "GATE|PIPE", "MCP|SK", "REG|SEC", "TEST|TOOLS"]);
+const BIDIRECTIONAL = new Set(["AST|MCP", "CLOUD|SCAN", "DOC|MCP", "FUN|PYT", "GATE|PIPE", "LOC|TEST", "MCP|SK", "REG|SEC"]);
 
 // Short text drawn on each connection — the protocol or payload that crosses
 // it ("HTTP POST /orders", "publishes OrderPaid"). Keyed by pairKey; every key
@@ -733,10 +751,12 @@ const LINK_LABELS = {
   "AST|DEV": "chat",
   "AST|MCP": "MCP · stdio",
   "MCP|PIPE": "svd_run",
-  "SEC|TOOLS": "subprocess",
-  "CLOUD|TOOLS": "HTTPS · token",
+  "SCAN|SEC": "subprocess",
+  "CLOUD|SCAN": "HTTPS · token",
+  "FUN|PYT": "runs tests",
+  "LOC|PERF": "load profile",
   "REG|SEC": "package age",
-  "TEST|TOOLS": "load traffic",
+  "LOC|TEST": "load traffic",
   "REND|RUNS": "writes .svd",
   "DEV|RUNS": "opens in browser",
   "GATE|PIPE": "results → verdict"
@@ -764,10 +784,19 @@ const GROUPS = [
     "tone": 0
   },
   {
+    "name": "Local tools",
+    "members": [
+      "SCAN",
+      "PYT",
+      "LOC"
+    ],
+    "tone": 2
+  },
+  {
     "name": "External — not ours",
     "members": [
-      "REG",
       "CLOUD",
+      "REG",
       "TEST"
     ],
     "tone": 1
@@ -820,7 +849,7 @@ const SUBTITLE = "One go-live check, from the developer's question to the verdic
 // default. LAYOUT_STAMP is bumped whenever that happens, which retires every
 // previously saved layout in every profile — otherwise a stale localStorage
 // entry would keep overriding the freshly baked one.
-const LAYOUT_STAMP = "v1";
+const LAYOUT_STAMP = "v2";
 const LAYOUT_KEY = "archflow-layout:" + TITLE;
 (function loadLayout() {
   try {
