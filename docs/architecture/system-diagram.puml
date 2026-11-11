@@ -1,0 +1,88 @@
+@startuml system-diagram
+title Secure Vibe Delivery — System Architecture
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultTextAlignment center
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam nodesep 40
+skinparam ranksep 55
+skinparam rectangle {
+  BorderColor #666666
+}
+skinparam cloud {
+  BackgroundColor #333333
+  FontColor #FFFFFF
+  BorderColor #111111
+}
+skinparam package {
+  BorderColor #888888
+  FontStyle bold
+}
+skinparam ArrowColor #444444
+
+actor "Developer /\nreviewer" as User
+
+package "People & assistant" {
+  rectangle "AI Assistant\nClaude Code · Copilot Chat" as AST #E3F2FD
+}
+
+package "MCP server (uvx child process · stdio)" {
+  rectangle "MCP Server\nFastMCP · 9 svd_* tools" as MCP #ECEFF1
+  rectangle "Fixing Skills\n5 skill:// guides" as SK #F3E5F5
+  rectangle "Guided Setup\nsvd_setup" as SETUP #FFF3E0
+  rectangle "Doctor\nsvd_doctor" as DOC #FFF3E0
+  rectangle "Run Pipeline\nbackground job · run_id" as PIPE #FFF3E0
+  rectangle "Locustfile Generator\nOpenAPI → routes" as LGEN #FFF3E0
+  package "Checks" {
+    rectangle "Security Check\nSnyk · Semgrep · provenance" as SEC #EDE7F6
+    rectangle "Functional Check\n70% coverage gate" as FUN #EDE7F6
+    rectangle "Performance Check\n1.5× expected peak" as PERF #EDE7F6
+  }
+  rectangle "Go-Live Gate\nGO · PROVISIONAL · NO-GO" as GATE #FCE4EC
+  rectangle "Report Renderer\nJinja2 · health score" as REND #FCE4EC
+}
+
+rectangle "Local Toolchain\nSnyk CLI · Semgrep · pytest/Jest · Locust" as TOOLS #E0F2F1
+database "Run Records\n.svd/runs · .svd/reports" as RUNS #E8F5E9
+rectangle "Chrome / Edge\nheadless PDF (optional)" as CHROME #FAFAFA
+
+cloud "Snyk cloud\nvuln DB · Code · sign-in" as SNYK
+cloud "Semgrep registry\nrules · sign-in" as SGR
+cloud "PyPI · npm\npackage age · uvx" as REG
+cloud "Test environment\nnever production" as TEST
+
+User -down-> AST : chat
+AST -down-> MCP : MCP · stdio
+MCP -right-> SK : serves
+MCP -down-> SETUP
+MCP -down-> DOC
+MCP -down-> PIPE : svd_run
+MCP -down-> LGEN
+PIPE -down-> SEC : runs in order
+PIPE -down-> FUN
+PIPE -down-> PERF
+PIPE -right-> GATE : results
+GATE -down-> REND : verdict
+SEC -down-> TOOLS : subprocess
+FUN -down-> TOOLS
+PERF -down-> TOOLS
+SETUP -down-> TOOLS : auth · login
+DOC -down-> TOOLS : versions
+SEC -down-> REG : provenance
+TOOLS -down-> SNYK : HTTPS · token
+TOOLS -down-> SGR : rules
+TOOLS -down-> REG : uvx fetch
+TOOLS -down-> TEST : load test
+REND -down-> CHROME : print PDF
+REND -down-> RUNS : HTML · summary
+PIPE .up.> User : opens report
+
+note bottom of SNYK
+  Dark boxes = external systems
+  this system depends on but does
+  not control. Snyk is reached only
+  through the local Snyk CLI.
+end note
+
+@enduml

@@ -1,0 +1,86 @@
+@startuml system-workflow
+title Secure Vibe Delivery — Workflow (a go-live check of one project)
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam roundcorner 8
+skinparam ArrowColor #444444
+skinparam ArrowFontColor #333333
+skinparam responseMessageBelowArrow true
+skinparam NoteBackgroundColor #FFF7E0
+skinparam NoteBorderColor #E0C46C
+
+actor "Developer" as User #ECEFF1
+participant "AI Assistant" as AST #E3F2FD
+participant "MCP Server" as MCP #E8F5E9
+participant "Doctor" as DOC #FFF3E0
+participant "Run Pipeline" as PIPE #FFF3E0
+participant "Security\nCheck" as SEC #F3E5F5
+participant "Functional\nCheck" as FUN #F3E5F5
+participant "Performance\nCheck" as PERF #F3E5F5
+participant "Local\nToolchain" as TOOLS #E3F2FD
+boundary "Snyk · Semgrep\n· PyPI/npm" as CLOUD #ECEFF1
+boundary "Test\nenvironment" as TEST #ECEFF1
+participant "Go-Live\nGate" as GATE #E8F5E9
+participant "Report\nRenderer" as REND #E8F5E9
+database "Run Records" as RUNS #ECEFF1
+
+User -> AST : "check this project before go-live"
+
+== Step 1 — Ask, check readiness, start the run ==
+AST -> MCP : svd_doctor
+MCP -> DOC : check tools
+DOC -> TOOLS : versions · sign-ins
+TOOLS --> DOC : all signed in
+DOC --> AST : ready
+AST -> MCP : svd_run
+MCP -> PIPE : start background job
+MCP --> AST : **run_id** (at once)
+
+== Step 2 — Scan for security problems ==
+activate PIPE
+PIPE -> PIPE : detect project type
+PIPE -> SEC : run
+activate SEC
+SEC -> TOOLS : snyk test / code / secrets · semgrep
+TOOLS -> CLOUD : HTTPS (Snyk token)
+CLOUD --> TOOLS : findings · rules
+TOOLS --> SEC : JSON results
+SEC -> CLOUD : package age (provenance)
+SEC --> PIPE : **security result**
+deactivate SEC
+
+== Step 3 — Prove it works and copes with load ==
+PIPE -> FUN : run
+FUN -> TOOLS : pytest / Jest + coverage
+TOOLS --> FUN : tests · coverage
+FUN --> PIPE : **functional result**
+PIPE -> PERF : run
+PERF -> TOOLS : Locust at 1.5× peak
+TOOLS -> TEST : load traffic
+TEST --> TOOLS : responses
+TOOLS --> PERF : p95 · errors
+PERF --> PIPE : **performance result**
+AST -> MCP : svd_status (polling)
+MCP --> AST : progress
+
+== Step 4 — Decide and report ==
+PIPE -> GATE : three results
+GATE --> PIPE : **verdict** + **must-fix list**
+PIPE -> REND : render
+REND -> RUNS : **HTML report** · PDF · summary.json
+deactivate PIPE
+PIPE --> User : opens **HTML report**
+AST -> MCP : svd_report · svd_skill
+MCP --> AST : verdict · must-fix · fixing guide
+AST --> User : 📄 verdict and what to fix first
+
+note across
+  The server never calls Snyk's API itself: the Security Check starts the
+  Snyk CLI as a local subprocess, and the CLI calls Snyk cloud with the token
+  from a browser sign-in. The run is a background job, so the assistant
+  polls svd_status instead of waiting on one long tool call.
+end note
+
+@enduml

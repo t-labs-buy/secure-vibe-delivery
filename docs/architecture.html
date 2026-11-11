@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Architecture — secure-vibe-delivery</title>
+    <meta name="description" content="Four views of the secure-vibe-delivery MCP server: the component diagram, the workflow, the interactive high-level architecture and an animated live demo." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" />
+    <script>
+      // Same saved theme as the install guide and tutorial ("doc-theme").
+      (function () {
+        try {
+          var t = localStorage.getItem("doc-theme");
+          if (t === "dark" || t === "light" || t === "paper") document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
+    <style>
+      /* Layout: header band with links to the other guides, a tab strip, then one full-width panel per view. */
+      :root {
+        color-scheme: light;
+        --bg: #f6f8f8; --head-bg: #efefed; --card: #ffffff; --ink: #1c2529; --muted: #56676d;
+        --accent: #0e6e68; --accent-soft: #e2efed; --border: #d8e0e0;
+        --font: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]):not([data-theme="paper"]) {
+          color-scheme: dark;
+          --bg: #303446; --head-bg: #292c3c; --card: #414559; --ink: #c6d0f5; --muted: #a5adce;
+          --accent: #81c8be; --accent-soft: #51576d; --border: #51576d;
+        }
+      }
+      :root[data-theme="dark"] {
+        color-scheme: dark;
+        --bg: #303446; --head-bg: #292c3c; --card: #414559; --ink: #c6d0f5; --muted: #a5adce;
+        --accent: #81c8be; --accent-soft: #51576d; --border: #51576d;
+      }
+      :root[data-theme="paper"] {
+        --bg: #f4f1e8; --head-bg: #ebe6d8; --card: #fbf9f3; --ink: #2b2a26; --muted: #66625a;
+        --accent: #0c635d; --accent-soft: #e3ece8; --border: #ddd6c4;
+      }
+      * { box-sizing: border-box; }
+      [hidden] { display: none !important; }
+      html, body { margin: 0; }
+      body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 14px; line-height: 1.6; }
+      .band { background: var(--head-bg); border-bottom: 1px solid var(--border); }
+      .inner { max-width: 1600px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+      header .inner { padding-block: 22px 0; display: flex; flex-direction: column; gap: 14px; }
+      .top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; }
+      h1 { margin: 0; font-size: 1.3rem; font-weight: 700; text-wrap: balance; }
+      .sub { margin: 0; color: var(--muted); max-width: 72ch; }
+      .links { display: flex; gap: 18px; font-size: 0.85rem; }
+      .links a { color: var(--accent); text-decoration: none; }
+      .links a:hover { text-decoration: underline; }
+      .tabs { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; }
+      .tab {
+        appearance: none; border: 0; background: none; color: var(--muted); font: inherit; font-weight: 600;
+        padding: 10px 14px; border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap;
+        display: flex; gap: 8px; align-items: baseline;
+      }
+      .tab .kind { font-size: 0.68rem; font-weight: 400; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.8; }
+      .tab:hover { color: var(--ink); }
+      .tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+      .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+      main .inner { padding-block: 18px 40px; }
+      .panel { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+      .panel-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 16px; }
+      .panel-head p { margin: 0; color: var(--muted); max-width: 80ch; }
+      .open { font-size: 0.8rem; color: var(--accent); text-decoration: none; white-space: nowrap; }
+      .open:hover { text-decoration: underline; }
+      .frame { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; min-width: 0; }
+      .frame.image { overflow: auto; padding: 12px; background: #ffffff; }
+      .frame.image img { display: block; width: 100%; height: auto; max-width: 100%; }
+      .frame iframe { display: block; width: 100%; height: calc(100vh - 230px); min-height: 560px; border: 0; background: #ffffff; }
+      @media (max-width: 640px) {
+        .frame.image { padding: 6px; }
+        .frame.image img { width: 900px; max-width: none; }
+        .frame iframe { min-height: 480px; height: 75vh; }
+      }
+      @media (prefers-reduced-motion: no-preference) { .tab { transition: color 120ms, border-color 120ms; } }
+    </style>
+  </head>
+  <body>
+    <header class="band">
+      <div class="inner">
+        <div class="top">
+          <h1>secure-vibe-delivery architecture</h1>
+          <nav class="links" aria-label="Other guides">
+            <a href="install.html">Install guide</a>
+            <a href="tutorial.html">Tutorial</a>
+            <a href="https://github.com/t-labs-buy/secure-vibe-delivery">GitHub</a>
+          </nav>
+        </div>
+        <p class="sub">How the MCP server is put together and how one go-live check flows through it. v0.1.13.</p>
+        <div class="tabs" role="tablist" aria-label="Architecture views">
+          <button class="tab" role="tab" id="tab-components" aria-controls="components" data-view="components"><span>Component diagram</span><span class="kind">png</span></button>
+          <button class="tab" role="tab" id="tab-workflow" aria-controls="workflow" data-view="workflow"><span>Workflow</span><span class="kind">png</span></button>
+          <button class="tab" role="tab" id="tab-overview" aria-controls="overview" data-view="overview"><span>High-level architecture</span><span class="kind">interactive</span></button>
+          <button class="tab" role="tab" id="tab-demo" aria-controls="demo" data-view="demo"><span>Live demo</span><span class="kind">animated</span></button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="inner">
+        <section class="panel" role="tabpanel" id="components" aria-labelledby="tab-components">
+          <div class="panel-head">
+            <p>Every component of the server in seven layers, from the developer and their assistant down to the reports, with the external services on the right.</p>
+            <a class="open" href="component-architecture.png" target="_blank" rel="noopener">Open full size ↗</a>
+          </div>
+          <div class="frame image"><img src="component-architecture.png" alt="Component architecture of the secure-vibe-delivery MCP server: seven layers from people and assistant to outputs, with external services" width="4260" height="3128" /></div>
+        </section>
+
+        <section class="panel" role="tabpanel" id="workflow" aria-labelledby="tab-workflow" hidden>
+          <div class="panel-head">
+            <p>One go-live check as a sequence: start the run, run the three checks, then decide and report. The assistant polls the background run.</p>
+            <a class="open" href="system-workflow-simple.png" target="_blank" rel="noopener">Open full size ↗</a>
+          </div>
+          <div class="frame image"><img src="system-workflow-simple.png" alt="Simplified workflow sequence diagram of a go-live check" width="1411" height="795" /></div>
+        </section>
+
+        <section class="panel" role="tabpanel" id="overview" aria-labelledby="tab-overview" hidden>
+          <div class="panel-head">
+            <p>The primary path across twelve core components, with the local boundary and the outside services. Hover, zoom and switch themes inside the view.</p>
+            <a class="open" href="svd-overview.html" target="_blank" rel="noopener">Open on its own ↗</a>
+          </div>
+          <div class="frame"><iframe title="High-level architecture" data-src="svd-overview.html"></iframe></div>
+        </section>
+
+        <section class="panel" role="tabpanel" id="demo" aria-labelledby="tab-demo" hidden>
+          <div class="panel-head">
+            <p>Press Play to watch one request travel through every component in 28 steps. Click any card or link to inspect it.</p>
+            <a class="open" href="architecture/demo/index.html" target="_blank" rel="noopener">Open on its own ↗</a>
+          </div>
+          <div class="frame"><iframe title="Live demo" data-src="architecture/demo/index.html" allow="fullscreen"></iframe></div>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        var tabs = Array.prototype.slice.call(document.querySelectorAll(".tab"));
+        var views = tabs.map(function (t) { return t.dataset.view; });
+        function show(view) {
+          if (views.indexOf(view) === -1) view = views[0];
+          tabs.forEach(function (t) {
+            var on = t.dataset.view === view;
+            t.setAttribute("aria-selected", on ? "true" : "false");
+            t.tabIndex = on ? 0 : -1;
+            var panel = document.getElementById(t.dataset.view);
+            panel.hidden = !on;
+            if (on) {
+              var f = panel.querySelector("iframe[data-src]");
+              if (f && !f.getAttribute("src")) f.setAttribute("src", f.dataset.src);
+            }
+          });
+        }
+        tabs.forEach(function (t, i) {
+          t.addEventListener("click", function () {
+            if (location.hash !== "#" + t.dataset.view) location.hash = t.dataset.view; else show(t.dataset.view);
+          });
+          t.addEventListener("keydown", function (e) {
+            var d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+            if (!d) return;
+            var next = tabs[(i + d + tabs.length) % tabs.length];
+            next.focus(); next.click();
+          });
+        });
+        window.addEventListener("hashchange", function () { show(location.hash.slice(1)); });
+        show(location.hash.slice(1));
+      })();
+    </script>
+  </body>
+</html>

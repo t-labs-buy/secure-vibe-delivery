@@ -1,0 +1,48 @@
+@startuml system-workflow-simple
+title Secure Vibe Delivery — Workflow (simplified)
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam roundcorner 8
+skinparam ArrowColor #444444
+skinparam ArrowFontColor #333333
+skinparam responseMessageBelowArrow true
+skinparam NoteBackgroundColor #FFF7E0
+skinparam NoteBorderColor #E0C46C
+
+actor "Developer" as User #ECEFF1
+participant "AI Assistant" as AST #E3F2FD
+participant "MCP Server" as MCP #E8F5E9
+participant "Run Pipeline" as PIPE #FFF3E0
+participant "Checks" as CHK #F3E5F5
+participant "Local Toolchain" as TOOLS #E3F2FD
+boundary "Snyk · Semgrep ·\nTest environment" as EXT #ECEFF1
+participant "Gate & Report" as GR #E8F5E9
+
+User -> AST : "check this project"
+
+== Step 1 — Start the run ==
+AST -> MCP : svd_run
+MCP -> PIPE : start background job
+MCP --> AST : **run_id**
+
+== Step 2 — Run the three checks ==
+PIPE -> CHK : security · functional · performance
+CHK -> TOOLS : run scanners, tests, Locust
+TOOLS -> EXT : HTTPS · load test
+TOOLS --> CHK : results
+AST -> MCP : svd_status (polling)
+
+== Step 3 — Decide and report ==
+PIPE -> GR : results
+GR -> GR : **verdict** + **HTML report**
+GR --> User : opens report
+AST --> User : 📄 verdict and must-fix list
+
+note across
+  Snyk is reached only through the local Snyk CLI, and the assistant polls
+  the background run. Full sequence: system-workflow.png
+end note
+
+@enduml

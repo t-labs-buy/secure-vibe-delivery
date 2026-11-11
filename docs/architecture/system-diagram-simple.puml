@@ -1,0 +1,58 @@
+@startuml system-diagram-simple
+title Secure Vibe Delivery — System Architecture (simplified)
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultTextAlignment center
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam nodesep 45
+skinparam ranksep 55
+skinparam rectangle {
+  BorderColor #666666
+}
+skinparam cloud {
+  BackgroundColor #333333
+  FontColor #FFFFFF
+  BorderColor #111111
+}
+skinparam package {
+  BorderColor #888888
+  FontStyle bold
+}
+skinparam ArrowColor #444444
+
+actor "Developer" as User
+rectangle "AI Assistant\nClaude Code · Copilot Chat" as AST #E3F2FD
+
+package "MCP server (uvx · stdio)" {
+  rectangle "MCP Server\nsvd_* tools · setup · skills" as MCP #ECEFF1
+  rectangle "Run Pipeline\nbackground job" as PIPE #FFF3E0
+  rectangle "Checks\nsecurity · functional · performance" as CHK #EDE7F6
+  rectangle "Gate & Report\nverdict · HTML + PDF" as GR #FCE4EC
+}
+
+rectangle "Local Toolchain\nSnyk CLI · Semgrep · pytest/Jest · Locust" as TOOLS #E0F2F1
+database "Run Records\n.svd" as RUNS #E8F5E9
+
+cloud "Snyk · Semgrep\n· PyPI/npm" as CLOUD
+cloud "Test environment\nnever production" as TEST
+
+User -down-> AST : asks
+AST -down-> MCP : MCP · stdio
+MCP -down-> PIPE : svd_run
+PIPE -down-> CHK : runs
+CHK -down-> TOOLS : subprocess
+TOOLS -down-> CLOUD : HTTPS
+TOOLS -down-> TEST : load test
+PIPE -right-> GR : results
+GR -down-> RUNS : writes
+GR .up.> User : report
+
+note bottom of TEST
+  Simplified: setup, doctor, locustfile
+  generator and skills are inside
+  MCP Server; the three checks are one box.
+  Full view: system-diagram.png
+end note
+
+@enduml
