@@ -18,6 +18,7 @@ from typing import Optional
 from . import gate, vcs
 from .checks import functional, performance, security
 from .checks.context import CheckContext
+from .config import load as load_config
 from .detect import detect
 from .doctor import tool_versions
 from .models import RunOptions, RunState, Status
@@ -55,6 +56,7 @@ class RunManager:
         self.runs: dict[str, RunState] = {}
         self.dirs: dict[str, Path] = {}
         self.tasks: dict[str, asyncio.Task] = {}
+        self.saved: dict[str, float] = {}  # run_id -> mtime of the state.json this server last wrote
 
     # ---- persistence -----------------------------------------------------------------
     def _save(self, state: RunState) -> None:
@@ -62,10 +64,20 @@ class RunManager:
         tmp = d / "state.json.tmp"
         tmp.write_text(state.model_dump_json(indent=1))
         tmp.replace(d / "state.json")
+        self.saved[state.run_id] = (d / "state.json").stat().st_mtime
 
     def load(self, run_id: str, project_path: Optional[str] = None) -> Optional[RunState]:
         if run_id in self.runs:
-            return self.runs[run_id]
+            st = self.runs[run_id]
+            # A finished run whose state.json changed since this server last wrote it (another server
+            # process, or a tool that updated it) is read again, so the newer results aren't
+            # overwritten with the copy held in memory.
+            p = self.dirs[run_id] / "state.json"
+            if st.state in ("done", "error") and p.exists() and p.stat().st_mtime > self.saved.get(run_id, 0):
+                st = RunState.model_validate_json(p.read_text())
+                self.runs[run_id] = st
+                self.saved[run_id] = p.stat().st_mtime
+            return st
         if project_path:
             p = Path(project_path).expanduser().resolve() / ".svd" / "runs" / run_id / "state.json"
             if p.exists():
@@ -124,9 +136,12 @@ class RunManager:
             st.tool_versions = await tool_versions(root)
             journal_step("setup", "Tool versions: " + ", ".join(f"{k} {v}" for k, v in st.tool_versions.items()))
             info = detect(root)
+            cfg = load_config(root)  # a malformed .svd.toml stops the run with its message
+            if cfg.path:
+                journal_step("setup", f"Project settings: {cfg.path.name}")
             log(f"Project: {'Python ' if info.is_python else ''}{'JavaScript ' if info.is_js else ''}"
-                f"tests={info.test_runner or 'none'}")
-            ctx = CheckContext(root=root, run_dir=d, info=info, options=st.options, log=log)
+                f"tests={'+'.join(s.name for s in cfg.suites) if cfg.suites else '+'.join(info.test_runners) or 'none'}")
+            ctx = CheckContext(root=root, run_dir=d, info=info, options=st.options, log=log, config=cfg)
             for name in gate.CHECKS:
                 if name not in st.options.checks:
                     continue
@@ -175,6 +190,30 @@ class RunManager:
         finally:
             st.current, st.finished_at = "", time.time()
             self._save(st)
+
+    async def replace_result(self, st: RunState, result) -> RunState:
+        """Put a check's result into a finished run (svd_add_results), then work out the verdict again
+        and rebuild the report in place. The summary written with svd_write_summary is kept."""
+        from .report.pdf import render_with_pdf
+        root = Path(st.options.project_path)
+        d = self.dirs.get(st.run_id) or root / ".svd" / "runs" / st.run_id
+        self.runs[st.run_id], self.dirs[st.run_id] = st, d
+        st.results[result.name] = result
+        if result.name not in st.options.checks:
+            st.options.checks.append(result.name)
+        st.progress[result.name] = "done"
+        st.messages.append(f"{time.strftime('%H:%M:%S')} {result.name}: {result.status.value}: {result.summary} "
+                           "(added after the run)")
+        st.journal.append({"t": time.time(), "kind": "decision",
+                           "text": f"{result.name} results added after the run: {result.summary}"})
+        results = gate.ensure_all(st)
+        st.verdict = gate.verdict(results)
+        html, summary_path, pdf_path, _ = await render_with_pdf(st, results, d, Path(st.report_path).parent,
+                                                                html_path=Path(st.report_path))
+        st.summary_path, st.pdf_path = str(summary_path), (str(pdf_path) if pdf_path else None)
+        write_run_log(st, d, Path(st.report_path).parent)
+        self._save(st)
+        return st
 
     async def wait(self, run_id: str, seconds: float) -> None:
         task = self.tasks.get(run_id)

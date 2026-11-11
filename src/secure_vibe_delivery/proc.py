@@ -2,11 +2,13 @@
 from __future__ import annotations
 
 import asyncio
+import atexit
 import contextvars
 import os
 import re
 import shlex
 import shutil
+import signal
 import subprocess
 import sys
 import time
@@ -156,15 +158,58 @@ async def _run_cmd(
             stdin=asyncio.subprocess.DEVNULL,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
+            **_group_kwargs(),
         )
     except (FileNotFoundError, PermissionError) as e:
         return ProcResult(None, "", "", time.monotonic() - start, error=str(e))
+    LIVE.add(proc.pid)
     try:
         out, err = await asyncio.wait_for(proc.communicate(), timeout=timeout)
         return ProcResult(proc.returncode, out.decode(errors="replace"), err.decode(errors="replace"),
                           time.monotonic() - start)
     except asyncio.TimeoutError:
-        proc.kill()
+        kill_group(proc.pid)
         out, err = await proc.communicate()
         return ProcResult(None, out.decode(errors="replace"), err.decode(errors="replace"),
                           time.monotonic() - start, timed_out=True, error=f"timed out after {timeout}s")
+    except asyncio.CancelledError:
+        kill_group(proc.pid)
+        raise
+    finally:
+        # Tools that fork workers (Semgrep starts semgrep-core; test suites start servers) can leave
+        # them running after the parent exits. They share the command's own process group, so ending
+        # the group cleans them up too.
+        kill_group(proc.pid, after_exit=True)
+        LIVE.discard(proc.pid)
+
+
+# Commands still running, so their process groups can be ended if the server itself exits.
+LIVE: set[int] = set()
+
+
+def _group_kwargs() -> dict:
+    """Start each command as the leader of its own process group (a new session on macOS and Linux,
+    a new process group on Windows), so everything it starts can be ended together."""
+    if sys.platform == "win32":
+        return {"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP}
+    return {"start_new_session": True}
+
+
+def kill_group(pid: int, after_exit: bool = False) -> None:
+    """End a command and every process it started. A group that has already finished is ignored."""
+    if sys.platform == "win32":
+        if not after_exit:  # taskkill /T finds the children through the parent, so only while it runs
+            subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)], capture_output=True)
+        return
+    try:
+        os.killpg(pid, signal.SIGKILL)
+    except (ProcessLookupError, PermissionError, OSError):
+        pass
+
+
+def _kill_live() -> None:
+    for pid in list(LIVE):
+        kill_group(pid)
+
+
+atexit.register(_kill_live)

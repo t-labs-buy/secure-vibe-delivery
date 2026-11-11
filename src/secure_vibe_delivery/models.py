@@ -57,6 +57,31 @@ class SecretFinding(BaseModel):
     masked_value: str = ""
     message: str = ""
     sources: list[str] = Field(default_factory=list)
+    # Where the value lives, which decides how much it matters:
+    #   committed  in git: anyone with a copy of the repository has it (fails the gate)
+    #   untracked  not in git yet, but not ignored either: the next `git add .` commits it (fails)
+    #   unknown    not a git repository, so nothing says it's kept private (fails)
+    #   local      git-ignored (.env and the like): the recommended place, listed for awareness
+    #   test-fixture / docs  a generic password in a test or an example in documentation
+    exposure: str = ""
+
+    @property
+    def blocking(self) -> bool:
+        return self.exposure in ("", "committed", "untracked", "unknown")
+
+
+EXPOSURE_TEXT = {
+    "committed": "in git",
+    "untracked": "not ignored: `git add .` would commit it",
+    "unknown": "not a git repository",
+    "local": "git-ignored, local only",
+    "test-fixture": "test fixture",
+    "docs": "example in documentation",
+}
+
+
+def blocking_secrets(secrets: list["SecretFinding"]) -> list["SecretFinding"]:
+    return [s for s in secrets if s.blocking]
 
 
 class CommandRecord(BaseModel):

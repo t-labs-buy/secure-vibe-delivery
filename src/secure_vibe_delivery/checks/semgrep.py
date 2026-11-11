@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 from importlib import resources
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Sequence
 
 from ..models import Finding, SecretFinding, norm_severity
 from .secrets_util import extract_secret, mask, read_span
@@ -41,27 +41,28 @@ def rules_path(name: str) -> str:
     return str(resources.files("secure_vibe_delivery").joinpath("rules", name))
 
 
-def _excl() -> list[str]:
+def _excl(extra: Sequence[str] = ()) -> list[str]:
+    """--exclude for the usual build and dependency folders, plus `extra`: the project's virtualenvs
+    under any name (hindsight-venv, .venv-loadtest...) and folders listed in .svd.toml."""
     out = []
-    for e in EXCLUDES:
+    for e in dict.fromkeys([*EXCLUDES, *extra]):
         out += ["--exclude", e]
     return out
 
 
-def code_argv(semgrep: list[str], project_rules: Optional[Path]) -> list[str]:
+def code_argv(semgrep: list[str], project_rules: Optional[Path], exclude: Sequence[str] = ()) -> list[str]:
     argv = [*semgrep, "scan", "--config", "auto", "--config", rules_path("ai-mistakes.yml")]
     if project_rules:
         argv += ["--config", str(project_rules)]
-    return argv + PROJECT_ROOT_ARGS + _excl() + ["--json", "--quiet", "--metrics", "auto", "."]
+    return argv + PROJECT_ROOT_ARGS + _excl(exclude) + ["--json", "--quiet", "--metrics", "auto", "."]
 
 
-def secrets_argv(semgrep: list[str], registry: bool = True) -> list[str]:
+def secrets_argv(semgrep: list[str], registry: bool = True, exclude: Sequence[str] = ()) -> list[str]:
     """registry=True adds Semgrep's p/secrets (downloaded from the Semgrep registry). The bundled
     svd-secrets rules are local files and need no account, network or paid plan."""
     configs = ["--config", "p/secrets"] if registry else []
-    return [*semgrep, "scan", *configs, "--config", rules_path("svd-secrets.yml"), *PROJECT_ROOT_ARGS, *_excl(),
-            "--json", "--quiet",
-            "--metrics", "off", "."]
+    return [*semgrep, "scan", *configs, "--config", rules_path("svd-secrets.yml"), *PROJECT_ROOT_ARGS,
+            *_excl(exclude), "--json", "--quiet", "--metrics", "off", "."]
 
 
 def token_hint(error: str) -> str:

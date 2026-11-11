@@ -1,9 +1,10 @@
 """Security check: is it safe? Snyk (Open Source, Code, Secrets, IaC) + Semgrep + package provenance."""
 from __future__ import annotations
 
+import re
 import time
 
-from ..models import SEVERITY_ORDER, CheckResult, Finding, SecretFinding, Status, SubCheck
+from ..models import EXPOSURE_TEXT, SEVERITY_ORDER, CheckResult, Finding, SecretFinding, Status, SubCheck, blocking_secrets
 from ..proc import journal_step, resolve_tool, run_cmd
 from . import iac, packages, semgrep, snyk
 from .context import CheckContext
@@ -33,7 +34,66 @@ def merge_code_findings(findings: list[Finding]) -> list[Finding]:
     return sorted(merged, key=lambda f: (-_sev(f), f.file, f.line))
 
 
+THIRD_PARTY_PARTS = {"node_modules", "site-packages", "dist-packages", ".venv", "venv"}
+
+
+def in_excluded(file: str, exclude: list[str]) -> bool:
+    """A finding in third-party code: inside node_modules or site-packages, or under a folder the
+    scanners were told to skip."""
+    rel = file.replace("\\", "/").removeprefix("./")
+    parts = rel.split("/")
+    if THIRD_PARTY_PARTS.intersection(parts[:-1]):
+        return True
+    return any(rel == e or rel.startswith(e.rstrip("/") + "/") for e in exclude)
+
+
 GENERIC_KINDS = ("hard-coded credential", "hardcoded", "generic")
+GENERIC_SECRET = re.compile(r"hard-?coded|generic|password|credential", re.I)
+DOC_SUFFIXES = (".md", ".rst", ".txt", ".adoc", ".html", ".ipynb")
+
+
+def _is_test_path(rel: str) -> bool:
+    parts = rel.split("/")
+    name = parts[-1]
+    return (any(p in ("tests", "test", "__tests__", "fixtures", "testdata") for p in parts[:-1])
+            or name.startswith("test_") or name.endswith(("_test.py", ".test.js", ".test.ts", ".spec.js", ".spec.ts")))
+
+
+def _is_generic(s: SecretFinding) -> bool:
+    """A made-up password rather than a provider key: provider keys (AWS, GitHub, Stripe, AI
+    providers...) have a recognisable shape and are real wherever they appear."""
+    return bool(GENERIC_SECRET.search(f"{s.kind} {s.rule_id}"))
+
+
+async def classify_exposure(root, secrets: list[SecretFinding], is_git: bool) -> None:
+    """Set each secret's exposure. Only a value in git, or about to be, fails the gate: a key in a
+    git-ignored .env is where keys belong, and a generic password in a test is a fixture."""
+    files = sorted({s.file for s in secrets})
+    tracked: set[str] = set()
+    ignored: set[str] = set()
+    if is_git and files:
+        p = await run_cmd(["git", "ls-files", "-z", "--", *files], root, timeout=60)
+        tracked = {f for f in p.stdout.split("\0") if f} if p.exit_code == 0 else set()
+        rest = [f for f in files if f not in tracked]
+        if rest:
+            p = await run_cmd(["git", "check-ignore", "--no-index", "--", *rest], root, timeout=60)
+            ignored = set(p.stdout.splitlines()) if p.exit_code in (0, 1) else set()
+        if p.exit_code not in (0, 1):
+            is_git = False  # git unusable here: be conservative
+    for s in secrets:
+        rel = s.file.replace("\\", "/").removeprefix("./")
+        if _is_generic(s) and _is_test_path(rel):
+            s.exposure = "test-fixture"
+        elif _is_generic(s) and rel.endswith(DOC_SUFFIXES):
+            s.exposure = "docs"
+        elif not is_git:
+            s.exposure = "unknown"
+        elif rel in tracked:
+            s.exposure = "committed"
+        elif rel in ignored:
+            s.exposure = "local"
+        else:
+            s.exposure = "untracked"
 
 
 def merge_secrets(secrets: list[SecretFinding]) -> list[SecretFinding]:
@@ -47,6 +107,11 @@ def merge_secrets(secrets: list[SecretFinding]) -> list[SecretFinding]:
         primary.sources = sorted({src for s in group for src in s.sources})
         out.append(primary)
     return sorted(out, key=lambda s: (s.file, s.line))
+
+
+def _lower_risk(by_exposure: dict[str, int]) -> str:
+    return ", ".join(f"{n} {EXPOSURE_TEXT[k]}" for k, n in sorted(by_exposure.items())
+                     if k in ("local", "test-fixture", "docs"))
 
 
 async def run_semgrep(argv: list[str], root, timeout: float):
@@ -72,11 +137,18 @@ async def run(ctx: CheckContext) -> CheckResult:
 
     snyk_bin = resolve_tool("snyk")
     semgrep_bin = resolve_tool("semgrep")
+    # Third-party code the scanners must skip: every virtualenv, whatever it's called, and the
+    # folders the project lists in .svd.toml. Untracked venvs are full of example keys.
+    exclude = list(dict.fromkeys([*ctx.info.venvs, *ctx.config.exclude]))
+    res.data["excluded"] = exclude
+    if exclude:
+        journal_step("decision", "Scanners skip " + ", ".join(exclude[:12])
+                     + (f" and {len(exclude) - 12} more" if len(exclude) > 12 else ""))
 
     # --- Snyk Open Source -------------------------------------------------------------
     if snyk_bin:
         ctx.log("Snyk Open Source: scanning libraries")
-        argv = snyk.open_source_argv(snyk_bin, ctx.info.python_cmd if ctx.info.is_python else None)
+        argv = snyk.open_source_argv(snyk_bin, ctx.info.python_cmd if ctx.info.is_python else None, exclude)
         p = await run_cmd(argv, root, timeout=900)
         res.commands.append(p.record("snyk-open-source", argv, ctx.raw_dir))
         err, libs, meta = snyk.parse_open_source(p.stdout)
@@ -118,7 +190,7 @@ async def run(ctx: CheckContext) -> CheckResult:
     # --- Semgrep ----------------------------------------------------------------------
     if semgrep_bin:
         ctx.log("Semgrep: OWASP rules + AI-mistake rules")
-        argv = semgrep.code_argv(semgrep_bin, ctx.info.svd_rules_dir)
+        argv = semgrep.code_argv(semgrep_bin, ctx.info.svd_rules_dir, exclude)
         p, argv = await run_semgrep(argv, root, 900)
         res.commands.append(p.record("semgrep", argv, None))
         (ctx.raw_dir / "semgrep.masked.json").write_text(semgrep.scrub_raw(p.stdout))
@@ -173,7 +245,7 @@ async def run(ctx: CheckContext) -> CheckResult:
     if secrets_scanner is None:
         if semgrep_bin:
             ctx.log("Secrets fallback: Semgrep p/secrets + svd-secrets rules")
-            argv = semgrep.secrets_argv(semgrep_bin, registry=True)
+            argv = semgrep.secrets_argv(semgrep_bin, registry=True, exclude=exclude)
             p, argv = await run_semgrep(argv, root, 600)
             err, sec = semgrep.parse_secrets(p.stdout, root)
             label = "semgrep (p/secrets + svd-secrets)"
@@ -183,7 +255,7 @@ async def run(ctx: CheckContext) -> CheckResult:
                 res.data["semgrep_registry_secrets_error"] = err[:300] + semgrep.token_hint(err)
                 ctx.log("p/secrets unavailable; retrying with the bundled svd-secrets rules only")
                 res.commands.append(p.record("semgrep-secrets-registry", argv, None))
-                argv = semgrep.secrets_argv(semgrep_bin, registry=False)
+                argv = semgrep.secrets_argv(semgrep_bin, registry=False, exclude=exclude)
                 p, argv = await run_semgrep(argv, root, 600)
                 err, sec = semgrep.parse_secrets(p.stdout, root)
                 label = "semgrep (bundled svd-secrets rules only)"
@@ -213,8 +285,23 @@ async def run(ctx: CheckContext) -> CheckResult:
         prov = []
 
     # --- Assemble ---------------------------------------------------------------------
+    # Snyk Code and Snyk Secrets have no exclude option, so findings inside skipped folders are
+    # dropped here, whichever scanner reported them.
+    before = len(code_findings) + len(secrets)
+    code_findings = [f for f in code_findings if not in_excluded(f.file, exclude)]
+    secrets = [s for s in secrets if not in_excluded(s.file, exclude)]
+    if len(code_findings) + len(secrets) < before:
+        res.data["dropped_in_excluded"] = before - len(code_findings) - len(secrets)
+        journal_step("decision", f"Dropped {res.data['dropped_in_excluded']} finding(s) inside third-party "
+                                 "folders (virtualenvs, node_modules, folders excluded in .svd.toml)")
     code_findings = merge_code_findings(code_findings)
     secrets = merge_secrets(secrets)
+    await classify_exposure(root, secrets, ctx.info.is_git)
+    blocking = blocking_secrets(secrets)
+    by_exposure: dict[str, int] = {}
+    for s in secrets:
+        by_exposure[s.exposure] = by_exposure.get(s.exposure, 0) + 1
+    res.data["secret_exposure"] = by_exposure
     res.findings = code_findings + iac_findings + sorted(lib_findings, key=lambda f: -_sev(f))
     res.secrets = secrets
     res.data["scanners"] = scanners
@@ -236,8 +323,11 @@ async def run(ctx: CheckContext) -> CheckResult:
                         detail=bad_detail if failing else ok_detail)
 
     res.subchecks = [
-        sub("secrets", "No keys or passwords in code", secrets, ["secrets"],
-            f"0 found by {secrets_scanner}", f"{len(secrets)} exposed secret(s)"),
+        sub("secrets", "No keys or passwords in code", blocking, ["secrets"],
+            f"0 exposed, found by {secrets_scanner}" + (
+                f" ({_lower_risk(by_exposure)} not counted)" if len(secrets) > len(blocking) else ""),
+            f"{len(blocking)} exposed secret(s)" + (
+                f" ({_lower_risk(by_exposure)} not counted)" if len(secrets) > len(blocking) else "")),
         sub("code", "0 critical or high issues in our code", code_hi, ["snyk-code", "semgrep"],
             f"{len(code_findings)} lower-severity issue(s)", f"{len(code_hi)} critical/high issue(s)"),
         sub("libraries", "0 critical issues in libraries", lib_crit, ["snyk-open-source"],
@@ -263,7 +353,7 @@ async def run(ctx: CheckContext) -> CheckResult:
         res.status = Status.NOT_RUN if all(s.status == Status.NOT_RUN for s in auto) else Status.FAIL
     else:
         res.status = Status.PASS
-    res.summary = (f"{len(secrets)} secret(s), {len(code_hi)} critical/high code issue(s), "
+    res.summary = (f"{len(blocking)} secret(s), {len(code_hi)} critical/high code issue(s), "
                    f"{len(lib_crit)} critical + {len(lib_high)} high library issue(s), "
                    f"{len(pkg_bad)} suspicious package(s)")
     if iac_files:

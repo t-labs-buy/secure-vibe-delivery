@@ -6,6 +6,8 @@ import os
 import re
 from pathlib import Path
 
+from .checks.functional import unsafe_pytest_files
+from .config import ConfigError, load as load_config
 from .detect import detect
 from .proc import UVX_FALLBACK, find_uv_runner, resolve_tool, run_cmd
 
@@ -108,11 +110,33 @@ async def doctor(project_path: str) -> dict:
     tools["uv"] = {"available": bool(runner), **({"path": runner[0]} if runner else {})}
 
     det = report["project_detection"]
+    try:
+        cfg = load_config(root)
+    except ConfigError as e:
+        cfg = None
+        report["actions"].append(f"Fix the project settings file: {e}")
     det.update(python=info.is_python, javascript=info.is_js, test_runner=info.test_runner,
+               test_runners=info.test_runners,
+               jest_folders=[d.relative_to(root).as_posix() or "." for d in info.jest_dirs],
                locustfile=str(info.locustfile) if info.locustfile else None,
                openapi=str(info.openapi_file) if info.openapi_file else None,
-               project_svd_rules=str(info.svd_rules_dir) if info.svd_rules_dir else None)
-    if info.test_runner == "pytest":
+               project_svd_rules=str(info.svd_rules_dir) if info.svd_rules_dir else None,
+               skipped_by_scanners=info.venvs + (cfg.exclude if cfg else []),
+               settings_file=str(cfg.path) if cfg and cfg.path else None)
+    if cfg and cfg.suites:
+        det["test_suites_from_settings"] = [{"name": s.name, "command": s.command} for s in cfg.suites]
+    elif "pytest" in info.test_runners:
+        unsafe = unsafe_pytest_files(root)
+        if unsafe and not (cfg and cfg.allow_unsafe_pytest):
+            det["pytest_refused"] = [h["file"] for h in unsafe]
+            report["actions"].append(
+                f"The functional check won't run pytest: {len(unsafe)} test file(s) use nose-style setup()/"
+                "teardown(), which pytest 8 doesn't call, so they'd run without their isolation"
+                + (" and some of them wipe data" if any(h["destructive"] for h in unsafe) else "")
+                + ". Add the command the project really uses to .svd.toml as a [[functional.suite]].")
+    if cfg and cfg.locustfile:
+        det["locustfile"] = str(root / cfg.locustfile)
+    if "pytest" in info.test_runners and not (cfg and cfg.suites):
         det["python"] = " ".join(info.python_cmd)
         probe = await run_cmd([*info.python_cmd, "-c",
                                "import importlib.util as u;print(*[m for m in ('pytest','pytest_cov','pip') "
@@ -124,14 +148,15 @@ async def doctor(project_path: str) -> dict:
         if not det["pip_in_env"]:
             report["actions"].append("Snyk Open Source needs pip inside the project venv: "
                                      f"{info.python_cmd[0]} -m ensurepip (or uv pip install pip)")
-    elif info.test_runner == "jest":
-        bin_dir = root / "node_modules" / ".bin"
-        det["jest_installed"] = (bin_dir / "jest").exists() or (bin_dir / "jest.cmd").exists()
-        if not det["jest_installed"]:
-            report["actions"].append("Install Jest: npm install --save-dev jest")
-    else:
+    if "jest" in info.test_runners and not (cfg and cfg.suites):
+        missing = [d for d in info.jest_dirs
+                   if not any((d / "node_modules" / ".bin" / n).exists() for n in ("jest", "jest.cmd"))]
+        det["jest_installed"] = not missing
+        for d in missing:
+            report["actions"].append(f"Install Jest in {d.relative_to(root).as_posix() or '.'}: npm install --save-dev jest")
+    if not info.has_tests and not (cfg and cfg.suites):
         report["actions"].append("No test suite detected; the functional check will be NOT_RUN (a failure).")
-    if not info.locustfile:
+    if not info.locustfile and not (cfg and cfg.locustfile):
         report["actions"].append("No locustfile.py: one will be generated (svd_generate_locustfile to review it first).")
     report["ok"] = not any(a.startswith(("Install Snyk", "Authenticate", "Install Semgrep", "The Snyk token", "Semgrep rejected")) for a in report["actions"])
     return report

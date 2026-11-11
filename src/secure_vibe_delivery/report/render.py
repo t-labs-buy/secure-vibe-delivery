@@ -15,7 +15,7 @@ from .. import summary as summaries
 from .commands import history as command_history
 from .commands import timeline as command_timeline
 from .overview import hero as overview_hero
-from ..models import SEVERITY_ORDER, CheckResult, RunState, Status
+from ..models import EXPOSURE_TEXT, SEVERITY_ORDER, CheckResult, RunState, Status
 
 _env = Environment(loader=PackageLoader("secure_vibe_delivery", "report/templates"),
                    autoescape=select_autoescape(["html", "j2"]), trim_blocks=True, lstrip_blocks=True)
@@ -156,7 +156,7 @@ def render_report(st: RunState, results: dict[str, CheckResult], run_dir: Path, 
         code=code, libs=libs, pkgs=pkgs, iac_issues=iac_issues, iac_counts=iac_counts, sev_counts=sev_counts, lib_counts=lib_counts,
         must_fix=summary["must_fix"], verdict=summary["verdict"], verdict_text=summary["verdict_text"],
         report_json=_json_script(report_data), native_rel=native_rel, checklist=checklist, commands=commands,
-        Status=Status, generated=datetime.now().strftime("%d %b %Y, %H:%M"),
+        Status=Status, exposure_text=EXPOSURE_TEXT, generated=datetime.now().strftime("%d %b %Y, %H:%M"),
         duration=_fmt_dur((st.finished_at or time.time()) - st.created_at),
         project_name=Path(st.options.project_path).name,
         score=summary["score"], overview=summary["overview_summary"],

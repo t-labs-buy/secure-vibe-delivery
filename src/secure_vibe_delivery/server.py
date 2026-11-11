@@ -26,8 +26,15 @@ from . import skills as skill_store
 
 INSTRUCTIONS = """Secure Vibe Delivery runs three kinds of check on an AI-built project before go-live:
 security (Snyk Open Source, Snyk Code, Snyk Secrets or a Semgrep fallback, Snyk IaC when the project has
-Terraform / Kubernetes / CloudFormation / ARM files, Semgrep with AI-mistake rules, package provenance), functional (pytest or Jest with a 70% coverage gate) and performance (Locust at 1.5x
+Terraform / Kubernetes / CloudFormation / ARM files, Semgrep with AI-mistake rules, package provenance), functional (pytest and/or Jest,
+or the project's own test commands from .svd.toml, with a 70% coverage gate) and performance (Locust at 1.5x
 the expected peak). It writes an HTML report with a GO / PROVISIONAL / NO-GO verdict.
+
+Tests: pytest is refused when test files use nose-style setup()/teardown(), which pytest 8 no longer calls:
+those tests would run without their isolation (often a throwaway database) and can wipe real data. If
+the functional check reports this, don't work around it by running pytest yourself. Run the tests the way
+the project runs them, then either add that command to .svd.toml as a [[functional.suite]] (with junit and
+coverage output paths) and re-run, or pass its JUnit XML and coverage JSON to svd_add_results.
 
 First use: if svd_doctor or svd_run reports that setup is needed (Snyk missing or not signed in), offer
 the one-time setup and walk the person through it step by step with svd_setup. Call it with no step
@@ -101,8 +108,9 @@ async def svd_run(
         response_time_p95_ms: Agreed p95 response-time target in milliseconds.
         checks: Subset of ["security", "functional", "performance"]. Default: all three. Checks left
             out appear in the report as NOT_RUN, so the verdict stays NO-GO.
-        locustfile: Path (relative to the project) of a locustfile to use. Default: the project's
-            locustfile.py, or a generated one.
+        locustfile: Path (relative to the project) of a locustfile to use. Default: performance.locustfile
+            in the project's .svd.toml, then the project's locustfile.py (also looked for in loadtest/,
+            load/, perf/ and similar folders), or a generated one.
         coverage_threshold: Minimum line coverage percentage. Default 70.
         stop_on_security_fail: Skip functional and performance checks if security doesn't pass.
         duration: Override the hold time, e.g. "5m". Only a 15m+ run in gate mode counts for go-live.
@@ -245,11 +253,67 @@ async def svd_write_summary(
                                                             html_path=Path(st.report_path))
     st.summary_path = str(summary_path)
     st.pdf_path = str(pdf_path) if pdf_path else None
-    (run_dir / "state.json").write_text(st.model_dump_json(indent=1))
+    runs.runs[st.run_id], runs.dirs[st.run_id] = st, run_dir
+    runs._save(st)
     opened = await open_in_browser(str(html)) if reopen else False
     return {"report_path": str(html), "pdf_path": st.pdf_path, "summary_added": True, "reopened": opened,
             "tell_the_user": "The summary is in the report's Overview tab"
                              + (" (the updated report just opened in your browser)." if opened else ".")}
+
+
+@mcp.tool()
+async def svd_add_results(
+    junit: Optional[str] = None,
+    coverage: Optional[str] = None,
+    run_id: Optional[str] = None,
+    project_path: Optional[str] = None,
+    name: str = "tests",
+    note: str = "",
+    reopen: bool = True,
+) -> dict:
+    """Add functional (test) results from a test run done outside this server to a finished run, then
+    work out the verdict again and rebuild its report. Use it when the project's tests can't run the way
+    svd_run would run them (for example pytest refused because the tests rely on nose-style setup()),
+    and they were run another way. For every run after this one, put that command in the project's
+    .svd.toml as a [[functional.suite]] instead, so svd_run runs it itself.
+
+    Args:
+        junit: Path (absolute, or relative to the project) of a JUnit XML file with the test results.
+        coverage: Path of coverage.py JSON (`coverage json`) or an Istanbul coverage-summary.json.
+        run_id: The run to update. Defaults to the latest run for project_path.
+        project_path: The project the run belongs to.
+        name: What to call these tests in the report, e.g. "backend tests".
+        note: One sentence on how they were run (shown in the report), e.g. "Each test file run
+            directly against a sandbox copy of the database".
+        reopen: Open the updated report in the browser.
+    """
+    from .checks.functional import result_from_files
+    st = runs.load(run_id, project_path) if run_id else runs.latest(_project(project_path))
+    if st is None or st.state != "done" or not st.report_path:
+        return {"error": "No finished run found to add results to."}
+    if not junit and not coverage:
+        return {"error": "Pass junit (test results) and/or coverage."}
+    root = Path(st.options.project_path)
+
+    def resolve(p: Optional[str]) -> Optional[Path]:
+        if not p:
+            return None
+        path = Path(p).expanduser()
+        path = path if path.is_absolute() else root / path
+        if not path.is_file():
+            raise FileNotFoundError(str(path))
+        return path
+    try:
+        junit_p, cov_p = resolve(junit), resolve(coverage)
+    except FileNotFoundError as e:
+        return {"error": f"File not found: {e}"}
+    result = result_from_files(root, junit_p, cov_p, st.options.coverage_threshold, name=name, note=note)
+    st = await runs.replace_result(st, result)
+    opened = await open_in_browser(st.report_path) if reopen else False
+    return {"run_id": st.run_id, "verdict": st.verdict, "functional": result.summary,
+            "report_path": st.report_path, "pdf_path": st.pdf_path, "reopened": opened,
+            "next": "Call svd_report for the updated must-fix list, and svd_write_summary to bring the "
+                    "Overview summary up to date with these results."}
 
 
 @mcp.tool()
@@ -341,6 +405,12 @@ language. I may be new to all of this.
 
 
 def main() -> None:
+    # Clients usually stop the server with SIGTERM. Exiting through SystemExit runs the atexit
+    # handler that ends any scan or test command still running, instead of leaving it orphaned.
+    import signal
+    import sys
+    if hasattr(signal, "SIGTERM"):
+        signal.signal(signal.SIGTERM, lambda *_: sys.exit(0))
     mcp.run()
 
 

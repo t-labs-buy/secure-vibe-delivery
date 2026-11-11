@@ -5,7 +5,7 @@
       "command": "uvx",
       "args": [
         "--from",
-        "git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.13",
+        "git+https://github.com/t-labs-buy/secure-vibe-delivery@v0.1.14",
         "secure-vibe-delivery"
       ]
     }

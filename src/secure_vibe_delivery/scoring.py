@@ -10,7 +10,7 @@ Principles:
 """
 from __future__ import annotations
 
-from .models import CheckResult, Status
+from .models import CheckResult, Status, blocking_secrets
 
 CHECK_WEIGHTS = {"security": 50, "functional": 25, "performance": 25}
 GRADES = [(90, "A", "Excellent"), (80, "B", "Good"), (70, "C", "Fair"), (60, "D", "Poor"), (0, "F", "Failing")]
@@ -43,8 +43,9 @@ def _security(r: CheckResult) -> list[dict]:
     c = {s: sum(1 for f in code if f.severity == s) for s in ("critical", "high", "medium", "low")}
     lb = {s: sum(1 for f in libs if f.severity == s) for s in ("critical", "high", "medium", "low")}
     comps = [
-        _component("No exposed secrets", 30, 0.0 if r.secrets else 1.0,
-                   f"{len(r.secrets)} exposed secret(s)" if r.secrets else "None found", _not_run(r, "secrets")),
+        _component("No exposed secrets", 30, 0.0 if blocking_secrets(r.secrets) else 1.0,
+                   f"{len(blocking_secrets(r.secrets))} exposed secret(s)" if blocking_secrets(r.secrets)
+                   else "None found", _not_run(r, "secrets")),
         _component("Issues in our code", 30,
                    1 - (c["critical"] * 0.5 + c["high"] * 0.25 + c["medium"] * 0.05 + c["low"] * 0.01),
                    f"{c['critical']} critical, {c['high']} high, {c['medium']} medium, {c['low']} low "
@@ -130,8 +131,9 @@ def compute(results: dict[str, CheckResult], quick_mode: bool) -> dict:
     caps = []
     sec = results["security"]
     critical = sum(1 for f in sec.findings if f.severity == "critical")
-    if sec.secrets or critical:
-        caps.append((59, f"{len(sec.secrets)} exposed secret(s) and {critical} critical issue(s): "
+    exposed = blocking_secrets(sec.secrets)
+    if exposed or critical:
+        caps.append((59, f"{len(exposed)} exposed secret(s) and {critical} critical issue(s): "
                          "the score is held at 59 or below until they're fixed"))
     if any_not_run:
         caps.append((79, "at least one check didn't run, so the score is held at 79 or below"))

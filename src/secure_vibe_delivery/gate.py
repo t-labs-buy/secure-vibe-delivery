@@ -1,7 +1,7 @@
 """Go-live gate: roadmap thresholds → verdict and a prioritised must-fix list."""
 from __future__ import annotations
 
-from .models import SEVERITY_ORDER, CheckResult, RunState, Status, SubCheck
+from .models import EXPOSURE_TEXT, SEVERITY_ORDER, CheckResult, RunState, Status, SubCheck, blocking_secrets
 
 CHECKS = ["security", "functional", "performance"]
 MANUAL = {"own-data", "review"}
@@ -42,10 +42,14 @@ def must_fix(results: dict[str, CheckResult], limit: int | None = None) -> list[
     items: list[dict] = []
     sec = results.get("security")
     if sec:
-        for s in sec.secrets:
+        # Only values in git (or about to be) are must-fix. Keys in git-ignored files, test fixtures
+        # and documentation examples stay listed on the Secrets tab.
+        for s in blocking_secrets(sec.secrets):
+            where = EXPOSURE_TEXT.get(s.exposure)
             items.append({"priority": 1, "severity": "critical", "check": "security", "kind": "Exposed secret",
                           "title": f"{s.kind} in {s.file}:{s.line}", "where": f"{s.file}:{s.line}",
-                          "detail": f"Masked value {s.masked_value}. Found by {', '.join(s.sources)}.",
+                          "detail": f"Masked value {s.masked_value}. Found by {', '.join(s.sources)}."
+                                    + (f" Where it is: {where}." if where else ""),
                           "fix": "Rotate it (issue a new one, cancel the old one), then load it from the environment "
                                  "or a secret manager. Deleting the line isn't enough: it stays in git history."})
         for f in sec.findings:

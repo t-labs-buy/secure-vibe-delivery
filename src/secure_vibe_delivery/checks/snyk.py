@@ -5,7 +5,7 @@ import json
 import os
 import re
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, Sequence
 
 from ..models import Finding, SecretFinding, norm_severity
 from .secrets_util import masked_from_source
@@ -53,8 +53,10 @@ def org_hint(error: str) -> str:
     return ""
 
 
-def open_source_argv(snyk: list[str], python_cmd: Optional[list[str]]) -> list[str]:
-    argv = [*snyk, "test", "--all-projects", f"--exclude={EXCLUDES}", "--json", *org_args()]
+def open_source_argv(snyk: list[str], python_cmd: Optional[list[str]], exclude: Sequence[str] = ()) -> list[str]:
+    """exclude: more folders to skip. Snyk matches folder names, not paths, so only the last part counts."""
+    names = list(dict.fromkeys([*EXCLUDES.split(","), *(Path(e).name for e in exclude if Path(e).name)]))
+    argv = [*snyk, "test", "--all-projects", f"--exclude={','.join(names)}", "--json", *org_args()]
     if python_cmd and len(python_cmd) == 1 and Path(python_cmd[0]).exists():
         argv.append(f"--command={python_cmd[0]}")
     return argv

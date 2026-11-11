@@ -11,7 +11,8 @@ from typing import Optional
 import httpx
 
 from ..models import CheckResult, Finding, Status, SubCheck
-from ..proc import resolve_tool, run_cmd
+from ..config import ConfigError, locust_env
+from ..proc import journal_step, resolve_tool, run_cmd
 from . import locustgen
 from ..detect import venv_exe
 from .context import CheckContext
@@ -132,13 +133,14 @@ async def run(ctx: CheckContext) -> CheckResult:
     if not ok:
         return not_run(f"Target {o.target_url} isn't reachable before the test ({detail}). Start the app first.")
 
-    # Locustfile: explicit > project's > generated
+    # Locustfile: explicit > .svd.toml > project's > generated
     lf: Optional[Path] = None
-    if o.locustfile:
-        lf = (ctx.root / o.locustfile).resolve()
+    given = o.locustfile or ctx.config.locustfile
+    if given:
+        lf = (ctx.root / given).resolve()
         if not lf.exists():
-            return not_run(f"locustfile {o.locustfile} not found")
-        res.data["locustfile_source"] = "given"
+            return not_run(f"locustfile {given} not found")
+        res.data["locustfile_source"] = "given" if o.locustfile else ".svd.toml"
     elif ctx.info.locustfile:
         lf = ctx.info.locustfile
         res.data["locustfile_source"] = "project"
@@ -147,9 +149,20 @@ async def run(ctx: CheckContext) -> CheckResult:
         lf = ctx.run_dir / "locustfile.generated.py"
         lf.write_text(src)
         res.data["locustfile_source"] = f"generated ({how})"
-        from ..proc import journal_step
         journal_step("decision", f"No locustfile in the project; generated one from {how}: {lf}")
     res.data["locustfile"] = str(lf)
+
+    # Variables the locustfile reads (test-account passwords and the like), from .svd.toml. Locust
+    # runs in its own process, so it doesn't see the shell the project was started from.
+    try:
+        extra_env, env_names = locust_env(ctx.root, ctx.config)
+    except ConfigError as e:
+        return not_run(str(e))
+    if env_names:
+        res.data["locust_env"] = env_names
+        journal_step("decision", "Locust gets " + ", ".join(env_names)
+                     + (f" from {ctx.config.locust_env_file}" if ctx.config.locust_env_file else "")
+                     + " (values not logged)")
 
     prefix = ctx.run_dir / "locust"
     html = ctx.run_dir / "locust-native.html"
@@ -157,7 +170,7 @@ async def run(ctx: CheckContext) -> CheckResult:
             "--host", o.target_url, "--csv", str(prefix), "--csv-full-history", "--html", str(html),
             "--only-summary", "--stop-timeout", "10", "--loglevel", "WARNING"]
     ctx.log(f"Locust: {users} users, +{o.spawn_rate}/s, holding for {duration} against {o.target_url}")
-    p = await run_cmd(argv, ctx.root, timeout=parse_duration(duration) + 240)
+    p = await run_cmd(argv, ctx.root, timeout=parse_duration(duration) + 240, env=extra_env or None)
     res.commands.append(p.record("locust", argv, ctx.raw_dir))
     data = parse_results(prefix)
     res.data.update(data)

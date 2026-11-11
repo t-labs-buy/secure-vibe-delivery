@@ -35,4 +35,4 @@ Scenes change with straight cuts; the demo stays on one page from scene 2 to sce
 - **Example figures:** the numbers in the speech bubbles (82% coverage, p95 410 ms, health score 61, run_id 7f3a) are illustrative, not from a real run. The narration says "In this example" before the first one.
 - **Data written:** none. The demo only animates; it runs no checks and stores nothing except a layout you choose to save.
 - **Names for the voice:** check that Kokoro says these correctly before the full render: *Snyk* ("sneak"), *Semgrep*, *pytest* ("pie-test"), *Jest*, *Locust*, *MCP*, *Copilot*, *PyPI* (shown on screen only), *.svd* (written as "dot S V D"), *t-labs-buy*.
-- **Version:** the install guide currently installs v0.1.13; the narration doesn't name a version, so it stays correct after the next release.
+- **Version:** the install guide currently installs v0.1.14; the narration doesn't name a version, so it stays correct after the next release.
