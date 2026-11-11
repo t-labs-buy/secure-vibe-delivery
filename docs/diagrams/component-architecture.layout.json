@@ -1,0 +1,790 @@
+{
+ "title": "secure-vibe-delivery MCP server \u2014 Component Architecture",
+ "canvas": {
+  "width": 1830,
+  "height": 1250
+ },
+ "box": {
+  "w": 200,
+  "h": 78
+ },
+ "link_style": {
+  "color": "#A3AAB4",
+  "head": "open",
+  "corners": "square",
+  "width": 1.5
+ },
+ "bands": [
+  {
+   "n": "1",
+   "name": "People &\nassistant",
+   "x": 20,
+   "y": 60,
+   "w": 1320,
+   "h": 130
+  },
+  {
+   "n": "2",
+   "name": "MCP server &\ncross-cutting",
+   "x": 20,
+   "y": 210,
+   "w": 1320,
+   "h": 130
+  },
+  {
+   "n": "3",
+   "name": "Orchestration",
+   "x": 20,
+   "y": 360,
+   "w": 1320,
+   "h": 130
+  },
+  {
+   "n": "4",
+   "name": "Checks",
+   "x": 20,
+   "y": 510,
+   "w": 1320,
+   "h": 130
+  },
+  {
+   "n": "5",
+   "name": "Scanners &\nrunners",
+   "x": 20,
+   "y": 660,
+   "w": 1320,
+   "h": 130
+  },
+  {
+   "n": "6",
+   "name": "Gate &\nreporting",
+   "x": 20,
+   "y": 810,
+   "w": 1320,
+   "h": 130
+  },
+  {
+   "n": "7",
+   "name": "Outputs",
+   "x": 20,
+   "y": 960,
+   "w": 1320,
+   "h": 130
+  }
+ ],
+ "groups": [
+  {
+   "n": "8",
+   "name": "External services",
+   "x": 1420,
+   "y": 512,
+   "w": 330,
+   "h": 278
+  }
+ ],
+ "actors": [
+  {
+   "label": "Developer /\nreviewer",
+   "cx": 330,
+   "cy": 125
+  }
+ ],
+ "nodes": [
+  {
+   "id": "AST",
+   "title": "AI assistant",
+   "sub": "Claude Code \u00b7 Copilot Chat\nVS Code or terminal",
+   "kind": "ui",
+   "cx": 890,
+   "cy": 125
+  },
+  {
+   "id": "MASK",
+   "title": "Secret masking",
+   "sub": "raw secret values\nnever leave the scan",
+   "kind": "api",
+   "cx": 330,
+   "cy": 275
+  },
+  {
+   "id": "RES",
+   "title": "Tool resolver",
+   "sub": "PATH \u2192 Snyk cache \u2192 uvx\n(UV variable fallback)",
+   "kind": "api",
+   "cx": 610,
+   "cy": 275
+  },
+  {
+   "id": "MCP",
+   "title": "MCP server",
+   "sub": "FastMCP \u00b7 stdio via uvx\n9 svd_* tools \u00b7 2 prompts",
+   "kind": "api",
+   "cx": 890,
+   "cy": 275
+  },
+  {
+   "id": "SK",
+   "title": "Fixing skills",
+   "sub": "5 step-by-step guides\nskill:// resources",
+   "kind": "svc",
+   "cx": 1170,
+   "cy": 275
+  },
+  {
+   "id": "SETUP",
+   "title": "Guided setup",
+   "sub": "svd_setup \u00b7 one step\nper answer \u00b7 sign-ins",
+   "kind": "agent",
+   "cx": 330,
+   "cy": 425
+  },
+  {
+   "id": "DOC",
+   "title": "Doctor",
+   "sub": "svd_doctor \u00b7 tools,\nsign-ins, project type",
+   "kind": "agent",
+   "cx": 610,
+   "cy": 425
+  },
+  {
+   "id": "PIPE",
+   "title": "Run pipeline",
+   "sub": "svd_run \u00b7 background job\ndetect \u2192 check \u2192 gate",
+   "kind": "agent",
+   "cx": 890,
+   "cy": 425
+  },
+  {
+   "id": "LGEN",
+   "title": "Locustfile generator",
+   "sub": "OpenAPI \u2192 routes\n\u2192 GET /",
+   "kind": "agent",
+   "cx": 1170,
+   "cy": 425
+  },
+  {
+   "id": "SEC",
+   "title": "Security check",
+   "sub": "Snyk \u00b7 Semgrep\npackage provenance",
+   "kind": "svc",
+   "cx": 610,
+   "cy": 575
+  },
+  {
+   "id": "FUN",
+   "title": "Functional check",
+   "sub": "pytest or Jest\n70% coverage gate",
+   "kind": "svc",
+   "cx": 890,
+   "cy": 575
+  },
+  {
+   "id": "PERF",
+   "title": "Performance check",
+   "sub": "Locust at 1.5\u00d7\nexpected peak",
+   "kind": "svc",
+   "cx": 1170,
+   "cy": 575
+  },
+  {
+   "id": "SNYK",
+   "title": "Snyk CLI",
+   "sub": "Open Source \u00b7 Code\nSecrets \u00b7 IaC",
+   "kind": "model",
+   "cx": 330,
+   "cy": 725
+  },
+  {
+   "id": "SG",
+   "title": "Semgrep",
+   "sub": "AI-mistake rules \u00b7 secrets\nfallback \u00b7 via uvx",
+   "kind": "model",
+   "cx": 610,
+   "cy": 725
+  },
+  {
+   "id": "PYT",
+   "title": "pytest / Jest",
+   "sub": "the project's own\ntest suite",
+   "kind": "model",
+   "cx": 890,
+   "cy": 725
+  },
+  {
+   "id": "LOC",
+   "title": "Locust",
+   "sub": "load generator\nvia uvx",
+   "kind": "model",
+   "cx": 1170,
+   "cy": 725
+  },
+  {
+   "id": "SCORE",
+   "title": "Health score",
+   "sub": "0\u2013100 + letter grade",
+   "kind": "eval",
+   "cx": 610,
+   "cy": 875
+  },
+  {
+   "id": "REND",
+   "title": "Report renderer",
+   "sub": "Overview \u00b7 tabs \u00b7 History\nJinja HTML template",
+   "kind": "eval",
+   "cx": 890,
+   "cy": 875
+  },
+  {
+   "id": "GATE",
+   "title": "Go-live gate",
+   "sub": "GO \u00b7 PROVISIONAL \u00b7 NO-GO\nranked must-fix list",
+   "kind": "eval",
+   "cx": 1170,
+   "cy": 875
+  },
+  {
+   "id": "PDF",
+   "title": "PDF report",
+   "sub": "A4 landscape\nheadless Chrome / Edge",
+   "kind": "data",
+   "cx": 610,
+   "cy": 1025,
+   "shape": "folder"
+  },
+  {
+   "id": "HTML",
+   "title": "HTML report",
+   "sub": "self-contained page\nopens in the browser",
+   "kind": "data",
+   "cx": 890,
+   "cy": 1025,
+   "shape": "folder"
+  },
+  {
+   "id": "RUNS",
+   "title": "Run records",
+   "sub": ".svd/runs \u00b7 summary.json\nrun log \u00b7 raw output",
+   "kind": "data",
+   "cx": 1170,
+   "cy": 1025,
+   "shape": "cyl"
+  },
+  {
+   "id": "SNYKC",
+   "title": "Snyk cloud",
+   "sub": "vuln DB \u00b7 Code analysis\nsign-in \u00b7 CLI download",
+   "kind": "ext",
+   "cx": 1590,
+   "cy": 580,
+   "shape": "cloud",
+   "h": 62
+  },
+  {
+   "id": "SGR",
+   "title": "Semgrep registry",
+   "sub": "rules \u00b7 optional sign-in",
+   "kind": "ext",
+   "cx": 1590,
+   "cy": 656,
+   "shape": "cloud",
+   "h": 62
+  },
+  {
+   "id": "REG",
+   "title": "PyPI \u00b7 npm",
+   "sub": "package age \u00b7 uvx\ntool downloads",
+   "kind": "ext",
+   "cx": 1590,
+   "cy": 732,
+   "shape": "cloud",
+   "h": 62
+  },
+  {
+   "id": "TEST",
+   "title": "Test environment",
+   "sub": "your app's test copy\nnever production",
+   "kind": "ext",
+   "cx": 1590,
+   "cy": 875,
+   "shape": "cloud"
+  }
+ ],
+ "links": [
+  {
+   "pts": [
+    [
+     470,
+     125
+    ],
+    [
+     788,
+     125
+    ]
+   ],
+   "label": "asks in plain words",
+   "label_at": [
+    629,
+    116
+   ],
+   "anchor": "middle"
+  },
+  {
+   "pts": [
+    [
+     890,
+     164
+    ],
+    [
+     890,
+     234
+    ]
+   ],
+   "label": "MCP \u00b7 stdio",
+   "label_at": [
+    900,
+    204
+   ],
+   "anchor": "start"
+  },
+  {
+   "pts": [
+    [
+     990,
+     275
+    ],
+    [
+     1068,
+     275
+    ]
+   ],
+   "label": "serves",
+   "label_at": [
+    1029,
+    266
+   ],
+   "anchor": "middle"
+  },
+  {
+   "pts": [
+    [
+     890,
+     314
+    ],
+    [
+     890,
+     350
+    ]
+   ],
+   "arrow": false,
+   "name": "tools bus",
+   "label": "svd_* tool calls",
+   "label_at": [
+    900,
+    336
+   ],
+   "anchor": "start"
+  },
+  {
+   "pts": [
+    [
+     330,
+     350
+    ],
+    [
+     1170,
+     350
+    ]
+   ],
+   "arrow": false,
+   "name": "tools bus"
+  },
+  {
+   "pts": [
+    [
+     330,
+     350
+    ],
+    [
+     330,
+     384
+    ]
+   ]
+  },
+  {
+   "pts": [
+    [
+     610,
+     350
+    ],
+    [
+     610,
+     384
+    ]
+   ]
+  },
+  {
+   "pts": [
+    [
+     890,
+     350
+    ],
+    [
+     890,
+     384
+    ]
+   ]
+  },
+  {
+   "pts": [
+    [
+     1170,
+     350
+    ],
+    [
+     1170,
+     384
+    ]
+   ]
+  },
+  {
+   "pts": [
+    [
+     890,
+     464
+    ],
+    [
+     890,
+     508
+    ]
+   ],
+   "name": "pipeline \u2192 checks layer",
+   "label": "runs all three checks",
+   "label_at": [
+    900,
+    494
+   ],
+   "anchor": "start"
+  },
+  {
+   "pts": [
+    [
+     990,
+     450
+    ],
+    [
+     1030,
+     450
+    ],
+    [
+     1030,
+     800
+    ],
+    [
+     1170,
+     800
+    ],
+    [
+     1170,
+     834
+    ]
+   ],
+   "name": "pipeline \u2192 gate",
+   "label": "results",
+   "label_at": [
+    1100,
+    792
+   ],
+   "anchor": "middle"
+  },
+  {
+   "pts": [
+    [
+     330,
+     464
+    ],
+    [
+     330,
+     684
+    ]
+   ],
+   "label": "downloads \u00b7 signs in",
+   "label_at": [
+    340,
+    600
+   ],
+   "anchor": "start"
+  },
+  {
+   "pts": [
+    [
+     570,
+     614
+    ],
+    [
+     570,
+     650
+    ],
+    [
+     370,
+     650
+    ],
+    [
+     370,
+     684
+    ]
+   ],
+   "label": "Snyk tests",
+   "label_at": [
+    470,
+    646
+   ],
+   "anchor": "middle"
+  },
+  {
+   "pts": [
+    [
+     650,
+     614
+    ],
+    [
+     650,
+     684
+    ]
+   ],
+   "label": "code + secrets",
+   "label_at": [
+    660,
+    656
+   ],
+   "anchor": "start"
+  },
+  {
+   "pts": [
+    [
+     890,
+     614
+    ],
+    [
+     890,
+     684
+    ]
+   ],
+   "label": "runs tests",
+   "label_at": [
+    900,
+    656
+   ],
+   "anchor": "start"
+  },
+  {
+   "pts": [
+    [
+     1170,
+     614
+    ],
+    [
+     1170,
+     684
+    ]
+   ],
+   "label": "load profile",
+   "label_at": [
+    1180,
+    656
+   ],
+   "anchor": "start"
+  },
+  {
+   "pts": [
+    [
+     1340,
+     700
+    ],
+    [
+     1418,
+     700
+    ]
+   ],
+   "name": "scanners layer \u2192 external",
+   "label": "cloud calls",
+   "label_at": [
+    1380,
+    692
+   ],
+   "anchor": "middle"
+  },
+  {
+   "pts": [
+    [
+     1270,
+     745
+    ],
+    [
+     1360,
+     745
+    ],
+    [
+     1360,
+     875
+    ],
+    [
+     1488,
+     875
+    ]
+   ],
+   "label": "load test",
+   "label_at": [
+    1370,
+    862
+   ],
+   "anchor": "start"
+  },
+  {
+   "pts": [
+    [
+     1070,
+     875
+    ],
+    [
+     992,
+     875
+    ]
+   ],
+   "label": "verdict",
+   "label_at": [
+    1031,
+    866
+   ],
+   "anchor": "middle"
+  },
+  {
+   "pts": [
+    [
+     790,
+     875
+    ],
+    [
+     712,
+     875
+    ]
+   ],
+   "label": "score",
+   "label_at": [
+    751,
+    866
+   ],
+   "anchor": "middle"
+  },
+  {
+   "pts": [
+    [
+     890,
+     914
+    ],
+    [
+     890,
+     984
+    ]
+   ],
+   "label": "writes",
+   "label_at": [
+    900,
+    955
+   ],
+   "anchor": "start"
+  },
+  {
+   "pts": [
+    [
+     950,
+     914
+    ],
+    [
+     950,
+     948
+    ],
+    [
+     1170,
+     948
+    ],
+    [
+     1170,
+     984
+    ]
+   ],
+   "label": "summary \u00b7 log",
+   "label_at": [
+    1060,
+    940
+   ],
+   "anchor": "middle"
+  },
+  {
+   "pts": [
+    [
+     790,
+     1025
+    ],
+    [
+     712,
+     1025
+    ]
+   ],
+   "label": "prints",
+   "label_at": [
+    751,
+    1016
+   ],
+   "anchor": "middle"
+  },
+  {
+   "pts": [
+    [
+     850,
+     1064
+    ],
+    [
+     850,
+     1108
+    ],
+    [
+     205,
+     1108
+    ],
+    [
+     205,
+     125
+    ],
+    [
+     298,
+     125
+    ]
+   ],
+   "name": "report \u2192 person",
+   "label": "opens in browser",
+   "label_at": [
+    213,
+    560
+   ],
+   "anchor": "start"
+  }
+ ],
+ "junctions": [
+  [
+   890,
+   350
+  ]
+ ],
+ "legend": {
+  "box": {
+   "x": 20,
+   "y": 1130,
+   "w": 1320
+  },
+  "lines": [
+   "Arrows = call / data direction \u00b7 an arrow to a layer or group = used by several of its parts",
+   "Cross-cutting boxes (secret masking, tool resolver) are used throughout; their links are left out",
+   "Dark pills = services outside your machine \u00b7 everything else runs locally inside the uvx-launched server"
+  ]
+ }
+}

@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "secure-vibe-delivery — high-level architecture",
+    "output": ".archify/architecture-svd-overview-20261111-111626/svd-overview.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    { "id": "dev", "type": "external", "label": "Developer", "sublabel": "or reviewer", "pos": [40, 40], "size": [120, 64] },
+    { "id": "assistant", "type": "frontend", "label": "AI assistant", "sublabel": "Claude Code · Copilot Chat", "pos": [330, 40], "size": [160, 64] },
+    { "id": "mcp", "type": "backend", "label": "MCP server", "sublabel": "svd_* tools · setup · skills", "pos": [590, 40], "size": [170, 64], "tag": "FastMCP · stdio" },
+    { "id": "pipeline", "type": "backend", "label": "Run pipeline", "sublabel": "background job · detect", "pos": [870, 40], "size": [160, 64] },
+    { "id": "perf", "type": "backend", "label": "Performance check", "sublabel": "1.5× expected peak", "pos": [610, 200], "size": [160, 64] },
+    { "id": "func", "type": "backend", "label": "Functional check", "sublabel": "70% coverage gate", "pos": [870, 200], "size": [160, 64] },
+    { "id": "sec", "type": "backend", "label": "Security check", "sublabel": "incl. package provenance", "pos": [1130, 200], "size": [170, 64] },
+    { "id": "locust", "type": "backend", "label": "Locust", "sublabel": "load generator · via uvx", "pos": [610, 350], "size": [160, 64] },
+    { "id": "pytest", "type": "backend", "label": "pytest / Jest", "sublabel": "the project's own tests", "pos": [870, 350], "size": [160, 64] },
+    { "id": "scanners", "type": "backend", "label": "Snyk CLI · Semgrep", "sublabel": "deps · code · secrets · IaC", "pos": [1130, 350], "size": [170, 64] },
+    { "id": "gate", "type": "security", "label": "Go-live gate", "sublabel": "GO · PROVISIONAL · NO-GO", "pos": [1130, 520], "size": [170, 64], "tag": "ranked must-fix list" },
+    { "id": "renderer", "type": "backend", "label": "Report renderer", "sublabel": "HTML template · health score", "pos": [870, 520], "size": [160, 64] },
+    { "id": "records", "type": "database", "label": "Run records", "sublabel": ".svd/runs · summary.json", "pos": [600, 520], "size": [160, 64] },
+    { "id": "reports", "type": "frontend", "label": "HTML + PDF report", "sublabel": "PDF via headless Chrome", "pos": [870, 670], "size": [160, 64] },
+    { "id": "services", "type": "cloud", "label": "External services", "sublabel": "Snyk · Semgrep · PyPI/npm", "pos": [1480, 350], "size": [170, 64], "tag": "data residency: unknown" },
+    { "id": "testenv", "type": "external", "label": "Test environment", "sublabel": "never production", "pos": [350, 350], "size": [160, 64], "tag": "hosting: unknown" }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Developer's machine: server launched by uvx, scanners run as local tools", "wraps": ["mcp", "pipeline", "perf", "func", "sec", "locust", "pytest", "scanners", "gate", "renderer", "records", "reports"] }
+  ],
+  "connections": [
+    { "id": "ask", "from": "dev", "to": "assistant", "label": "asks in plain words", "variant": "emphasis" },
+    { "id": "call-tools", "from": "assistant", "to": "mcp", "label": "MCP · stdio", "variant": "emphasis" },
+    { "id": "start-run", "from": "mcp", "to": "pipeline", "label": "svd_run", "variant": "emphasis" },
+    { "id": "run-perf", "from": "pipeline", "to": "perf" },
+    { "id": "run-func", "from": "pipeline", "to": "func", "label": "runs all three checks", "variant": "emphasis" },
+    { "id": "run-sec", "from": "pipeline", "to": "sec" },
+    { "id": "load-profile", "from": "perf", "to": "locust", "label": "load profile" },
+    { "id": "run-tests", "from": "func", "to": "pytest", "label": "runs tests" },
+    { "id": "snyk-tests", "from": "sec", "to": "scanners", "label": "Snyk tests · code + secrets" },
+    { "id": "load-test", "from": "locust", "to": "testenv", "label": "load test" },
+    { "id": "cloud-calls", "from": "scanners", "to": "services", "label": "cloud calls" },
+    { "id": "results", "from": "pipeline", "to": "gate", "label": "results", "variant": "emphasis", "fromSide": "right", "toSide": "top", "via": [[1080, 72], [1080, 480], [1215, 480]] },
+    { "id": "verdict", "from": "gate", "to": "renderer", "label": "verdict", "variant": "emphasis" },
+    { "id": "writes", "from": "renderer", "to": "reports", "label": "writes", "variant": "emphasis" },
+    { "id": "summary-log", "from": "renderer", "to": "records", "label": "summary · log" },
+    { "id": "open", "from": "reports", "to": "dev", "label": "opens in browser", "variant": "emphasis", "fromSide": "left", "toSide": "bottom" }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "Primary path", "items": ["Ask → MCP tool call → run pipeline → three checks", "Pipeline collects results → gate → renderer → report opens for the developer"] },
+    { "dot": "violet", "title": "Folded in (see component diagram)", "items": ["MCP server: guided setup, doctor, locustfile generator, 5 fixing skills", "Cross-cutting: secret masking, tool resolver (PATH → Snyk cache → uvx)", "Semgrep and Locust also download through uvx from PyPI"] },
+    { "dot": "amber", "title": "Unknowns (not invented)", "items": ["Where the test environment is hosted, and who runs it", "Where Snyk and Semgrep keep scan data", "Which model the assistant uses: the user's choice"] }
+  ]
+}

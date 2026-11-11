@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "secure-vibe-delivery — high-level architecture",
+    "output": ".archify/architecture-svd-overview-20261111-111324/svd-overview.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    { "id": "dev", "type": "external", "label": "Developer", "sublabel": "or reviewer", "pos": [40, 40], "size": [120, 64] },
+    { "id": "assistant", "type": "frontend", "label": "AI assistant", "sublabel": "Claude Code · Copilot Chat", "pos": [230, 40], "size": [150, 64] },
+    { "id": "mcp", "type": "backend", "label": "MCP server", "sublabel": "9 svd_* tools · setup · skills", "pos": [480, 40], "size": [170, 64], "tag": "stdio · uvx" },
+    { "id": "pipeline", "type": "backend", "label": "Run pipeline", "sublabel": "background job · polled", "pos": [760, 40], "size": [160, 64] },
+    { "id": "perf", "type": "backend", "label": "Performance check", "sublabel": "Locust · 1.5× peak", "pos": [500, 200], "size": [160, 64] },
+    { "id": "func", "type": "backend", "label": "Functional check", "sublabel": "pytest or Jest · ≥70%", "pos": [760, 200], "size": [160, 64] },
+    { "id": "sec", "type": "backend", "label": "Security check", "sublabel": "Snyk · Semgrep · packages", "pos": [1020, 200], "size": [170, 64] },
+    { "id": "gate", "type": "security", "label": "Go-live gate", "sublabel": "GO · PROVISIONAL · NO-GO", "pos": [760, 350], "size": [160, 64], "tag": "didn't run = fail" },
+    { "id": "report", "type": "frontend", "label": "Go-live report", "sublabel": "HTML + PDF · must-fix list", "pos": [760, 500], "size": [160, 64] },
+    { "id": "records", "type": "database", "label": "Run records", "sublabel": ".svd/runs · summary.json", "pos": [1080, 500], "size": [160, 64] },
+    { "id": "clouds", "type": "cloud", "label": "Scanner services", "sublabel": "Snyk · Semgrep · PyPI/npm", "pos": [1360, 200], "size": [170, 64], "tag": "data residency: unknown" },
+    { "id": "testenv", "type": "external", "label": "Test environment", "sublabel": "your app · never production", "pos": [230, 200], "size": [160, 64], "tag": "hosting: unknown" }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Local server process (launched by uvx on the developer's machine)", "wraps": ["mcp", "pipeline", "perf", "func", "sec", "gate", "report", "records"] }
+  ],
+  "connections": [
+    { "id": "ask", "from": "dev", "to": "assistant", "label": "asks", "variant": "emphasis" },
+    { "id": "call-tools", "from": "assistant", "to": "mcp", "label": "MCP · stdio", "variant": "emphasis" },
+    { "id": "start-run", "from": "mcp", "to": "pipeline", "label": "svd_run", "variant": "emphasis" },
+    { "id": "run-perf", "from": "pipeline", "to": "perf" },
+    { "id": "run-func", "from": "pipeline", "to": "func", "label": "runs checks", "variant": "emphasis" },
+    { "id": "run-sec", "from": "pipeline", "to": "sec" },
+    { "id": "load-test", "from": "perf", "to": "testenv", "label": "load test" },
+    { "id": "scan-cloud", "from": "sec", "to": "clouds", "label": "scans · rules · lookups" },
+    { "id": "perf-result", "from": "perf", "to": "gate" },
+    { "id": "func-result", "from": "func", "to": "gate", "label": "results", "variant": "emphasis" },
+    { "id": "sec-result", "from": "sec", "to": "gate" },
+    { "id": "verdict", "from": "gate", "to": "report", "label": "verdict", "variant": "emphasis" },
+    { "id": "save", "from": "report", "to": "records", "label": "summary · log" },
+    { "id": "open", "from": "report", "to": "dev", "label": "opens in browser", "variant": "emphasis", "fromSide": "left", "toSide": "bottom" }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "Primary path", "items": ["Ask → MCP tool call → background run → three checks → gate → report back to the developer", "The assistant polls svd_status while the run works"] },
+    { "dot": "rose", "title": "Gate rule", "items": ["Any must-pass check failing or not running gives NO-GO", "A quick-mode load test gives PROVISIONAL", "GO still needs the Delivery Lead's sign-off on manual items"] },
+    { "dot": "amber", "title": "Unknowns (not invented)", "items": ["Where the test environment is hosted, and who runs it", "Where Snyk and Semgrep keep scan data", "Which model the assistant uses: that's the user's choice"] }
+  ]
+}

@@ -1,0 +1,236 @@
+{
+  "title": "Secure Vibe Delivery — how a go-live check works",
+  "subtitle": "Recorded from the animated architecture demo · example figures are illustrative",
+  "output": "secure-vibe-delivery-tutorial.mp4",
+  "viewport": [
+    1920,
+    1080
+  ],
+  "voice": {
+    "kokoro": "af_heart",
+    "say": "Daniel",
+    "speed": 1.0
+  },
+  "pronounce": {
+    "kokoro": [
+      [
+        "\\bSnyk\\b",
+        "[Snyk](/snˈik/)"
+      ],
+      [
+        "\\bSemgrep\\b",
+        "[Semgrep](/sˈɛmɡɹɛp/)"
+      ],
+      [
+        "\\bpytest\\b",
+        "[pytest](/pˈItɛst/)"
+      ],
+      [
+        "\\bMCP\\b",
+        "M-C-P"
+      ],
+      [
+        "t-labs-buy",
+        "T labs buy"
+      ],
+      [
+        "secure-vibe-delivery",
+        "secure vibe delivery"
+      ],
+      [
+        "\\bgithub\\b",
+        "git hub"
+      ]
+    ],
+    "say": [
+      [
+        "\\bSnyk\\b",
+        "sneak"
+      ],
+      [
+        "\\bpytest\\b",
+        "pie test"
+      ],
+      [
+        "t-labs-buy",
+        "T labs buy"
+      ],
+      [
+        "\\bgithub\\b",
+        "git hub"
+      ]
+    ]
+  },
+  "mask": [],
+  "check_ignore": [],
+  "theme": {
+    "bg": "#10202a",
+    "accent": "#0e6e68",
+    "accent_light": "#81c8be",
+    "accent_rgb": "14,110,104"
+  },
+  "scenes": [
+    {
+      "id": "s00_title",
+      "kind": "card",
+      "dur": 8,
+      "vo": "Hello, and welcome. In the next few minutes, I'll show you how Secure Vibe Delivery checks an AI-built project before it goes live."
+    },
+    {
+      "id": "s01_idea",
+      "kind": "app",
+      "caption": "Three questions before go-live: safe, working, ready for real traffic",
+      "screen": "The demo at rest; point to the three checks, then the Go-Live Gate.",
+      "vo": "AI assistants write code quickly, but someone still has to ask: is it safe, does it work, and can it cope with real traffic? Secure Vibe Delivery answers those three questions with real tools, and gives one verdict: go, provisional, or no-go.",
+      "cues": [
+        "is it safe",
+        "does it work",
+        "can it cope",
+        "gives one verdict"
+      ]
+    },
+    {
+      "id": "s02_cast",
+      "kind": "app",
+      "caption": "An MCP server: you ask your AI assistant, it calls the server's tools",
+      "screen": "Point to Developer, AI Assistant, MCP Server, then the Local tools box.",
+      "vo": "It's an MCP server, so you never run it yourself. You ask your AI assistant, such as Claude Code or Copilot Chat, and the assistant calls the server's tools. Everything runs on your own machine, using local tools like Snyk, Semgrep, pytest and Locust.",
+      "cues": [
+        "It's an MCP server",
+        "You ask your AI assistant",
+        "the assistant calls",
+        "Everything runs on your own machine"
+      ]
+    },
+    {
+      "id": "s03_ask",
+      "kind": "app",
+      "caption": "Step 1 · The developer asks; the Doctor confirms the tools are ready",
+      "screen": "Step three times: Developer → AI Assistant, AI Assistant → MCP Server, MCP Server ⇄ Doctor.",
+      "vo": "Here's one real request. The developer asks for a go-live check. First, the assistant calls the Doctor, which confirms that every tool is installed and signed in.",
+      "cues": [
+        "The developer asks",
+        "First, the assistant calls",
+        "which confirms"
+      ]
+    },
+    {
+      "id": "s04_run",
+      "kind": "app",
+      "caption": "Step 2 · svd_run starts a background job and returns a run ID at once",
+      "screen": "Step three times: start the run, background job, run_id back to the assistant.",
+      "vo": "Then it starts the run. A full check takes several minutes, so the server doesn't make the assistant wait. It starts a background job and hands back a run ID straight away. The assistant checks on progress whenever it likes.",
+      "cues": [
+        "Then it starts the run",
+        "It starts a background job",
+        "hands back a run ID"
+      ]
+    },
+    {
+      "id": "s05_security",
+      "kind": "app",
+      "caption": "Step 3 · Security: Snyk and Semgrep run locally; packages are checked too",
+      "screen": "Step six times, through Security Check → Run Pipeline.",
+      "vo": "Security comes first. The security check runs the Snyk scans and Semgrep as local programs. They look for vulnerable packages, risky code and hard-coded secrets. It also checks that every package really exists and isn't brand new, which catches packages an AI may have made up. In this example, security fails.",
+      "cues": [
+        "Security comes first",
+        "runs the Snyk scans",
+        "They look for",
+        "It also checks",
+        "which catches",
+        "In this example"
+      ]
+    },
+    {
+      "id": "s06_function",
+      "kind": "app",
+      "caption": "Step 4 · Functional: the project's own tests, with a 70% coverage gate",
+      "screen": "Step four times, through the polling step.",
+      "vo": "Next, the functional check runs the project's own tests with pytest or Jest, and measures coverage. The gate is seventy percent. Here it's eighty-two, so this check passes. Meanwhile, the assistant polls for progress.",
+      "cues": [
+        "the functional check runs",
+        "and measures coverage",
+        "Here it's eighty-two",
+        "Meanwhile"
+      ]
+    },
+    {
+      "id": "s07_load",
+      "kind": "app",
+      "caption": "Step 5 · Performance: Locust at 1.5× peak, against a test copy only",
+      "screen": "Step five times, through Performance Check → Run Pipeline.",
+      "vo": "Then performance. Locust sends one and a half times the expected peak traffic to a test copy of your app, never to production. A quick run gives an early answer; a fifteen-minute gate run is needed before a full go.",
+      "cues": [
+        "Then performance",
+        "Locust sends",
+        "to a test copy",
+        "A quick run",
+        "a fifteen-minute gate run"
+      ]
+    },
+    {
+      "id": "s08_verdict",
+      "kind": "app",
+      "caption": "Step 6 · The gate decides; the report is written and opened",
+      "screen": "Two-second pause, then step four times, through Run Records → Developer.",
+      "vo": "Now the gate decides. Any check that fails, or doesn't run, means no-go. The report renderer writes an HTML report with a health score, plus a PDF copy, into the project's dot S V D folder, and opens it in the developer's browser.",
+      "cues": [
+        "Now the gate decides",
+        "means no-go",
+        "The report renderer writes",
+        "and opens it"
+      ],
+      "pauses": {
+        "Now the gate decides": 2.0
+      }
+    },
+    {
+      "id": "s09_fix",
+      "kind": "app",
+      "caption": "Step 7 · The must-fix list, each item with a step-by-step guide",
+      "screen": "Step three times, to the end.",
+      "vo": "Finally, the assistant fetches the verdict and the must-fix list. Each item links to a step-by-step guide from the server's skills, so the assistant can explain what to fix first, and help you fix it.",
+      "cues": [
+        "the assistant fetches",
+        "Each item links",
+        "so the assistant can explain"
+      ]
+    },
+    {
+      "id": "s10_key",
+      "kind": "app",
+      "caption": "Snyk is reached only through the local Snyk command-line tool",
+      "screen": "Open the Security Check ⇄ Snyk CLI · Semgrep connection inspector, then close it.",
+      "vo": "One thing worth remembering: the server never calls Snyk directly. It runs the Snyk command-line tool on your machine, signed in through your browser. So a check only works when the tools can be found, and the one-time setup takes care of that.",
+      "cues": [
+        "the server never calls",
+        "It runs the Snyk",
+        "So a check only works"
+      ]
+    },
+    {
+      "id": "s11_close",
+      "kind": "card",
+      "dur": 14,
+      "vo": "To try it, follow the install guide at t-labs-buy dot github dot io, slash secure-vibe-delivery. Then just ask your assistant to check your project before go-live. Thank you for watching."
+    }
+  ],
+  "cards": {
+    "s00_title": {
+      "kicker": "MCP server · tutorial",
+      "title": "Secure Vibe Delivery",
+      "sub": "Checking an AI-built project before go-live",
+      "foot": "Told through the animated architecture demo · figures in the demo are illustrative"
+    },
+    "s11_close": {
+      "kicker": "Try it",
+      "title": "Ask your assistant: “Check this project before go-live”",
+      "bullets": [
+        "Security · functional · performance, with real local tools",
+        "One verdict: GO, PROVISIONAL or NO-GO",
+        "Install guide: t-labs-buy.github.io/secure-vibe-delivery/install.html"
+      ],
+      "foot": "secure-vibe-delivery · open source on GitHub"
+    }
+  }
+}

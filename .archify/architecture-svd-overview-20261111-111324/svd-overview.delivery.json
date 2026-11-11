@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "f89041e7-4554-42c4-bf9c-e66b82c530f1",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/Users/senthilpalanivelu/Programme/secure-vibe-delivery/.archify/architecture-svd-overview-20261111-111324/candidate.json",
+  "output": "/Users/senthilpalanivelu/Programme/secure-vibe-delivery/.archify/architecture-svd-overview-20261111-111324/svd-overview.html",
+  "specification": {
+    "sha256": "8b36cf8de41ff6ce26cd96c7f60d1911098184254520b336a0a148fe3f17cac6",
+    "bytes": 4343
+  },
+  "artifact": {
+    "sha256": "f75f562779b680a468ea208b5f01cfe8cd04836465b693562d21eb9962f8df7f",
+    "bytes": 856189
+  }
+}

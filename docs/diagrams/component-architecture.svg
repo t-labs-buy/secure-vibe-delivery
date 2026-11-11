@@ -1,0 +1,186 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2130" height="1564" viewBox="0 0 2130 1564" font-family="-apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+<defs><marker id="arrA3AAB4" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#A3AAB4" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker><style>.lbl{paint-order:stroke;stroke:#FFFFFF;stroke-width:5px;stroke-linejoin:round}</style></defs>
+<rect width="2130" height="1564" fill="#FFFFFF"/>
+<text x="1065.0" y="38" text-anchor="middle" font-size="24" font-weight="700" fill="#1E2530">secure-vibe-delivery MCP server — Component Architecture</text>
+<rect x="28.0" y="96.0" width="1528.0" height="161.2" rx="14" fill="#FBFCFE" stroke="#C9D1DB" stroke-width="1.3"/>
+<text x="48.0" y="126.0" font-size="13" font-weight="700" fill="#5B6B7F">1</text>
+<text x="48.0" y="146.0" font-size="15" font-weight="700" fill="#1E2530">People &amp;</text>
+<text x="48.0" y="164.0" font-size="15" font-weight="700" fill="#1E2530">assistant</text>
+<rect x="28.0" y="289.2" width="1528.0" height="161.2" rx="14" fill="#FBFCFE" stroke="#C9D1DB" stroke-width="1.3"/>
+<text x="48.0" y="319.2" font-size="13" font-weight="700" fill="#5B6B7F">2</text>
+<text x="48.0" y="339.2" font-size="15" font-weight="700" fill="#1E2530">MCP server &amp;</text>
+<text x="48.0" y="357.2" font-size="15" font-weight="700" fill="#1E2530">cross-cutting</text>
+<rect x="28.0" y="482.4" width="1528.0" height="161.2" rx="14" fill="#FBFCFE" stroke="#C9D1DB" stroke-width="1.3"/>
+<text x="48.0" y="512.4" font-size="13" font-weight="700" fill="#5B6B7F">3</text>
+<text x="48.0" y="532.4" font-size="15" font-weight="700" fill="#1E2530">Orchestration</text>
+<rect x="28.0" y="675.6" width="1528.0" height="152.2" rx="14" fill="#FBFCFE" stroke="#C9D1DB" stroke-width="1.3"/>
+<text x="48.0" y="705.6" font-size="13" font-weight="700" fill="#5B6B7F">4</text>
+<text x="48.0" y="725.6" font-size="15" font-weight="700" fill="#1E2530">Checks</text>
+<rect x="28.0" y="847.8" width="1528.0" height="145.6" rx="14" fill="#FBFCFE" stroke="#C9D1DB" stroke-width="1.3"/>
+<text x="48.0" y="877.8" font-size="13" font-weight="700" fill="#5B6B7F">5</text>
+<text x="48.0" y="897.8" font-size="15" font-weight="700" fill="#1E2530">Scanners &amp;</text>
+<text x="48.0" y="915.8" font-size="15" font-weight="700" fill="#1E2530">runners</text>
+<rect x="28.0" y="1025.4" width="1528.0" height="161.2" rx="14" fill="#FBFCFE" stroke="#C9D1DB" stroke-width="1.3"/>
+<text x="48.0" y="1055.4" font-size="13" font-weight="700" fill="#5B6B7F">6</text>
+<text x="48.0" y="1075.4" font-size="15" font-weight="700" fill="#1E2530">Gate &amp;</text>
+<text x="48.0" y="1093.4" font-size="15" font-weight="700" fill="#1E2530">reporting</text>
+<rect x="28.0" y="1218.6" width="1528.0" height="161.2" rx="14" fill="#FBFCFE" stroke="#C9D1DB" stroke-width="1.3"/>
+<text x="48.0" y="1248.6" font-size="13" font-weight="700" fill="#5B6B7F">7</text>
+<text x="48.0" y="1268.6" font-size="15" font-weight="700" fill="#1E2530">Outputs</text>
+<rect x="1668.0" y="678.8" width="382.0" height="314.6" rx="14" fill="#FBFCFE" stroke="#C9D1DB" stroke-width="1.3"/>
+<text x="1684.0" y="704.8" font-size="15" font-weight="700" fill="#1E2530"><tspan fill="#5B6B7F" font-size="13">8  </tspan>External services</text>
+<path d="M578.0,176.6 L943.2,176.6" fill="none" stroke="#A3AAB4" stroke-width="1.5" stroke-linejoin="miter" marker-end="url(#arrA3AAB4)"/>
+<path d="M1046.0,215.6 L1046.0,327.6" fill="none" stroke="#A3AAB4" stroke-width="1.5" stroke-linejoin="miter" marker-end="url(#arrA3AAB4)"/>
+<path d="M1146.0,369.8 L1255.2,369.8" fill="none" stroke="#A3AAB4" stroke-width="1.5" stroke-linejoin="miter" marker-end="url(#arrA3AAB4)"/>
+<path d="M1046.0,408.8 L1046.0,466.4" fill="none" stroke="#A3AAB4" stroke-width="1.5" stroke-linejoin="miter"/>
+<path d="M422.0,466.4 L1358.0,466.4" fill="none" stroke="#A3AAB4" stroke-width="1.5" stroke-linejoin="miter"/>
+<path d="M422.0,466.4 L422.0,520.8" fill="none" stroke="#A3AAB4" stroke-width="1.5" stroke-linejoin="miter" marker-end="url(#arrA3AAB4)"/>
+<path d="M734.0,466.4 L734.0,520.8" fill="none" stroke="#A3AAB4" stroke-width="1.5" stroke-linejoin="miter" marker-end="url(#arrA3AAB4)"/>
+<path d="M1046.0,466.4 L1046.0,520.8" fill="none" stroke="#A3AAB4" stroke-width="1.5" stroke-linejoin="miter" marker-end="url(#arrA3AAB4)"/>
+<path d="M1358.0,466.4 L1358.0,520.8" fill="none" stroke="#A3AAB4" stroke-width="1.5" stroke-linejoin="miter" marker-end="url(#arrA3AAB4)"/>
+<path d="M1046.0,602.0 L1046.0,672.4" fill="none" stroke="#A3AAB4" stroke-width="1.5" stroke-linejoin="miter" marker-end="url(#arrA3AAB4)"/>
+<path d="M1146.0,588.0 L1202.0,588.0 L1202.0,1009.4 L1358.0,1009.4 L1358.0,1063.8" fill="none" stroke="#A3AAB4" stroke-width="1.5" stroke-linejoin="miter" marker-end="url(#arrA3AAB4)"/>
+<path d="M422.0,602.0 L422.0,871.8" fill="none" stroke="#A3AAB4" stroke-width="1.5" stroke-linejoin="miter" marker-end="url(#arrA3AAB4)"/>
+<path d="M694.0,795.2 L694.0,837.8 L462.0,837.8 L462.0,871.8" fill="none" stroke="#A3AAB4" stroke-width="1.5" stroke-linejoin="miter" marker-end="url(#arrA3AAB4)"/>
+<path d="M774.0,795.2 L774.0,871.8" fill="none" stroke="#A3AAB4" stroke-width="1.5" stroke-linejoin="miter" marker-end="url(#arrA3AAB4)"/>
+<path d="M1046.0,795.2 L1046.0,871.8" fill="none" stroke="#A3AAB4" stroke-width="1.5" stroke-linejoin="miter" marker-end="url(#arrA3AAB4)"/>
+<path d="M1358.0,795.2 L1358.0,871.8" fill="none" stroke="#A3AAB4" stroke-width="1.5" stroke-linejoin="miter" marker-end="url(#arrA3AAB4)"/>
+<path d="M1556.0,887.8 L1665.2,887.8" fill="none" stroke="#A3AAB4" stroke-width="1.5" stroke-linejoin="miter" marker-end="url(#arrA3AAB4)"/>
+<path d="M1458.0,932.8 L1584.0,932.8 L1584.0,1106.0 L1763.2,1106.0" fill="none" stroke="#A3AAB4" stroke-width="1.5" stroke-linejoin="miter" marker-end="url(#arrA3AAB4)"/>
+<path d="M1258.0,1106.0 L1148.8,1106.0" fill="none" stroke="#A3AAB4" stroke-width="1.5" stroke-linejoin="miter" marker-end="url(#arrA3AAB4)"/>
+<path d="M946.0,1106.0 L836.8,1106.0" fill="none" stroke="#A3AAB4" stroke-width="1.5" stroke-linejoin="miter" marker-end="url(#arrA3AAB4)"/>
+<path d="M1046.0,1145.0 L1046.0,1257.0" fill="none" stroke="#A3AAB4" stroke-width="1.5" stroke-linejoin="miter" marker-end="url(#arrA3AAB4)"/>
+<path d="M1106.0,1145.0 L1106.0,1199.4 L1358.0,1199.4 L1358.0,1257.0" fill="none" stroke="#A3AAB4" stroke-width="1.5" stroke-linejoin="miter" marker-end="url(#arrA3AAB4)"/>
+<path d="M946.0,1299.2 L836.8,1299.2" fill="none" stroke="#A3AAB4" stroke-width="1.5" stroke-linejoin="miter" marker-end="url(#arrA3AAB4)"/>
+<path d="M1006.0,1338.2 L1006.0,1408.6 L287.0,1408.6 L287.0,176.6 L390.0,176.6" fill="none" stroke="#A3AAB4" stroke-width="1.5" stroke-linejoin="miter" marker-end="url(#arrA3AAB4)"/>
+<circle cx="1046.0" cy="466.4" r="3.5" fill="#A3AAB4"/>
+<text x="753.0" y="167.6" text-anchor="middle" font-size="12" fill="#37424F" class="lbl">asks in plain words</text>
+<text x="1056.0" y="279.6" text-anchor="start" font-size="12" fill="#37424F" class="lbl">MCP · stdio</text>
+<text x="1200.6" y="360.8" text-anchor="middle" font-size="12" fill="#37424F" class="lbl">serves</text>
+<text x="1056.0" y="444.0" text-anchor="start" font-size="12" fill="#37424F" class="lbl">svd_* tool calls</text>
+<text x="1056.0" y="650.0" text-anchor="start" font-size="12" fill="#37424F" class="lbl">runs all three checks</text>
+<text x="1288.0" y="996.6" text-anchor="middle" font-size="12" fill="#37424F" class="lbl">results</text>
+<text x="432.0" y="781.2" text-anchor="start" font-size="12" fill="#37424F" class="lbl">downloads · signs in</text>
+<text x="578.0" y="833.8" text-anchor="middle" font-size="12" fill="#37424F" class="lbl">Snyk tests</text>
+<text x="784.0" y="843.8" text-anchor="start" font-size="12" fill="#37424F" class="lbl">code + secrets</text>
+<text x="1056.0" y="843.8" text-anchor="start" font-size="12" fill="#37424F" class="lbl">runs tests</text>
+<text x="1368.0" y="843.8" text-anchor="start" font-size="12" fill="#37424F" class="lbl">load profile</text>
+<text x="1612.0" y="879.8" text-anchor="middle" font-size="12" fill="#37424F" class="lbl">cloud calls</text>
+<text x="1598.0" y="1093.0" text-anchor="start" font-size="12" fill="#37424F" class="lbl">load test</text>
+<text x="1203.4" y="1097.0" text-anchor="middle" font-size="12" fill="#37424F" class="lbl">verdict</text>
+<text x="891.4" y="1097.0" text-anchor="middle" font-size="12" fill="#37424F" class="lbl">score</text>
+<text x="1056.0" y="1210.6" text-anchor="start" font-size="12" fill="#37424F" class="lbl">writes</text>
+<text x="1244.0" y="1186.6" text-anchor="middle" font-size="12" fill="#37424F" class="lbl">summary · log</text>
+<text x="891.4" y="1290.2" text-anchor="middle" font-size="12" fill="#37424F" class="lbl">prints</text>
+<text x="298.2" y="741.2" text-anchor="start" font-size="12" fill="#37424F" class="lbl">opens in browser</text>
+<circle cx="422.0" cy="151.6" r="11" fill="#FFFFFF" stroke="#56606E" stroke-width="1.6"/><path d="M422.0,162.6 V186.6 M404.0,171.6 H440.0 M422.0,186.6 L408.0,205.6 M422.0,186.6 L436.0,205.6" stroke="#56606E" stroke-width="1.6" fill="none"/>
+<text x="457.0" y="173.6" font-size="14" font-weight="700" fill="#1E2530">Developer /</text>
+<text x="457.0" y="190.6" font-size="14" font-weight="700" fill="#1E2530">reviewer</text>
+<rect x="946.0" y="137.6" width="200" height="78" rx="10" fill="#EEF4FF" stroke="#6B8BC9" stroke-width="1.5"/>
+<text x="1046.0" y="164.6" text-anchor="middle" font-size="15" font-weight="700" fill="#1E2530">AI assistant</text>
+<text x="1046.0" y="181.6" text-anchor="middle" font-size="12.5" fill="#4A5563">Claude Code · Copilot Chat</text>
+<text x="1046.0" y="198.6" text-anchor="middle" font-size="12.5" fill="#4A5563">VS Code or terminal</text>
+<rect x="322.0" y="330.8" width="200" height="78" rx="10" fill="#F1F5F9" stroke="#64748B" stroke-width="1.5"/>
+<text x="422.0" y="357.8" text-anchor="middle" font-size="15" font-weight="700" fill="#1E2530">Secret masking</text>
+<text x="422.0" y="374.8" text-anchor="middle" font-size="12.5" fill="#4A5563">raw secret values</text>
+<text x="422.0" y="391.8" text-anchor="middle" font-size="12.5" fill="#4A5563">never leave the scan</text>
+<rect x="634.0" y="330.8" width="200" height="78" rx="10" fill="#F1F5F9" stroke="#64748B" stroke-width="1.5"/>
+<text x="734.0" y="357.8" text-anchor="middle" font-size="15" font-weight="700" fill="#1E2530">Tool resolver</text>
+<text x="734.0" y="374.8" text-anchor="middle" font-size="12.5" fill="#4A5563">PATH → Snyk cache → uvx</text>
+<text x="734.0" y="391.8" text-anchor="middle" font-size="12.5" fill="#4A5563">(UV variable fallback)</text>
+<rect x="946.0" y="330.8" width="200" height="78" rx="10" fill="#F1F5F9" stroke="#64748B" stroke-width="1.5"/>
+<text x="1046.0" y="357.8" text-anchor="middle" font-size="15" font-weight="700" fill="#1E2530">MCP server</text>
+<text x="1046.0" y="374.8" text-anchor="middle" font-size="12.5" fill="#4A5563">FastMCP · stdio via uvx</text>
+<text x="1046.0" y="391.8" text-anchor="middle" font-size="12.5" fill="#4A5563">9 svd_* tools · 2 prompts</text>
+<rect x="1258.0" y="330.8" width="200" height="78" rx="10" fill="#F3EEFF" stroke="#8C6BC9" stroke-width="1.5"/>
+<text x="1358.0" y="357.8" text-anchor="middle" font-size="15" font-weight="700" fill="#1E2530">Fixing skills</text>
+<text x="1358.0" y="374.8" text-anchor="middle" font-size="12.5" fill="#4A5563">5 step-by-step guides</text>
+<text x="1358.0" y="391.8" text-anchor="middle" font-size="12.5" fill="#4A5563">skill:// resources</text>
+<rect x="322.0" y="524.0" width="200" height="78" rx="10" fill="#FFF7E8" stroke="#C8913A" stroke-width="1.5"/>
+<text x="422.0" y="551.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1E2530">Guided setup</text>
+<text x="422.0" y="568.0" text-anchor="middle" font-size="12.5" fill="#4A5563">svd_setup · one step</text>
+<text x="422.0" y="585.0" text-anchor="middle" font-size="12.5" fill="#4A5563">per answer · sign-ins</text>
+<rect x="634.0" y="524.0" width="200" height="78" rx="10" fill="#FFF7E8" stroke="#C8913A" stroke-width="1.5"/>
+<text x="734.0" y="551.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1E2530">Doctor</text>
+<text x="734.0" y="568.0" text-anchor="middle" font-size="12.5" fill="#4A5563">svd_doctor · tools,</text>
+<text x="734.0" y="585.0" text-anchor="middle" font-size="12.5" fill="#4A5563">sign-ins, project type</text>
+<rect x="946.0" y="524.0" width="200" height="78" rx="10" fill="#FFF7E8" stroke="#C8913A" stroke-width="1.5"/>
+<text x="1046.0" y="551.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1E2530">Run pipeline</text>
+<text x="1046.0" y="568.0" text-anchor="middle" font-size="12.5" fill="#4A5563">svd_run · background job</text>
+<text x="1046.0" y="585.0" text-anchor="middle" font-size="12.5" fill="#4A5563">detect → check → gate</text>
+<rect x="1258.0" y="524.0" width="200" height="78" rx="10" fill="#FFF7E8" stroke="#C8913A" stroke-width="1.5"/>
+<text x="1358.0" y="551.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1E2530">Locustfile generator</text>
+<text x="1358.0" y="568.0" text-anchor="middle" font-size="12.5" fill="#4A5563">OpenAPI → routes</text>
+<text x="1358.0" y="585.0" text-anchor="middle" font-size="12.5" fill="#4A5563">→ GET /</text>
+<rect x="634.0" y="717.2" width="200" height="78" rx="10" fill="#F3EEFF" stroke="#8C6BC9" stroke-width="1.5"/>
+<text x="734.0" y="744.2" text-anchor="middle" font-size="15" font-weight="700" fill="#1E2530">Security check</text>
+<text x="734.0" y="761.2" text-anchor="middle" font-size="12.5" fill="#4A5563">Snyk · Semgrep</text>
+<text x="734.0" y="778.2" text-anchor="middle" font-size="12.5" fill="#4A5563">package provenance</text>
+<rect x="946.0" y="717.2" width="200" height="78" rx="10" fill="#F3EEFF" stroke="#8C6BC9" stroke-width="1.5"/>
+<text x="1046.0" y="744.2" text-anchor="middle" font-size="15" font-weight="700" fill="#1E2530">Functional check</text>
+<text x="1046.0" y="761.2" text-anchor="middle" font-size="12.5" fill="#4A5563">pytest or Jest</text>
+<text x="1046.0" y="778.2" text-anchor="middle" font-size="12.5" fill="#4A5563">70% coverage gate</text>
+<rect x="1258.0" y="717.2" width="200" height="78" rx="10" fill="#F3EEFF" stroke="#8C6BC9" stroke-width="1.5"/>
+<text x="1358.0" y="744.2" text-anchor="middle" font-size="15" font-weight="700" fill="#1E2530">Performance check</text>
+<text x="1358.0" y="761.2" text-anchor="middle" font-size="12.5" fill="#4A5563">Locust at 1.5×</text>
+<text x="1358.0" y="778.2" text-anchor="middle" font-size="12.5" fill="#4A5563">expected peak</text>
+<rect x="322.0" y="873.8" width="200" height="78" rx="10" fill="#EAF7F7" stroke="#3F9A9A" stroke-width="1.5"/>
+<text x="422.0" y="900.8" text-anchor="middle" font-size="15" font-weight="700" fill="#1E2530">Snyk CLI</text>
+<text x="422.0" y="917.8" text-anchor="middle" font-size="12.5" fill="#4A5563">Open Source · Code</text>
+<text x="422.0" y="934.8" text-anchor="middle" font-size="12.5" fill="#4A5563">Secrets · IaC</text>
+<rect x="634.0" y="873.8" width="200" height="78" rx="10" fill="#EAF7F7" stroke="#3F9A9A" stroke-width="1.5"/>
+<text x="734.0" y="900.8" text-anchor="middle" font-size="15" font-weight="700" fill="#1E2530">Semgrep</text>
+<text x="734.0" y="917.8" text-anchor="middle" font-size="12.5" fill="#4A5563">AI-mistake rules · secrets</text>
+<text x="734.0" y="934.8" text-anchor="middle" font-size="12.5" fill="#4A5563">fallback · via uvx</text>
+<rect x="946.0" y="873.8" width="200" height="78" rx="10" fill="#EAF7F7" stroke="#3F9A9A" stroke-width="1.5"/>
+<text x="1046.0" y="900.8" text-anchor="middle" font-size="15" font-weight="700" fill="#1E2530">pytest / Jest</text>
+<text x="1046.0" y="917.8" text-anchor="middle" font-size="12.5" fill="#4A5563">the project's own</text>
+<text x="1046.0" y="934.8" text-anchor="middle" font-size="12.5" fill="#4A5563">test suite</text>
+<rect x="1258.0" y="873.8" width="200" height="78" rx="10" fill="#EAF7F7" stroke="#3F9A9A" stroke-width="1.5"/>
+<text x="1358.0" y="900.8" text-anchor="middle" font-size="15" font-weight="700" fill="#1E2530">Locust</text>
+<text x="1358.0" y="917.8" text-anchor="middle" font-size="12.5" fill="#4A5563">load generator</text>
+<text x="1358.0" y="934.8" text-anchor="middle" font-size="12.5" fill="#4A5563">via uvx</text>
+<rect x="634.0" y="1067.0" width="200" height="78" rx="10" fill="#FFF0F3" stroke="#C9546E" stroke-width="1.5"/>
+<text x="734.0" y="1102.5" text-anchor="middle" font-size="15" font-weight="700" fill="#1E2530">Health score</text>
+<text x="734.0" y="1119.5" text-anchor="middle" font-size="12.5" fill="#4A5563">0–100 + letter grade</text>
+<rect x="946.0" y="1067.0" width="200" height="78" rx="10" fill="#FFF0F3" stroke="#C9546E" stroke-width="1.5"/>
+<text x="1046.0" y="1094.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1E2530">Report renderer</text>
+<text x="1046.0" y="1111.0" text-anchor="middle" font-size="12.5" fill="#4A5563">Overview · tabs · History</text>
+<text x="1046.0" y="1128.0" text-anchor="middle" font-size="12.5" fill="#4A5563">Jinja HTML template</text>
+<rect x="1258.0" y="1067.0" width="200" height="78" rx="10" fill="#FFF0F3" stroke="#C9546E" stroke-width="1.5"/>
+<text x="1358.0" y="1094.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1E2530">Go-live gate</text>
+<text x="1358.0" y="1111.0" text-anchor="middle" font-size="12.5" fill="#4A5563">GO · PROVISIONAL · NO-GO</text>
+<text x="1358.0" y="1128.0" text-anchor="middle" font-size="12.5" fill="#4A5563">ranked must-fix list</text>
+<path d="M634.0,1270.2 V1264.2 Q634.0,1260.2 638.0,1260.2 H694.0 L704.0,1270.2 H828.0 Q834.0,1270.2 834.0,1276.2 V1332.2 Q834.0,1338.2 828.0,1338.2 H640.0 Q634.0,1338.2 634.0,1332.2 Z" fill="#EAF4EC" stroke="#5B8F66" stroke-width="1.5"/>
+<text x="734.0" y="1290.2" text-anchor="middle" font-size="15" font-weight="700" fill="#1E2530">PDF report</text>
+<text x="734.0" y="1307.2" text-anchor="middle" font-size="12.5" fill="#4A5563">A4 landscape</text>
+<text x="734.0" y="1324.2" text-anchor="middle" font-size="12.5" fill="#4A5563">headless Chrome / Edge</text>
+<path d="M946.0,1270.2 V1264.2 Q946.0,1260.2 950.0,1260.2 H1006.0 L1016.0,1270.2 H1140.0 Q1146.0,1270.2 1146.0,1276.2 V1332.2 Q1146.0,1338.2 1140.0,1338.2 H952.0 Q946.0,1338.2 946.0,1332.2 Z" fill="#EAF4EC" stroke="#5B8F66" stroke-width="1.5"/>
+<text x="1046.0" y="1290.2" text-anchor="middle" font-size="15" font-weight="700" fill="#1E2530">HTML report</text>
+<text x="1046.0" y="1307.2" text-anchor="middle" font-size="12.5" fill="#4A5563">self-contained page</text>
+<text x="1046.0" y="1324.2" text-anchor="middle" font-size="12.5" fill="#4A5563">opens in the browser</text>
+<path d="M1258.0,1269.2 A100.0,9 0 0 1 1458.0,1269.2 V1329.2 A100.0,9 0 0 1 1258.0,1329.2 Z" fill="#EAF4EC" stroke="#5B8F66" stroke-width="1.5"/>
+<path d="M1258.0,1269.2 A100.0,9 0 0 0 1458.0,1269.2" fill="none" stroke="#5B8F66" stroke-width="1.5"/>
+<text x="1358.0" y="1289.2" text-anchor="middle" font-size="15" font-weight="700" fill="#1E2530">Run records</text>
+<text x="1358.0" y="1306.2" text-anchor="middle" font-size="12.5" fill="#4A5563">.svd/runs · summary.json</text>
+<text x="1358.0" y="1323.2" text-anchor="middle" font-size="12.5" fill="#4A5563">run log · raw output</text>
+<rect x="1766.0" y="730.2" width="200" height="62.0" rx="30" fill="#2F2F33" stroke="#111111" stroke-width="1.5"/>
+<text x="1866.0" y="749.2" text-anchor="middle" font-size="15" font-weight="700" fill="#FFFFFF">Snyk cloud</text>
+<text x="1866.0" y="766.2" text-anchor="middle" font-size="12.5" fill="#D6D6DA">vuln DB · Code analysis</text>
+<text x="1866.0" y="783.2" text-anchor="middle" font-size="12.5" fill="#D6D6DA">sign-in · CLI download</text>
+<rect x="1766.0" y="812.8" width="200" height="62.0" rx="30" fill="#2F2F33" stroke="#111111" stroke-width="1.5"/>
+<text x="1866.0" y="840.3" text-anchor="middle" font-size="15" font-weight="700" fill="#FFFFFF">Semgrep registry</text>
+<text x="1866.0" y="857.3" text-anchor="middle" font-size="12.5" fill="#D6D6DA">rules · optional sign-in</text>
+<rect x="1766.0" y="888.8" width="200" height="62.0" rx="30" fill="#2F2F33" stroke="#111111" stroke-width="1.5"/>
+<text x="1866.0" y="907.8" text-anchor="middle" font-size="15" font-weight="700" fill="#FFFFFF">PyPI · npm</text>
+<text x="1866.0" y="924.8" text-anchor="middle" font-size="12.5" fill="#D6D6DA">package age · uvx</text>
+<text x="1866.0" y="941.8" text-anchor="middle" font-size="12.5" fill="#D6D6DA">tool downloads</text>
+<rect x="1766.0" y="1067.0" width="200" height="78" rx="30" fill="#2F2F33" stroke="#111111" stroke-width="1.5"/>
+<text x="1866.0" y="1094.0" text-anchor="middle" font-size="15" font-weight="700" fill="#FFFFFF">Test environment</text>
+<text x="1866.0" y="1111.0" text-anchor="middle" font-size="12.5" fill="#D6D6DA">your app's test copy</text>
+<text x="1866.0" y="1128.0" text-anchor="middle" font-size="12.5" fill="#D6D6DA">never production</text>
+<rect x="28.0" y="1443.8" width="1528.0" height="76" rx="10" fill="#F8FAFC" stroke="#D5DCE4"/>
+<text x="48.0" y="1466.8" font-size="12.5" fill="#4A5563">Arrows = call / data direction · an arrow to a layer or group = used by several of its parts</text>
+<text x="48.0" y="1484.8" font-size="12.5" fill="#4A5563">Cross-cutting boxes (secret masking, tool resolver) are used throughout; their links are left out</text>
+<text x="48.0" y="1502.8" font-size="12.5" fill="#4A5563">Dark pills = services outside your machine · everything else runs locally inside the uvx-launched server</text>
+</svg>

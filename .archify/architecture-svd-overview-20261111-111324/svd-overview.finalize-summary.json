@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "architecture",
+  "quality": "showcase",
+  "specification": {
+    "path": "/Users/senthilpalanivelu/Programme/secure-vibe-delivery/.archify/architecture-svd-overview-20261111-111324/candidate.json",
+    "sha256": "8b36cf8de41ff6ce26cd96c7f60d1911098184254520b336a0a148fe3f17cac6",
+    "bytes": 4343
+  },
+  "artifact": {
+    "path": "/Users/senthilpalanivelu/Programme/secure-vibe-delivery/.archify/architecture-svd-overview-20261111-111324/svd-overview.html",
+    "sha256": "f75f562779b680a468ea208b5f01cfe8cd04836465b693562d21eb9962f8df7f",
+    "bytes": 856189
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "/Users/senthilpalanivelu/Programme/secure-vibe-delivery/.archify/architecture-svd-overview-20261111-111324/svd-overview.finalize.json",
+    "summaryReceipt": "/Users/senthilpalanivelu/Programme/secure-vibe-delivery/.archify/architecture-svd-overview-20261111-111324/svd-overview.finalize-summary.json",
+    "browserCheckReceipt": "/Users/senthilpalanivelu/Programme/secure-vibe-delivery/.archify/architecture-svd-overview-20261111-111324/svd-overview.browser-check.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-11-11T05:43:24.318Z",
+    "source": "network",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 1586,
+  "browserCheck": {
+    "requested": true,
+    "ran": true
+  }
+}
